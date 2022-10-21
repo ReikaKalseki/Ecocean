@@ -1,0 +1,31 @@
+<Root>
+	<GLOWSHROOM>
+		<name>
+			Lumashroom
+		</name>
+		<desc>
+			A large flora species which periodically emits large drops of seed-laden oil.
+		</desc>
+		<pda>
+			The large drops of viscous oil regularly expelled by this plant contain the seeds of future generations in a dormant state, ready to be reactivated by favorable environmental conditions. These seeds possess an unusual property, arising from their unique chemical environment, being capable of strong chemiluminescence. However, probably as an energy-conservation measure, this behavior is only exhibited in the presence of other light sources, and only ones matching neither the wavelengths of sunlight nor other seed droplets.
+			
+			Unfortunately, the fertility of this species seems to be inextricably tied to its natural habitat; while the plant can be cultivated anywhere, it will not exhibit this seed ejection behavior in captivity.
+			
+			Assessment: The oil droplets containing the seeds are likely to be of great chemical utility 
+		</pda>
+		<header>
+			Glowshroom
+		</header>
+	</GLOWSHROOM>
+	<enum>
+		<name>
+			
+		</name>
+		<desc>
+			
+		</desc>
+		<pda>
+			
+		</pda>
+	</enum>
+</Root>
