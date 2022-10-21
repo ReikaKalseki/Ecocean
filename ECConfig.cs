@@ -15,6 +15,7 @@ namespace ReikaKalseki.Ecocean
 			[ConfigEntry("Lumashroom Fertility Factor", typeof(float), 1, 0.2F, 2F, 1)]GLOWFIRERATE,
 			[ConfigEntry("Bloodvine Attack Damage Factor", typeof(float), 1, 0.1F, 10F, 1)]BLOODDMG,
 			[ConfigEntry("Anchor Pod Detonation Damage Factor", typeof(float), 1, 0.1F, 10F, 1)]ANCHORDMG,
+			[ConfigEntry("Lava Bomb Damage Factor", typeof(float), 1, 0.1F, 10F, 1)]BOMBDMG,
 		}
 	}
 }

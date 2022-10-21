@@ -46,14 +46,17 @@ namespace ReikaKalseki.Ecocean {
 			return 240;
 		}
 		
-		protected override float getFireRate() {
-			return EcoceanMod.config.getFloat(ECConfig.ConfigEntries.GLOWFIRERATE);
+		protected override float getNextFireInterval() {
+			return UnityEngine.Random.Range(30, 120F)*EcoceanMod.config.getFloat(ECConfig.ConfigEntries.GLOWFIRERATE);
 		}
 		
 		protected override GameObject createProjectile() {
 			GameObject go = ObjectUtil.createWorldObject(EcoceanMod.glowOil.ClassID);
-			go.GetComponent<GlowOilTag>().onLit();
 			return go;
+		}
+		
+		internal override void onFire(GameObject go) {
+			go.GetComponent<GlowOilTag>().onFired();
 		}
 		
 	}

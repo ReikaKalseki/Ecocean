@@ -71,15 +71,26 @@ namespace ReikaKalseki.Ecocean
 			lastTime = time;
 		}
 		
+		internal bool canAttack(GameObject go, out LiveMixin live) {
+			live = go.FindAncestor<LiveMixin>();
+			if (gameObject.FindAncestor<WaterPark>())
+				return false;
+			if (!live || !live.IsAlive())
+				return false;
+			Player p = go.FindAncestor<Player>();
+			if (p && gameObject.FindAncestor<Planter>())
+				return false;
+			if (p && !p.IsSwimming())
+				return false;
+			return true;
+		}
+		
 		internal void trigger(GameObject go) {
 			float time = DayNightCycle.main.timePassedAsFloat;
 			if (time-eatStart <= 4)
 				return;
-			LiveMixin live = go.GetComponentInParent<LiveMixin>();
-			if (!live || !live.IsAlive())
-				return;
-			Player p = go.FindAncestor<Player>();
-			if (p && !p.IsSwimming())
+			LiveMixin live;
+			if (!canAttack(go, out live))
 				return;
 			//if (go.GetComponent<SubRoot>())
 			//	return;

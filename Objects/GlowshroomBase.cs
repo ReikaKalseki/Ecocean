@@ -151,6 +151,10 @@ namespace ReikaKalseki.Ecocean {
 			tick();
 		}
 		
+		internal void fireAsap() {
+			nextEmitTime = Mathf.Min(nextEmitTime, DayNightCycle.main.timePassedAsFloat+15);
+		}
+		
 		private void setBrightness(float f) {
 			foreach (Light l in lights) {
 				l.intensity = 2*f;
@@ -161,30 +165,35 @@ namespace ReikaKalseki.Ecocean {
 					RenderUtil.setEmissivity(r.materials[1], 0.4F+f*3.6F, "GlowStrength");
 				}
 				else
-					RenderUtil.setEmissivity(r.materials[0], 0, "GlowStrength");
+					RenderUtil.setEmissivity(r.materials[0], f, "GlowStrength");
 			}
 		}
 		
 		private void emit(float time) {
 			lastEmitTime = time;
-			nextEmitTime = time+UnityEngine.Random.Range(30, 120F)*getFireRate();
+			nextEmitTime = time+getNextFireInterval();
 			GameObject go = createProjectile();
 			ObjectUtil.ignoreCollisions(go, gameObject);
-			go.transform.position = transform.position;
+			go.transform.position = transform.position+transform.up*3.5F*transform.localScale.magnitude;
 			Rigidbody rb = go.GetComponent<Rigidbody>();
 			rb.isKinematic = false;
 			rb.angularVelocity = MathUtil.getRandomVectorAround(Vector3.zero, 15);
 			Vector3 vec = MathUtil.getRandomVectorAround(transform.up.normalized*UnityEngine.Random.Range(10F, 15F)*getFireVelocity(), 0.5F);
 			rb.AddForce(vec, ForceMode.VelocityChange);
 			SoundManager.playSoundAt(fireSound, transform.position, false, 40);
+			onFire(go);
 			//rb.drag = go.GetComponent<WorldForces>().underwaterDrag;
+		}
+		
+		internal virtual void onFire(GameObject go) {
+			
 		}
 		
 		protected virtual float getSize() {
 			return 1;
 		}
 		
-		protected virtual float getFireRate() {
+		protected virtual float getNextFireInterval() {
 			return 1;
 		}
 		

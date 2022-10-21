@@ -80,7 +80,15 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		public static void getWaterTemperature(DIHooks.WaterTemperatureCalculation calc) {
-			
+			foreach (LavaBombTag lb in UnityEngine.Object.FindObjectsOfType<LavaBombTag>()) {
+				if (lb) {
+					float dist = Vector3.Distance(lb.transform.position, calc.position);
+					if (dist <= LavaBomb.HEAT_RADIUS) {
+						float f = 1F-(dist/LavaBomb.HEAT_RADIUS);
+						calc.setValue(Mathf.Max(calc.getTemperature(), f*lb.getTemperature()));
+					}
+				}
+			}
 		}
 	    
 	    public static void onSkyApplierSpawn(SkyApplier pk) {

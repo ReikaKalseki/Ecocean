@@ -43,8 +43,8 @@ namespace ReikaKalseki.Ecocean {
 			return 1200;
 		}
 		
-		protected override float getFireRate() {
-			return 2;
+		protected override float getNextFireInterval() {
+			return UnityEngine.Random.Range(20F, 40F);
 		}
 		
 		protected override float getSize() {
@@ -53,8 +53,15 @@ namespace ReikaKalseki.Ecocean {
 		
 		protected override GameObject createProjectile() {
 			GameObject go = ObjectUtil.createWorldObject(EcoceanMod.lavaBomb.ClassID);
-			go.GetComponent<LavaBombTag>().onFired();
 			return go;
+		}
+		
+		internal override void onFire(GameObject go) {
+			go.GetComponent<LavaBombTag>().onFired();
+		}
+		
+		protected override float getFireVelocity() {
+			return UnityEngine.Random.Range(1F, 2.5F);
 		}
 		
 	}

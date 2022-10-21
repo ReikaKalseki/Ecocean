@@ -152,8 +152,9 @@ namespace ReikaKalseki.Ecocean {
 		private float lastLitTime;
 		private float lastRepelTime;
 		
-		private float spawnTime;
 		private float lastPLayerDistanceCheckTime;
+		
+		private float spawnTime;
 		
 		private readonly List<GlowSeed> seeds = new List<GlowSeed>();
 		
@@ -204,8 +205,11 @@ namespace ReikaKalseki.Ecocean {
 			if (time-lastPLayerDistanceCheckTime >= 0.5) {
 				lastPLayerDistanceCheckTime = time;
 				if (Vector3.Distance(transform.position, Player.main.transform.position) > 150) {
-					UnityEngine.Object.DestroyImmediate(this);
+					UnityEngine.Object.DestroyImmediate(gameObject);
 				}
+			}
+			if (time-spawnTime >= 300) {
+				UnityEngine.Object.DestroyImmediate(gameObject);
 			}
 			dT = Time.deltaTime;
 			if (time-lastRepelTime >= 0.5) {
@@ -276,12 +280,17 @@ namespace ReikaKalseki.Ecocean {
 		internal void repel(GlowOilTag g, float dT) {
 			Vector3 dd = transform.position-g.transform.position;
 			//SNUtil.writeToChat("Repel from "+g.transform.position+" > "+dd);
-			mainBody.AddForce(dd.normalized*(15F/dd.sqrMagnitude)*dT, ForceMode.VelocityChange);
-			g.mainBody.AddForce(dd.normalized*(-15F/dd.sqrMagnitude)*dT, ForceMode.VelocityChange);
+			mainBody.AddForce(dd.normalized*(10F/dd.sqrMagnitude)*dT, ForceMode.VelocityChange);
+			g.mainBody.AddForce(dd.normalized*(-10F/dd.sqrMagnitude)*dT, ForceMode.VelocityChange);
 		}
 		
 		internal void onLit() {
 			lastLitTime = DayNightCycle.main.timePassedAsFloat;
+		}
+		
+		internal void onFired() {
+			onLit();
+			spawnTime = DayNightCycle.main.timePassedAsFloat;
 		}
 		
 		internal void resetGlow() {
