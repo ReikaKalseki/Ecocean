@@ -17,6 +17,48 @@
 			Glowshroom
 		</header>
 	</GLOWSHROOM>
+	<LAVASHROOM>
+		<name>
+			Magmashroom
+		</name>
+		<desc>
+			A large domed plant that channels molten rock through its core, firing it out at random intervals.
+		</desc>
+		<pda>
+			--TODO--
+		</pda>
+		<header>
+			Lavashroom
+		</header>
+	</LAVASHROOM>
+	<GlowOil>
+		<name>
+			 Luma Oil
+		</name>
+		<desc>
+			--TODO--
+		</desc>
+		<pda>
+			--TODO--
+		</pda>
+		<header>
+			
+		</header>
+	</GlowOil>
+	<LavaBomb>
+		<name>
+			 Lava Bomb
+		</name>
+		<desc>
+			
+		</desc>
+		<pda>
+			
+		</pda>
+		<header>
+			
+		</header>
+	</LavaBomb>
 	<enum>
 		<name>
 			

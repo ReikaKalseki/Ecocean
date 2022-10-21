@@ -24,10 +24,13 @@ namespace ReikaKalseki.Ecocean
 	public static readonly Assembly modDLL = Assembly.GetExecutingAssembly();
     
     public static readonly Config<ECConfig.ConfigEntries> config = new Config<ECConfig.ConfigEntries>();
-    internal static readonly XMLLocale itemLocale = new XMLLocale("XML/items.xml");
+    internal static readonly XMLLocale locale = new XMLLocale("XML/locale.xml");
     
     internal static GlowOilMushroom glowShroom;
     internal static GlowOil glowOil;
+    
+    internal static LavaBombMushroom lavaShroom;
+    internal static LavaBomb lavaBomb;
 
     [QModPatch]
     public static void Load() {
@@ -47,17 +50,32 @@ namespace ReikaKalseki.Ecocean
 			FileLog.Log(ex.StackTrace);
 			FileLog.Log(ex.ToString());
         }
+        
+        locale.load();
 	    
-	    glowOil = new GlowOil(itemLocale.getEntry("GlowOil"));
+	    glowOil = new GlowOil(locale.getEntry("GlowOil"));
 	    glowOil.register();
+	    
+	    lavaBomb = new LavaBomb(locale.getEntry("LavaBomb"));
+	    lavaBomb.Patch();
 		
         glowShroom = new GlowOilMushroom();
 		glowShroom.Patch();	
-		XMLLocale.LocaleEntry e = itemLocale.getEntry(glowShroom.ClassID);
+		XMLLocale.LocaleEntry e = locale.getEntry(glowShroom.ClassID);
 		glowShroom.addPDAEntry(e.pda, 15F, e.getField<string>("header"));
 		SNUtil.log(" > "+glowShroom);
-		GenUtil.registerSlotWorldgen(glowShroom.ClassID, glowShroom.PrefabFileName, glowShroom.TechType, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Far, BiomeType.Dunes_Grass, 1, 0.3F);		
+		GenUtil.registerSlotWorldgen(glowShroom.ClassID, glowShroom.PrefabFileName, glowShroom.TechType, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Far, BiomeType.Dunes_Grass, 1, 0.25F);		
+		
+		lavaShroom = new LavaBombMushroom();
+		lavaShroom.Patch();	
+		e = locale.getEntry(lavaShroom.ClassID);
+		lavaShroom.addPDAEntry(e.pda, 20F, e.getField<string>("header"));
+		SNUtil.log(" > "+lavaShroom);
+		GenUtil.registerSlotWorldgen(lavaShroom.ClassID, lavaShroom.PrefabFileName, lavaShroom.TechType, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Far, BiomeType.InactiveLavaZone_Chamber_Floor, 1, 0.25F);		
+		GenUtil.registerSlotWorldgen(lavaShroom.ClassID, lavaShroom.PrefabFileName, lavaShroom.TechType, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Far, BiomeType.InactiveLavaZone_Chamber_Floor_Far, 1, 0.25F);
+		
 		BioReactorHandler.Main.SetBioReactorCharge(glowShroom.seed.TechType, BaseBioReactor.GetCharge(TechType.SnakeMushroomSpore)*3);
+		BioReactorHandler.Main.SetBioReactorCharge(glowOil.TechType, BaseBioReactor.GetCharge(TechType.BloodOil)*6);
 		
 		System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(ECHooks).TypeHandle);
     }

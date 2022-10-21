@@ -13,9 +13,9 @@ using ReikaKalseki.DIAlterra;
 
 namespace ReikaKalseki.Ecocean {
 	
-	public class GlowshroomBase<T> : BasicCustomPlant, MultiTexturePrefab<VanillaFlora> where T : GlowShroomTagBase {
+	internal abstract class GlowshroomBase<T> : BasicCustomPlant, MultiTexturePrefab<VanillaFlora> where T : GlowShroomTagBase {
 		
-		public GlowshroomBase(string localeKey) : base(EcoceanMod.itemLocale.getEntry(localeKey), VanillaFlora.JELLYSHROOM_LIVE, "7fcf1275-0687-491e-a086-d928dd3ba67a") {
+		public GlowshroomBase(string localeKey) : base(EcoceanMod.locale.getEntry(localeKey), VanillaFlora.JELLYSHROOM_LIVE, "7fcf1275-0687-491e-a086-d928dd3ba67a") {
 			glowIntensity = 1.5F;
 			finalCutBonus = 1;
 		}
@@ -83,7 +83,7 @@ namespace ReikaKalseki.Ecocean {
 		
 	}
 	
-	class GlowShroomTagBase : MonoBehaviour {
+	internal abstract class GlowShroomTagBase : MonoBehaviour {
 		
 		private static readonly SoundManager.SoundData fireSound = SoundManager.registerSound(EcoceanMod.modDLL, "glowshroomfire", "Sounds/glowshroom-fire.ogg", SoundManager.soundMode3D, s => {SoundManager.setup3D(s, 40);}, SoundSystem.masterBus);
 		
@@ -114,7 +114,7 @@ namespace ReikaKalseki.Ecocean {
     			gameObject.transform.localScale = Vector3.one*UnityEngine.Random.Range(0.1F, 0.125F);
     		}
     		else {
-    			gameObject.transform.localScale = Vector3.one*UnityEngine.Random.Range(0.75F, 1F);
+				gameObject.transform.localScale = Vector3.one*UnityEngine.Random.Range(0.75F, 1F)*getSize();
     		}
     		init();
 		}
@@ -133,7 +133,7 @@ namespace ReikaKalseki.Ecocean {
 			else {
 				float time = DayNightCycle.main.timePassedAsFloat;
 				float dT = nextEmitTime-time;
-				if (dT <= 0) {
+				if (dT <= 0 && Vector3.Distance(transform.position, Player.main.transform.position) <= 300) {
 					emit(time);
 				}
 				else {
@@ -178,6 +178,10 @@ namespace ReikaKalseki.Ecocean {
 			rb.AddForce(vec, ForceMode.VelocityChange);
 			SoundManager.playSoundAt(fireSound, transform.position, false, 40);
 			//rb.drag = go.GetComponent<WorldForces>().underwaterDrag;
+		}
+		
+		protected virtual float getSize() {
+			return 1;
 		}
 		
 		protected virtual float getFireRate() {

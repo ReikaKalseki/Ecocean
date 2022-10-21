@@ -16,8 +16,8 @@ namespace ReikaKalseki.Ecocean {
 	
 	public class GlowOil : Spawnable {
 		
-		internal static readonly float MAX_GLOW = 2;
-		internal static readonly float MAX_RADIUS = 18;
+		internal static readonly float MAX_GLOW = 1.5F;
+		internal static readonly float MAX_RADIUS = 30;//18;
 		
 		private readonly XMLLocale.LocaleEntry locale;
 		
@@ -152,6 +152,9 @@ namespace ReikaKalseki.Ecocean {
 		private float lastLitTime;
 		private float lastRepelTime;
 		
+		private float spawnTime;
+		private float lastPLayerDistanceCheckTime;
+		
 		private readonly List<GlowSeed> seeds = new List<GlowSeed>();
 		
 		void Update() {
@@ -198,13 +201,19 @@ namespace ReikaKalseki.Ecocean {
 				lastGlowUpdate = time;
 				updateGlowStrength(time, dT);
 			}
+			if (time-lastPLayerDistanceCheckTime >= 0.5) {
+				lastPLayerDistanceCheckTime = time;
+				if (Vector3.Distance(transform.position, Player.main.transform.position) > 150) {
+					UnityEngine.Object.DestroyImmediate(this);
+				}
+			}
 			dT = Time.deltaTime;
 			if (time-lastRepelTime >= 0.5) {
 				lastRepelTime = time;
 				foreach (RaycastHit hit in Physics.SphereCastAll(transform.position, 8F, Vector3.one, 8)) {
 					if (hit.transform && hit.transform != transform) {
 						GlowOilTag g = hit.transform.GetComponentInParent<GlowOilTag>();
-						if (g)
+						if (g && g.mainBody)
 							repel(g, dT);
 					}
 				}
@@ -273,6 +282,11 @@ namespace ReikaKalseki.Ecocean {
 		
 		internal void onLit() {
 			lastLitTime = DayNightCycle.main.timePassedAsFloat;
+		}
+		
+		internal void resetGlow() {
+			glowIntensity = 0;
+			lastLitTime = -1;
 		}
 		
 		class GlowSeed {

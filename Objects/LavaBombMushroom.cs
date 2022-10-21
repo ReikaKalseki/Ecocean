@@ -13,46 +13,47 @@ using ReikaKalseki.DIAlterra;
 
 namespace ReikaKalseki.Ecocean {
 	
-	internal class GlowOilMushroom : GlowshroomBase<GlowShroomTag> {
+	internal class LavaBombMushroom : GlowshroomBase<LavaShroomTag> { //hollow's lantern
 		
-		public GlowOilMushroom() : base("GLOWSHROOM") {
+		public LavaBombMushroom() : base("LAVASHROOM") {
 			
 		}
 		
 		public override Color getLightColor() {
-			return new Color(0.4F, 0.7F, 1F, 1F);
+			return new Color(1.0F, 0.5F, 0.1F, 1F);
 		}
 		
 		protected override string getTextureSubfolder() {
-			return "GlowOilMushroom";
+			return "LavaBombMushroom";
 		}
 		
 	}
 	
-	internal class GlowShroomTag : GlowShroomTagBase {
-		
-		private static readonly Vector3 reaperlessTripleVent = new Vector3(-1150, -243, -258);
+	internal class LavaShroomTag : GlowShroomTagBase {
 		
 		protected override void init() {
 			
 		}
 		
 		protected override void tick() {
-			if (Vector3.Distance(transform.position, reaperlessTripleVent) <= 200)
-    			UnityEngine.Object.Destroy(gameObject);
+			
 		}
 		
 		protected override float getMinimumAllowableDepth() {
-			return 240;
+			return 1200;
 		}
 		
 		protected override float getFireRate() {
-			return EcoceanMod.config.getFloat(ECConfig.ConfigEntries.GLOWFIRERATE);
+			return 2;
+		}
+		
+		protected override float getSize() {
+			return 1.5F;
 		}
 		
 		protected override GameObject createProjectile() {
-			GameObject go = ObjectUtil.createWorldObject(EcoceanMod.glowOil.ClassID);
-			go.GetComponent<GlowOilTag>().onLit();
+			GameObject go = ObjectUtil.createWorldObject(EcoceanMod.lavaBomb.ClassID);
+			go.GetComponent<LavaBombTag>().onFired();
 			return go;
 		}
 		

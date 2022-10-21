@@ -32,6 +32,7 @@ namespace ReikaKalseki.Ecocean {
 	    	DIHooks.onSkyApplierSpawnEvent += onSkyApplierSpawn;
 	    	//DIHooks.onDamageEvent += onTakeDamage;
 	    	DIHooks.onKnifedEvent += onKnifed;
+	    	DIHooks.onItemPickedUpEvent += onPickup;
 			
 	    	DIHooks.onPlayerTickEvent += tickPlayer;
 	    	DIHooks.onSeamothTickEvent += tickSeamoth;
@@ -70,6 +71,12 @@ namespace ReikaKalseki.Ecocean {
 			ExplodingAnchorPod e = go.FindAncestor<ExplodingAnchorPod>();
 			if (e)
 				e.explode();
+		}
+		
+		public static void onPickup(Pickupable pp) {
+			GlowOilTag g = pp.GetComponent<GlowOilTag>();
+			if (g)
+				g.resetGlow();
 		}
 		
 		public static void getWaterTemperature(DIHooks.WaterTemperatureCalculation calc) {
