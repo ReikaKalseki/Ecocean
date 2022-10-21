@@ -91,6 +91,7 @@ namespace ReikaKalseki.Ecocean
 				else
 					amt *= 2;
 			}
+			amt *= EcoceanMod.config.getFloat(ECConfig.ConfigEntries.BLOODDMG);
 			target = go;
 			eatStart = time;
 			live.TakeDamage(amt, go.transform.position, DamageType.Puncture, gameObject);

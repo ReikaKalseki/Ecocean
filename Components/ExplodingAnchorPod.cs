@@ -130,6 +130,7 @@ namespace ReikaKalseki.Ecocean
 							amt = 50;
 						float f = (Vector3.Distance(rh.transform.position, effectivePodCenter)-10)/35F;
 						amt *= Mathf.Clamp01(1.5F-f*f);
+						amt *= EcoceanMod.config.getFloat(ECConfig.ConfigEntries.ANCHORDMG);
 						lv.TakeDamage(amt, rh.transform.position, DamageType.Explosive, gameObject);
 						Rigidbody rb = rh.transform.GetComponent<Rigidbody>();
 						if (rb) {
