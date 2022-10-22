@@ -39,6 +39,7 @@ namespace ReikaKalseki.Ecocean {
 			ObjectUtil.removeComponent<Plantable>(world);
 			ObjectUtil.removeComponent<Pickupable>(world);
 			ObjectUtil.removeComponent<PickPrefab>(world);
+			world.EnsureComponent<LargeWorldEntity>().cellLevel = LargeWorldEntity.CellLevel.Far;
 			LavaBombTag g = world.EnsureComponent<LavaBombTag>();
 			Light l = ObjectUtil.addLight(world);
 			l.bounceIntensity *= 3;
@@ -113,11 +114,11 @@ namespace ReikaKalseki.Ecocean {
 			
 			if (mainBody && mainBody.velocity.magnitude < 0.1F)
 				explode(null);
-			else if (time-spawnTime >= 45)
+			else if (spawnTime > 0 && time-spawnTime >= 45)
 				explode(null);
 			else if (time-lastPLayerDistanceCheckTime >= 0.5) {
 				lastPLayerDistanceCheckTime = time;
-				if (Vector3.Distance(transform.position, Player.main.transform.position) > 150) {
+				if (Vector3.Distance(transform.position, Player.main.transform.position) > 250) {
 					UnityEngine.Object.DestroyImmediate(gameObject);
 				}
 			}
@@ -155,8 +156,8 @@ namespace ReikaKalseki.Ecocean {
 
 	    void OnCollisionEnter(Collision c) {
 			GameObject collider = c.gameObject;
-			//SNUtil.writeToChat("Collided with "+collider+" at speed "+c.relativeVelocity.magnitude);
-			if (c.relativeVelocity.magnitude >= 2) {
+			if (spawnTime > 0 && DayNightCycle.main.timePassedAsFloat-spawnTime >= 0.1 && c.relativeVelocity.magnitude >= 2 && (collider.FindAncestor<LiveMixin>() || collider.FindAncestor<SubRoot>() || collider.FindAncestor<WorldStreaming.ClipmapChunk>())) {
+			SNUtil.writeToChat("Collided with "+collider+" at speed "+c.relativeVelocity.magnitude);
 	        	explode(collider);
 	        	GlowShroomTagBase gs = collider.FindAncestor<GlowShroomTagBase>();
 	        	if (gs)

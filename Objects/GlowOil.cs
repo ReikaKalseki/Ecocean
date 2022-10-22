@@ -57,6 +57,7 @@ namespace ReikaKalseki.Ecocean {
 			//ObjectUtil.removeComponent<EnzymeBall>(world);
 			ObjectUtil.removeComponent<Plantable>(world);
 			GlowOilTag g = world.EnsureComponent<GlowOilTag>();
+			world.EnsureComponent<LargeWorldEntity>().cellLevel = LargeWorldEntity.CellLevel.VeryFar;
 			Light l = ObjectUtil.addLight(world);
 			l.bounceIntensity *= 2;
 			l.color = new Color(0.5F, 0.8F, 1F, 1F);

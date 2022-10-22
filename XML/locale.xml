@@ -19,13 +19,15 @@
 	</GLOWSHROOM>
 	<LAVASHROOM>
 		<name>
-			Magmashroom
+			Hollow Lanternshroom
 		</name>
 		<desc>
 			A large domed plant that channels molten rock through its core, firing it out at random intervals.
 		</desc>
 		<pda>
-			--TODO--
+			The magmashroom is fairly closely related to the jellyshrooms found in shallower caves, and shares its dependence upon a symbiotic relationship with a host organism. Where that species relies on decaying animal matter provided by the remains of its associated crabsnake, the magmashroom has eschewed that approach in favor of hosting colonies of chemosynthetic bacteria in its cap, which can extract nutrients from the magma channeled up through the hollow central core.
+			
+			Small surges in the pressure of this magma can result in eruptions from the jellyshroom, including the ejection of lava bomb projectiles, which pose a hazard to nearby creatures and explorers. Caution is strongly advised.
 		</pda>
 		<header>
 			Lavashroom

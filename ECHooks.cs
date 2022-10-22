@@ -80,11 +80,13 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		public static void getWaterTemperature(DIHooks.WaterTemperatureCalculation calc) {
+			//SNUtil.writeToChat("EC: Checking water temp @ "+calc.position+" def="+calc.originalValue);
 			foreach (LavaBombTag lb in UnityEngine.Object.FindObjectsOfType<LavaBombTag>()) {
 				if (lb) {
 					float dist = Vector3.Distance(lb.transform.position, calc.position);
 					if (dist <= LavaBomb.HEAT_RADIUS) {
 						float f = 1F-(dist/LavaBomb.HEAT_RADIUS);
+						//SNUtil.writeToChat("Found lava bomb "+lb.transform.position+" at dist "+dist+" > "+f+" > "+(f*lb.getTemperature()));
 						calc.setValue(Mathf.Max(calc.getTemperature(), f*lb.getTemperature()));
 					}
 				}
