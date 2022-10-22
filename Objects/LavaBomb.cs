@@ -79,6 +79,7 @@ namespace ReikaKalseki.Ecocean {
 	class LavaBombTag : MonoBehaviour {
 		
 		private static readonly SoundManager.SoundData fireSound = SoundManager.registerSound(EcoceanMod.modDLL, "lavabombfire", "Sounds/lavabomb-fire.ogg", SoundManager.soundMode3D, s => {SoundManager.setup3D(s, 40);}, SoundSystem.masterBus);
+		private static readonly SoundManager.SoundData impactSound = SoundManager.registerSound(EcoceanMod.modDLL, "lavabombimpact", "Sounds/lavabomb-impact.ogg", SoundManager.soundMode3D, s => {SoundManager.setup3D(s, 40);}, SoundSystem.masterBus);
 		
 		private Light light;
 		
@@ -126,7 +127,7 @@ namespace ReikaKalseki.Ecocean {
 			float f = getIntensity();
 			if (light)
 				light.intensity = UnityEngine.Random.Range(1.8F, 2.2F)*f;
-			RenderUtil.setEmissivity(mainRender.materials[0], f*36, "GlowStrength");
+			RenderUtil.setEmissivity(mainRender.materials[0], f*45, "GlowStrength");
 			RenderUtil.setEmissivity(mainRender.materials[1], (0.5F+f*0.5F)*7.5F, "GlowStrength");
 			mainRender.materials[0].SetColor("_GlowColor", getColor(f));
 			mainRender.materials[0].SetColor("_SpecColor", getColor(f));
@@ -166,7 +167,7 @@ namespace ReikaKalseki.Ecocean {
 	    }
 		
 		internal void explode(GameObject impacted) {
-			SoundManager.playSoundAt(SoundManager.buildSound("event:/env/background/debris_fall_fire"), transform.position, false, 40);
+			SoundManager.playSoundAt(impactSound, transform.position, false, 40);
 			RaycastHit[] hit = Physics.SphereCastAll(transform.position, 15, new Vector3(1, 1, 1), 15);
 			HashSet<int> used = new HashSet<int>();
 			foreach (RaycastHit rh in hit) {
