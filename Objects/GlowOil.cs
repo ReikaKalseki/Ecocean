@@ -203,13 +203,13 @@ namespace ReikaKalseki.Ecocean {
 				lastGlowUpdate = time;
 				updateGlowStrength(time, dT);
 			}
-			if (time-lastPLayerDistanceCheckTime >= 0.5) {
+			if (spawnTime > 0 && time-lastPLayerDistanceCheckTime >= 0.5) {
 				lastPLayerDistanceCheckTime = time;
 				if (Vector3.Distance(transform.position, Player.main.transform.position) > 150) {
 					UnityEngine.Object.DestroyImmediate(gameObject);
 				}
 			}
-			if (time-spawnTime >= 300) {
+			if (spawnTime > 0 && time-spawnTime >= 300) {
 				UnityEngine.Object.DestroyImmediate(gameObject);
 			}
 			dT = Time.deltaTime;

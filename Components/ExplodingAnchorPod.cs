@@ -112,8 +112,9 @@ namespace ReikaKalseki.Ecocean
 					Player p = rh.transform.GetComponent<Player>();
 					if (p && !p.IsSwimming())
 						continue;
+					float dd = Vector3.Distance(rh.transform.position, effectivePodCenter);
 					ExplodingAnchorPod pod = rh.transform.GetComponent<ExplodingAnchorPod>();
-					if (pod && !pod.isExploded && pod.isGrown && UnityEngine.Random.Range(0F, 1F) <= 0.5F) {
+					if (pod && !pod.isExploded && pod.isGrown && UnityEngine.Random.Range(0F, 1F) <= 0.5F*Mathf.Max(0, 1-dd/30F)) {
 						pod.scheduleExplode(UnityEngine.Random.Range(0.2F, 0.67F));
 						continue;
 					}
@@ -128,7 +129,7 @@ namespace ReikaKalseki.Ecocean
 							amt = 20;
 						else if (v && v is Exosuit)
 							amt = 50;
-						float f = (Vector3.Distance(rh.transform.position, effectivePodCenter)-10)/35F;
+						float f = (dd-10)/35F;
 						amt *= Mathf.Clamp01(1.5F-f*f);
 						amt *= EcoceanMod.config.getFloat(ECConfig.ConfigEntries.ANCHORDMG);
 						lv.TakeDamage(amt, rh.transform.position, DamageType.Explosive, gameObject);
