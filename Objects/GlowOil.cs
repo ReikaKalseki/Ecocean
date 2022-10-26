@@ -205,11 +205,11 @@ namespace ReikaKalseki.Ecocean {
 			}
 			if (spawnTime > 0 && time-lastPLayerDistanceCheckTime >= 0.5) {
 				lastPLayerDistanceCheckTime = time;
-				if (Vector3.Distance(transform.position, Player.main.transform.position) > 150) {
+				if (Vector3.Distance(transform.position, Player.main.transform.position) > 250) {
 					UnityEngine.Object.DestroyImmediate(gameObject);
 				}
 			}
-			if (spawnTime > 0 && time-spawnTime >= 300) {
+			if (spawnTime > 0 && time-spawnTime >= 600) {
 				UnityEngine.Object.DestroyImmediate(gameObject);
 			}
 			dT = Time.deltaTime;
@@ -264,7 +264,7 @@ namespace ReikaKalseki.Ecocean {
 					g.go.transform.localPosition = g.go.transform.localPosition+g.motion*dT;
 					g.go.transform.Rotate(g.rotation, Space.Self);
 				}
-				RenderUtil.setEmissivity(g.render.materials[1], glowIntensity*9F, "GlowStrength");
+				RenderUtil.setEmissivity(g.render.materials[1], 0.05F+glowIntensity*8.95F, "GlowStrength");
 			}
 			RenderUtil.setEmissivity(mainRender.materials[0], glowIntensity*5F, "GlowStrength");
 			if (light) {

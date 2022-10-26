@@ -87,10 +87,10 @@ namespace ReikaKalseki.Ecocean {
 		
 		private static readonly SoundManager.SoundData fireSound = SoundManager.registerSound(EcoceanMod.modDLL, "glowshroomfire", "Sounds/glowshroom-fire.ogg", SoundManager.soundMode3D, s => {SoundManager.setup3D(s, 40);}, SoundSystem.masterBus);
 		
-		private Renderer[] renderers;
-		private Light[] lights;
+		protected Renderer[] renderers;
+		protected Light[] lights;
 		
-		private bool isGrown;
+		protected bool isGrown;
 		
 		private float lastEmitTime;
 		private float nextEmitTime;
@@ -160,13 +160,19 @@ namespace ReikaKalseki.Ecocean {
 				l.intensity = 2*f;
 			}
 			foreach (Renderer r in renderers) {
-				if (r.materials.Length > 1) {
+				if (r.materials.Length > 1) { //outer stem and cap
 					RenderUtil.setEmissivity(r.materials[0], 0.75F+f*0.5F, "GlowStrength");
 					RenderUtil.setEmissivity(r.materials[1], 0.4F+f*3.6F, "GlowStrength");
 				}
-				else
+				else { //inner
 					RenderUtil.setEmissivity(r.materials[0], f, "GlowStrength");
+				}
 			}
+			updateBrightness(f);
+		}
+		
+		protected virtual void updateBrightness(float f) {
+			
 		}
 		
 		private void emit(float time) {

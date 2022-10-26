@@ -127,11 +127,13 @@ namespace ReikaKalseki.Ecocean {
 			float f = getIntensity();
 			if (light)
 				light.intensity = UnityEngine.Random.Range(1.8F, 2.2F)*f;
-			RenderUtil.setEmissivity(mainRender.materials[0], f*45, "GlowStrength");
-			RenderUtil.setEmissivity(mainRender.materials[1], (0.5F+f*0.5F)*7.5F, "GlowStrength");
-			mainRender.materials[0].SetColor("_GlowColor", getColor(f));
-			mainRender.materials[0].SetColor("_SpecColor", getColor(f));
-			mainRender.materials[1].SetColor("_GlowColor", Color.Lerp(Color.white, Color.red, 1-f));
+			if (mainRender) {
+				RenderUtil.setEmissivity(mainRender.materials[0], f*45, "GlowStrength");
+				RenderUtil.setEmissivity(mainRender.materials[1], (0.5F+f*0.5F)*7.5F, "GlowStrength");
+				mainRender.materials[0].SetColor("_GlowColor", getColor(f));
+				mainRender.materials[0].SetColor("_SpecColor", getColor(f));
+				mainRender.materials[1].SetColor("_GlowColor", Color.Lerp(Color.white, Color.red, 1-f));
+			}
 			if (isCollided)
 				UnityEngine.Object.DestroyImmediate(gameObject);
 		}
