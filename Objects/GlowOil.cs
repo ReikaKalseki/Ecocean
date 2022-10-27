@@ -85,6 +85,7 @@ namespace ReikaKalseki.Ecocean {
 			e.locked = true;
 			e.scanTime = 3;
 			PDAHandler.AddCustomScannerEntry(e);
+			ItemRegistry.instance.addItem(this);
 		}
 		
 		internal static void setupRenderer(Renderer r, string texName) {
