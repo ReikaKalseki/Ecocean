@@ -213,7 +213,7 @@ namespace ReikaKalseki.Ecocean {
 			}
 			if (spawnTime > 0 && time-lastPLayerDistanceCheckTime >= 0.5) {
 				lastPLayerDistanceCheckTime = time;
-				if (Vector3.Distance(transform.position, Player.main.transform.position) > 250) {
+				if (Player.main && Vector3.Distance(transform.position, Player.main.transform.position) > 250) {
 					UnityEngine.Object.DestroyImmediate(gameObject);
 				}
 			}

@@ -10,16 +10,17 @@ using UnityEngine;  //Needed for most Unity Enginer manipulations: Vectors, Game
 using ReikaKalseki.DIAlterra;
 
 namespace ReikaKalseki.Ecocean {
-	/*
-	[HarmonyPatch(typeof(uGUI_MapRoomScanner))]
-	[HarmonyPatch("RebuildResourceList")]
-	public static class ScannerTypeFilteringHook {
+	
+	[HarmonyPatch(typeof(CyclopsHornButton))]
+	[HarmonyPatch("OnPress")]
+	public static class CyclopsHornHook {
 		
 		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
 			List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
 			try {
-				CodeInstruction call = InstructionHandlers.createMethodCall("ReikaKalseki.Ecocean.IFHooks", "filterScannerRoomResourceList", false, typeof(uGUI_MapRoomScanner));
-				InstructionHandlers.patchInitialHook(codes, new CodeInstruction(OpCodes.Ldarg_0), call);
+				int idx = InstructionHandlers.getInstruction(codes, 0, 0, OpCodes.Callvirt, "FMOD_CustomEmitter", "Play", true, new Type[0]);
+				codes.Insert(idx, InstructionHandlers.createMethodCall("ReikaKalseki.Ecocean.ECHooks", "honkCyclopsHorn", false, typeof(CyclopsHornButton)));
+				codes.Insert(idx, new CodeInstruction(OpCodes.Ldarg_0));
 				FileLog.Log("Done patch "+MethodBase.GetCurrentMethod().DeclaringType);
 			}
 			catch (Exception e) {
@@ -30,5 +31,5 @@ namespace ReikaKalseki.Ecocean {
 			}
 			return codes.AsEnumerable();
 		}
-	}*/
+	}
 }

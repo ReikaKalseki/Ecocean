@@ -41,6 +41,9 @@ namespace ReikaKalseki.Ecocean {
 	    	
 	    	DIHooks.getTemperatureEvent += getWaterTemperature;
 	    	
+	    	DIHooks.onSeamothSonarUsedEvent += pingSeamothSonar;
+	    	DIHooks.onCyclopsSonarUsedEvent += pingCyclopsSonar;
+	    	
 	    	bloodVine.AddRange(VanillaFlora.BLOOD_KELP.getPrefabs(true, true));
 	    }
 	    
@@ -103,5 +106,121 @@ namespace ReikaKalseki.Ecocean {
 	    			go.EnsureComponent<PredatoryBloodvine>();
 	    	}
 	    }
+		
+		public static void honkCyclopsHorn(CyclopsHornButton b) {
+			attractToSoundPing(b.gameObject.FindAncestor<SubRoot>(), true);
+		}
+	    
+	    public static void pingSeamothSonar(SeaMoth sm) {
+			attractToSoundPing(sm, false);
+	    }
+	    
+		public static void pingCyclopsSonar(SubRoot sm) {
+			attractToSoundPing(sm, false);
+	    }
+		
+		private static void attractToSoundPing(MonoBehaviour obj, bool isHorn) {
+			if (obj is SubRoot) {
+				CyclopsNoiseManager noise = obj.gameObject.GetComponentInChildren<CyclopsNoiseManager>();
+				noise.noiseScalar *= isHorn ? 6 : 2;
+				noise.Invoke("RecalculateNoiseValues", isHorn ? 15 : 10);
+			}
+			RaycastHit[] hit = Physics.SphereCastAll(obj.transform.position, 400, new Vector3(1, 1, 1), 400);
+			foreach (RaycastHit rh in hit) {
+				if (rh.transform != null && rh.transform.gameObject) {
+					Creature c = rh.transform.gameObject.GetComponent<Creature>();
+					if (c && !c.gameObject.GetComponent<WaterParkCreature>()) {
+						float chance = Mathf.Clamp01(1F-Vector3.Distance(rh.transform.position, obj.transform.position)/400F);
+						if (isHorn) {
+							chance *= 2;
+							chance = Mathf.Min(chance, 0.05F);
+							if (c is Reefback || c is GhostLeviathan || c is GhostLeviatanVoid || c is ReaperLeviathan || c is SeaDragon) {
+								chance *= 5;
+								chance = Mathf.Min(chance, 0.25F);
+							}
+							if (c is Reefback && isHorn) {
+								chance *= 5;
+								chance = Mathf.Min(chance, 0.5F);
+							}
+						}
+						if (UnityEngine.Random.Range(0F, 1F) <= chance)
+							attractCreatureToSoundSource(c, obj, isHorn);
+					}
+				}
+			}
+		}
+		
+		private static void attractCreatureToSoundSource(Creature c, MonoBehaviour obj, bool isHorn) {
+			AttractToTarget ac = c.gameObject.EnsureComponent<AttractToTarget>();
+			ac.fire(obj, isHorn);
+			if (c is Reefback && isHorn)
+				SoundManager.playSoundAt(c.GetComponent<FMOD_CustomLoopingEmitter>().asset, c.transform.position, false, -1, 1);
+		}
+		
+		class AttractToTarget : MonoBehaviour {
+			
+			private MonoBehaviour target;
+			private bool isHorn;
+			
+			private Creature owner;
+			private SwimBehaviour swimmer;
+			private AttackCyclops cyclopsAttacker;
+			private MeleeAttack[] attacks;
+			private AggressiveWhenSeeTarget[] targeting;
+			
+			private float lastTick;
+			
+			private float delete;
+			
+			internal void fire(MonoBehaviour from, bool horn) {
+				target = from;
+				isHorn |= horn;
+				delete = Mathf.Max(delete, DayNightCycle.main.timePassedAsFloat+20);
+			}
+			
+			void Update() {
+				if (!owner)
+					owner = GetComponent<Creature>();
+				if (!swimmer)
+					swimmer = GetComponent<SwimBehaviour>();
+				if (!cyclopsAttacker)
+					cyclopsAttacker = GetComponent<AttackCyclops>();
+				if (attacks == null)
+					attacks = GetComponents<MeleeAttack>();
+				if (targeting == null)
+					targeting = GetComponents<AggressiveWhenSeeTarget>();
+				
+				float time = DayNightCycle.main.timePassedAsFloat;
+				if (time >= delete) {
+					UnityEngine.Object.DestroyImmediate(this);
+					return;
+				}
+				
+				if (time-lastTick <= 0.5)
+					return;
+				lastTick = time;
+				
+				if (owner is Reefback && isHorn) {
+					Reefback r = (Reefback)owner;
+					swimmer.SwimTo(target.transform.position, r.maxMoveSpeed);
+					r.friend = target.gameObject;
+					return;
+				}
+				
+				if (target is SubRoot && !(cyclopsAttacker && cyclopsAttacker.isActiveAndEnabled))
+					return;
+				
+				if (Vector3.Distance(transform.position, target.transform.position) >= 40)
+					swimmer.SwimTo(target.transform.position, 10);
+				
+				owner.Aggression.Add(isHorn ? 0.5F : 0.05F);
+				cyclopsAttacker.SetCurrentTarget(target.gameObject, false);
+		    	foreach (MeleeAttack a in attacks)
+		    		a.lastTarget.SetTarget(target.gameObject);
+		    	foreach (AggressiveWhenSeeTarget a in targeting)
+		    		a.lastTarget.SetTarget(target.gameObject);
+			}
+			
+		}
 	}
 }
