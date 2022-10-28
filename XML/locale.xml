@@ -1,17 +1,15 @@
 <Root>
 	<GLOWSHROOM>
 		<name>
-			Lumashroom
+			Lumenshroom
 		</name>
 		<desc>
 			A large flora species which periodically emits large drops of seed-laden oil.
 		</desc>
 		<pda>
-			The large drops of viscous oil regularly expelled by this plant contain the seeds of future generations in a dormant state, ready to be reactivated by favorable environmental conditions. These seeds possess an unusual property, arising from their unique chemical environment, being capable of strong chemiluminescence. However, probably as an energy-conservation measure, this behavior is only exhibited in the presence of other light sources, and only ones matching neither the wavelengths of sunlight nor other seed droplets.
+			This plant regularly expels large droplets of oil containing its seeds, the event of which is heralded by an initially gradual and then sudden increase in its luminosity.
 			
-			Unfortunately, the fertility of this species seems to be inextricably tied to its natural habitat; while the plant can be cultivated anywhere, it will not exhibit this seed ejection behavior in captivity.
-			
-			Assessment: The oil droplets containing the seeds are likely to be of great chemical utility 
+			Unfortunately, the fertility of this species seems to be inextricably tied to its natural habitat; while the plant can be cultivated anywhere, it will not exhibit this seed ejection behavior in captivity. However, when this fact is combined with the inedibility of the cap or the stony stem, there is little reason to maintain such cultivations unless as decoration.
 		</pda>
 		<header>
 			Glowshroom
@@ -35,16 +33,18 @@
 	</LAVASHROOM>
 	<GlowOil>
 		<name>
-			 Luma Oil
+			 Lumenshroom Oil
 		</name>
 		<desc>
-			--TODO--
+			A large globule of oil containing several unusual seeds.
 		</desc>
 		<pda>
-			--TODO--
+			These large drops of viscous oil contain the seeds of future generations in a dormant state, ready to be reactivated by favorable environmental conditions. These seeds possess an unusual property, arising from their unique chemical environment, in that they are capable of strong chemiluminescence. However, probably as an energy-conservation measure, this behavior is only exhibited in the presence of other light sources, and only ones matching neither the wavelengths of sunlight nor other seed droplets.
+		
+			Assessment: Seeds can be planted to maintain captive populations of the flora, and the enveloping oil may have crafting applications
 		</pda>
 		<header>
-			
+			GlowOil
 		</header>
 	</GlowOil>
 	<LavaBomb>

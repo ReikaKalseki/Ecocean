@@ -2,6 +2,7 @@
 using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.Serialization;
 using UnityEngine.Scripting;
@@ -55,7 +56,10 @@ namespace ReikaKalseki.Ecocean {
 			rb.maxAngularVelocity = 6;
 			rb.drag = wf.underwaterDrag;
 			//ObjectUtil.removeComponent<EnzymeBall>(world);
-			ObjectUtil.removeComponent<Plantable>(world);
+			//ObjectUtil.removeComponent<Plantable>(world);
+			Plantable p = world.GetComponent<Plantable>();
+			CraftData.GetPrefabForTechType(TechType.SnakeMushroomSpore).GetComponent<Plantable>().CopyFields<Plantable>(p, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+			BasicCustomPlant.setPlantSeed(TechType, EcoceanMod.glowShroom);
 			GlowOilTag g = world.EnsureComponent<GlowOilTag>();
 			world.EnsureComponent<LargeWorldEntity>().cellLevel = LargeWorldEntity.CellLevel.VeryFar;
 			Light l = ObjectUtil.addLight(world);
@@ -78,12 +82,15 @@ namespace ReikaKalseki.Ecocean {
 		
 		public void register() {
 			Patch();
+			PDAManager.PDAPage p = PDAManager.createPage("ency_"+ClassID, FriendlyName, locale.pda, "Advanced");
+			p.setHeaderImage(TextureManager.getTexture(EcoceanMod.modDLL, "Textures/PDA/"+locale.getField<string>("header")));
+			p.register();
         	KnownTechHandler.Main.SetAnalysisTechEntry(TechType, new List<TechType>(){TechType});
 			PDAScanner.EntryData e = new PDAScanner.EntryData();
 			e.key = TechType;
-			e.blueprint = TechType;
 			e.locked = true;
 			e.scanTime = 3;
+			e.encyclopedia = p.id;
 			PDAHandler.AddCustomScannerEntry(e);
 			ItemRegistry.instance.addItem(this);
 		}
@@ -126,7 +133,7 @@ namespace ReikaKalseki.Ecocean {
 			float time = DayNightCycle.main.timePassedAsFloat;
 			if (time-lastLightRaytrace >= 0.25F) {
 				lastLightRaytrace = time;
-				foreach (RaycastHit hit in Physics.SphereCastAll(go.position, 2.5F, go.forward, 180)) {
+				foreach (RaycastHit hit in Physics.SphereCastAll(go.position, 4F, go.forward, 180)) {
 					if (hit.transform) {
 						GlowOilTag g = hit.transform.GetComponentInParent<GlowOilTag>();
 						if (g)

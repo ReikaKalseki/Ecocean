@@ -26,6 +26,10 @@ namespace ReikaKalseki.Ecocean {
 		protected override string getTextureSubfolder() {
 			return "LavaBombMushroom";
 		}
+
+		protected override bool isExploitable() {
+			return false;
+		}
 		
 	}
 	

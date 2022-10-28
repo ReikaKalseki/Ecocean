@@ -16,7 +16,7 @@ namespace ReikaKalseki.Ecocean {
 	internal class GlowOilMushroom : GlowshroomBase<GlowShroomTag> {
 		
 		public GlowOilMushroom() : base("GLOWSHROOM") {
-			
+			collectionMethod = HarvestType.None;
 		}
 		
 		public override Color getLightColor() {
@@ -25,6 +25,10 @@ namespace ReikaKalseki.Ecocean {
 		
 		protected override string getTextureSubfolder() {
 			return "GlowOilMushroom";
+		}
+
+		protected override bool isExploitable() {
+			return true;
 		}
 		
 	}
