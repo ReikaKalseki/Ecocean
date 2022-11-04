@@ -62,9 +62,13 @@ namespace ReikaKalseki.Ecocean {
 		
 		protected override void updateBrightness(float f) {
 			f = Mathf.Min(0.5F, f)*2; //0.5 is the max it reaches before the quick burst before firing
+			if (isGrown)
+				f = 0;
 			foreach (Renderer r in renderers) {
 				RenderUtil.setEmissivity(r.materials[0], 0.5F+f*1.5F, "GlowStrength");
 				Color c = Color.Lerp(Color.white, new Color(0.8F, 0, 0, 1), 1-f);
+				if (isGrown)
+					c = Color.black;
 				r.materials[0].SetColor("_GlowColor", c);				
 			}
 		}

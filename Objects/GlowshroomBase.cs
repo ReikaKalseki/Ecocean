@@ -54,8 +54,16 @@ namespace ReikaKalseki.Ecocean {
 			for (int i = 0; i < r.materials.Length; i++) {
 				string N = r.materials[i].name.Replace("(Instance)", "");
 				N = N.Substring(N.LastIndexOf('_')+1).Trim();
+				if (!N.Contains("hat")) {
+					N = N.Replace("small", "05");
+					if (i == 1) { //wrong tex on grown plant
+						N = "hat_small";
+					}
+				}
 				ret[i] = N;
 			}
+			//ReikaKalseki.DIAlterra.RenderUtil.dumpTexture(ReikaKalseki.DIAlterra.SNUtil.diDLL, "captex", (Texture2D)m.mainTexture);
+			//SNUtil.log("Loading texture dict "+ret.toDebugString<int, string>());
 			return ret;
 		}
 
@@ -66,7 +74,7 @@ namespace ReikaKalseki.Ecocean {
 		protected abstract string getTextureSubfolder();
 		
 		public override sealed float getScaleInGrowbed(bool indoors) {
-			return 0.1F;
+			return 1F;
 		}
 
 		public override bool isResource() {
@@ -107,11 +115,11 @@ namespace ReikaKalseki.Ecocean {
 		
 		void Start() {
 			isGrown = gameObject.GetComponent<GrownPlant>() != null;
-			if (gameObject.transform.position.y > -getMinimumAllowableDepth())
+			if (!isGrown && gameObject.transform.position.y > -getMinimumAllowableDepth())
     			UnityEngine.Object.Destroy(gameObject);
     		else if (isGrown) {
     			gameObject.SetActive(true);
-    			gameObject.transform.localScale = Vector3.one*UnityEngine.Random.Range(0.1F, 0.125F);
+    			gameObject.transform.localScale = Vector3.one*UnityEngine.Random.Range(1.5F, 1.75F);
     		}
     		else {
 				gameObject.transform.localScale = Vector3.one*UnityEngine.Random.Range(0.75F, 1F)*getSize();
@@ -127,11 +135,14 @@ namespace ReikaKalseki.Ecocean {
 				lights = GetComponentsInChildren<Light>();
 			}
 			
-			if (isGrown) {
-				setBrightness(0.75F);
+			float time = DayNightCycle.main.timePassedAsFloat;
+			if (isGrown) { //0.5 is the max it reaches before the quick burst before firing
+				float sp = 1+0.4F*Mathf.Cos((0.2F*transform.position.magnitude)%(600*Mathf.PI));
+				float tt = (sp*time+gameObject.GetHashCode())%(200*Mathf.PI);
+				float lt = Mathf.Sin(tt)+0.33F*Mathf.Sin(tt*3.93F+2367.2F);
+				setBrightness(0.5F+0.125F*lt);
 			}
 			else {
-				float time = DayNightCycle.main.timePassedAsFloat;
 				float dT = nextEmitTime-time;
 				if (dT <= 0 && Vector3.Distance(transform.position, Player.main.transform.position) <= 300) {
 					emit(time);
@@ -157,7 +168,7 @@ namespace ReikaKalseki.Ecocean {
 		
 		private void setBrightness(float f) {
 			foreach (Light l in lights) {
-				l.intensity = 2*f;
+				l.intensity = (isGrown ? 1 : 2)*f;
 			}
 			foreach (Renderer r in renderers) {
 				if (r.materials.Length > 1) { //outer stem and cap

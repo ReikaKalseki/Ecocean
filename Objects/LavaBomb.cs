@@ -19,11 +19,20 @@ namespace ReikaKalseki.Ecocean {
 		internal static readonly float HEAT_RADIUS = 30;
 		internal static readonly float MAX_TEMPERATURE = 2000;
 		
+		internal static List<LavaBombTag> activeLavaBombs = new List<LavaBombTag>();
+		
 		private readonly XMLLocale.LocaleEntry locale;
 	        
 	    internal LavaBomb(XMLLocale.LocaleEntry e) : base(e.key, e.name, e.desc) {
 			locale = e;
 	    }
+		
+		public static void iterateLavaBombs(Action<LavaBombTag> a) {
+			foreach (LavaBombTag go in activeLavaBombs) {
+				if (go)
+					a(go);
+			}
+		}
 			
 	    public override GameObject GetGameObject() {
 			GameObject world = ObjectUtil.createWorldObject("18229b4b-3ed3-4b35-ae30-43b1c31a6d8d");
@@ -76,10 +85,12 @@ namespace ReikaKalseki.Ecocean {
 			
 	}
 		
-	class LavaBombTag : MonoBehaviour {
+	public class LavaBombTag : MonoBehaviour {
 		
 		private static readonly SoundManager.SoundData fireSound = SoundManager.registerSound(EcoceanMod.modDLL, "lavabombfire", "Sounds/lavabomb-fire.ogg", SoundManager.soundMode3D, s => {SoundManager.setup3D(s, 40);}, SoundSystem.masterBus);
 		private static readonly SoundManager.SoundData impactSound = SoundManager.registerSound(EcoceanMod.modDLL, "lavabombimpact", "Sounds/lavabomb-impact.ogg", SoundManager.soundMode3D, s => {SoundManager.setup3D(s, 40);}, SoundSystem.masterBus);
+		
+		public static event Action<LavaBombTag, GameObject> onLavaBombImpactEvent;
 		
 		private Light light;
 		
@@ -147,13 +158,14 @@ namespace ReikaKalseki.Ecocean {
 			SoundManager.playSoundAt(fireSound, transform.position, false, 40);
 			WorldUtil.spawnParticlesAt(transform.position, "db6907f8-2c37-4d0b-8eac-1b1e3b59fa71", 0.5F);
 			spawnTime = DayNightCycle.main.timePassedAsFloat;
+			LavaBomb.activeLavaBombs.Add(this);
 		}
 		
 		public float getTemperature() {
 			return temperature;
 		}
 		
-		internal float getIntensity() {
+		public float getIntensity() {
 			return temperature/LavaBomb.MAX_TEMPERATURE;
 		}
 
@@ -169,9 +181,12 @@ namespace ReikaKalseki.Ecocean {
 	    }
 		
 		internal void explode(GameObject impacted) {
+			LavaBomb.activeLavaBombs.Remove(this);
 			SoundManager.playSoundAt(impactSound, transform.position, false, 40);
-			RaycastHit[] hit = Physics.SphereCastAll(transform.position, 15, new Vector3(1, 1, 1), 15);
+			if (onLavaBombImpactEvent != null)
+				onLavaBombImpactEvent.Invoke(this, impacted);
 			HashSet<int> used = new HashSet<int>();
+			RaycastHit[] hit = Physics.SphereCastAll(transform.position, 15, new Vector3(1, 1, 1), 15);
 			foreach (RaycastHit rh in hit) {
 				if (rh.transform != null && rh.transform.gameObject) {
 					if (used.Contains(rh.transform.gameObject.GetInstanceID()))

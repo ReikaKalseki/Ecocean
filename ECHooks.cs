@@ -27,6 +27,8 @@ namespace ReikaKalseki.Ecocean {
 	    };
 	    
 		private static readonly HashSet<string> bloodVine = new HashSet<string>();
+		
+		private static bool addingExtraGlowOil = false;
 	    
 	    static ECHooks() {
 	    	DIHooks.onSkyApplierSpawnEvent += onSkyApplierSpawn;
@@ -78,22 +80,30 @@ namespace ReikaKalseki.Ecocean {
 		
 		public static void onPickup(Pickupable pp) {
 			GlowOilTag g = pp.GetComponent<GlowOilTag>();
-			if (g)
+			if (g) {
 				g.resetGlow();
+				if (!addingExtraGlowOil) {
+					addingExtraGlowOil = true;
+					for (int i = 1; i < EcoceanMod.config.getInt(ECConfig.ConfigEntries.GLOWCOUNT); i++) { //start at 1 to account for the one already has
+						GameObject gameObject = UnityEngine.Object.Instantiate(EcoceanMod.glowOil.GetGameObject());
+						gameObject.SetActive(true);
+						Inventory.main.Pickup(gameObject.GetComponent<Pickupable>());
+					}
+					addingExtraGlowOil = false;
+				}
+			}
 		}
 		
 		public static void getWaterTemperature(DIHooks.WaterTemperatureCalculation calc) {
 			//SNUtil.writeToChat("EC: Checking water temp @ "+calc.position+" def="+calc.originalValue);
-			foreach (LavaBombTag lb in UnityEngine.Object.FindObjectsOfType<LavaBombTag>()) {
-				if (lb) {
-					float dist = Vector3.Distance(lb.transform.position, calc.position);
-					if (dist <= LavaBomb.HEAT_RADIUS) {
-						float f = 1F-(dist/LavaBomb.HEAT_RADIUS);
-						//SNUtil.writeToChat("Found lava bomb "+lb.transform.position+" at dist "+dist+" > "+f+" > "+(f*lb.getTemperature()));
-						calc.setValue(Mathf.Max(calc.getTemperature(), f*lb.getTemperature()));
-					}
+			LavaBomb.iterateLavaBombs(lb => {
+				float dist = Vector3.Distance(lb.transform.position, calc.position);
+				if (dist <= LavaBomb.HEAT_RADIUS) {
+					float f = 1F-(dist/LavaBomb.HEAT_RADIUS);
+					//SNUtil.writeToChat("Found lava bomb "+lb.transform.position+" at dist "+dist+" > "+f+" > "+(f*lb.getTemperature()));
+					calc.setValue(Mathf.Max(calc.getTemperature(), f*lb.getTemperature()));
 				}
-			}
+			});
 		}
 	    
 	    public static void onSkyApplierSpawn(SkyApplier pk) {

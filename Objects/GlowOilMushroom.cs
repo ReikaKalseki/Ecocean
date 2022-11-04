@@ -35,15 +35,15 @@ namespace ReikaKalseki.Ecocean {
 	
 	internal class GlowShroomTag : GlowShroomTagBase {
 		
-		private static readonly Vector3 reaperlessTripleVent = new Vector3(-1150, -243, -258);
-		
 		protected override void init() {
 			
 		}
 		
-		protected override void tick() {
-			if (Vector3.Distance(transform.position, reaperlessTripleVent) <= 200)
-    			UnityEngine.Object.Destroy(gameObject);
+		protected override void tick() {/*
+			if (!isGrown) {
+				if (Mathf.Min(Vector3.Distance(transform.position, northDuneBit), Vector3.Distance(transform.position, reaperlessTripleVent)) <= 200)
+    				UnityEngine.Object.Destroy(gameObject);
+			}*/
 		}
 		
 		protected override float getMinimumAllowableDepth() {

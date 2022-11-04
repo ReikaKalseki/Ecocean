@@ -31,6 +31,9 @@ namespace ReikaKalseki.Ecocean
     
     internal static LavaBombMushroom lavaShroom;
     internal static LavaBomb lavaBomb;
+		
+	internal static readonly Vector3 reaperlessTripleVent = new Vector3(-1150, -240, -258);
+	internal static readonly Vector3 northDuneBit = new Vector3(-1151, -340, 1444);
 
     [QModPatch]
     public static void Load() {
@@ -76,6 +79,9 @@ namespace ReikaKalseki.Ecocean
 		
 		BioReactorHandler.Main.SetBioReactorCharge(glowShroom.seed.TechType, BaseBioReactor.GetCharge(TechType.SnakeMushroomSpore)*3);
 		BioReactorHandler.Main.SetBioReactorCharge(glowOil.TechType, BaseBioReactor.GetCharge(TechType.BloodOil)*6);
+		
+		GenUtil.registerWorldgen(new PositionedPrefab(VanillaCreatures.REAPER.prefab, reaperlessTripleVent.setY(-200)));
+		GenUtil.registerWorldgen(new PositionedPrefab(VanillaCreatures.REAPER.prefab, northDuneBit.setY(-320)));
 		
 		System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(ECHooks).TypeHandle);
     }
