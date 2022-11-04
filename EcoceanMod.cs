@@ -28,6 +28,7 @@ namespace ReikaKalseki.Ecocean
     
     internal static GlowOilMushroom glowShroom;
     internal static GlowOil glowOil;
+    internal static GlowOilNatural naturalOil;
     
     internal static LavaBombMushroom lavaShroom;
     internal static LavaBomb lavaBomb;
@@ -58,6 +59,8 @@ namespace ReikaKalseki.Ecocean
 	    
 	    glowOil = new GlowOil(locale.getEntry("GlowOil"));
 	    glowOil.register();
+	    naturalOil = new GlowOilNatural();
+	    naturalOil.register();
 	    
 	    lavaBomb = new LavaBomb(locale.getEntry("LavaBomb"));
 	    lavaBomb.Patch();

@@ -82,15 +82,6 @@ namespace ReikaKalseki.Ecocean {
 			GlowOilTag g = pp.GetComponent<GlowOilTag>();
 			if (g) {
 				g.resetGlow();
-				if (!addingExtraGlowOil) {
-					addingExtraGlowOil = true;
-					for (int i = 1; i < EcoceanMod.config.getInt(ECConfig.ConfigEntries.GLOWCOUNT); i++) { //start at 1 to account for the one already has
-						GameObject gameObject = UnityEngine.Object.Instantiate(EcoceanMod.glowOil.GetGameObject());
-						gameObject.SetActive(true);
-						Inventory.main.Pickup(gameObject.GetComponent<Pickupable>());
-					}
-					addingExtraGlowOil = false;
-				}
 			}
 		}
 		

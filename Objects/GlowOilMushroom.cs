@@ -55,7 +55,7 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		protected override GameObject createProjectile() {
-			GameObject go = ObjectUtil.createWorldObject(EcoceanMod.glowOil.ClassID);
+			GameObject go = ObjectUtil.createWorldObject(EcoceanMod.naturalOil.ClassID);
 			return go;
 		}
 		

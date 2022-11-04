@@ -26,6 +26,8 @@ namespace ReikaKalseki.Ecocean {
 		private static float lastLightRaytrace;
 		
 		internal static readonly Simplex3DGenerator sizeNoise = (Simplex3DGenerator)new Simplex3DGenerator(0).setFrequency(0.4);
+		
+		private PDAManager.PDAPage pdaPage;
 	        
 	    internal GlowOil(XMLLocale.LocaleEntry e) : base(e.key, e.name, e.desc) {
 			locale = e;
@@ -37,6 +39,10 @@ namespace ReikaKalseki.Ecocean {
 
 		protected sealed override Atlas.Sprite GetItemSprite() {
 			return TextureManager.getSprite(EcoceanMod.modDLL, "Textures/Items/GlowOil");
+		}
+		
+		public Atlas.Sprite getSprite() {
+			return GetItemSprite();
 		}
 			
 	    public override GameObject GetGameObject() {
@@ -97,17 +103,21 @@ namespace ReikaKalseki.Ecocean {
 		
 		public void register() {
 			Patch();
-			PDAManager.PDAPage p = PDAManager.createPage("ency_"+ClassID, FriendlyName, locale.pda, "Advanced");
-			p.setHeaderImage(TextureManager.getTexture(EcoceanMod.modDLL, "Textures/PDA/"+locale.getField<string>("header")));
-			p.register();
+			pdaPage = PDAManager.createPage("ency_"+ClassID, FriendlyName, locale.pda, "Advanced");
+			pdaPage.setHeaderImage(TextureManager.getTexture(EcoceanMod.modDLL, "Textures/PDA/"+locale.getField<string>("header")));
+			pdaPage.register();
         	KnownTechHandler.Main.SetAnalysisTechEntry(TechType, new List<TechType>(){TechType});
 			PDAScanner.EntryData e = new PDAScanner.EntryData();
 			e.key = TechType;
 			e.locked = true;
 			e.scanTime = 3;
-			e.encyclopedia = p.id;
+			e.encyclopedia = pdaPage.id;
 			PDAHandler.AddCustomScannerEntry(e);
 			ItemRegistry.instance.addItem(this);
+		}
+		
+		internal PDAManager.PDAPage getPDAEntry() {
+			return pdaPage;
 		}
 		
 		internal static void setupRenderer(Renderer r, string texName) {
