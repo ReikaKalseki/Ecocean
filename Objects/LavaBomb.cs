@@ -124,14 +124,19 @@ namespace ReikaKalseki.Ecocean {
 			
 			temperature = Mathf.Max(600, temperature-Time.deltaTime*150);
 			
-			if (mainBody && mainBody.velocity.magnitude < 0.1F)
+			if (mainBody && mainBody.velocity.magnitude < 0.1F) {
 				explode(null);
-			else if (spawnTime > 0 && time-spawnTime >= 45)
+				SNUtil.writeToChat("Destroyed lava bomb because zero speed");
+			}
+			else if (spawnTime > 0 && time-spawnTime >= 45) {
 				explode(null);
+				SNUtil.writeToChat("Destroyed lava bomb because age");
+			}
 			else if (time-lastPLayerDistanceCheckTime >= 0.5) {
 				lastPLayerDistanceCheckTime = time;
 				if (Vector3.Distance(transform.position, Player.main.transform.position) > 250) {
 					UnityEngine.Object.DestroyImmediate(gameObject);
+					SNUtil.writeToChat("Destroyed lava bomb because far");
 				}
 			}
 			
@@ -145,8 +150,10 @@ namespace ReikaKalseki.Ecocean {
 				mainRender.materials[0].SetColor("_SpecColor", getColor(f));
 				mainRender.materials[1].SetColor("_GlowColor", Color.Lerp(Color.white, Color.red, 1-f));
 			}
-			if (isCollided)
+			if (isCollided) {
 				UnityEngine.Object.DestroyImmediate(gameObject);
+				SNUtil.writeToChat("Destroyed lava bomb because collided");
+			}
 		}
 		
 		internal Color getColor(float f) {
@@ -156,7 +163,8 @@ namespace ReikaKalseki.Ecocean {
 		internal void onFired() {
 			temperature = LavaBomb.MAX_TEMPERATURE;
 			SoundManager.playSoundAt(fireSound, transform.position, false, 40);
-			WorldUtil.spawnParticlesAt(transform.position, "db6907f8-2c37-4d0b-8eac-1b1e3b59fa71", 0.5F);
+			if (Vector3.Distance(transform.position, Player.main.transform.position) <= 200)
+				WorldUtil.spawnParticlesAt(transform.position, "db6907f8-2c37-4d0b-8eac-1b1e3b59fa71", 0.5F);
 			spawnTime = DayNightCycle.main.timePassedAsFloat;
 			LavaBomb.activeLavaBombs.Add(this);
 		}
@@ -172,7 +180,7 @@ namespace ReikaKalseki.Ecocean {
 	    void OnCollisionEnter(Collision c) {
 			GameObject collider = c.gameObject;
 			if (spawnTime > 0 && DayNightCycle.main.timePassedAsFloat-spawnTime >= 0.1 && c.relativeVelocity.magnitude >= 2 && (collider.FindAncestor<LiveMixin>() || collider.FindAncestor<SubRoot>() || collider.FindAncestor<WorldStreaming.ClipmapChunk>())) {
-			SNUtil.writeToChat("Collided with "+collider+" at speed "+c.relativeVelocity.magnitude);
+			//SNUtil.writeToChat("Collided with "+collider+" at speed "+c.relativeVelocity.magnitude);
 	        	explode(collider);
 	        	GlowShroomTagBase gs = collider.FindAncestor<GlowShroomTagBase>();
 	        	if (gs)
@@ -180,45 +188,60 @@ namespace ReikaKalseki.Ecocean {
 			}
 	    }
 		
+		void OnDestroy() {
+			LavaBomb.activeLavaBombs.Remove(this);
+		}
+		
+		void OnDisable() {
+			LavaBomb.activeLavaBombs.Remove(this);
+		}
+		
 		internal void explode(GameObject impacted) {
 			LavaBomb.activeLavaBombs.Remove(this);
-			SoundManager.playSoundAt(impactSound, transform.position, false, 40);
 			if (onLavaBombImpactEvent != null)
 				onLavaBombImpactEvent.Invoke(this, impacted);
-			HashSet<int> used = new HashSet<int>();
-			RaycastHit[] hit = Physics.SphereCastAll(transform.position, 15, new Vector3(1, 1, 1), 15);
-			foreach (RaycastHit rh in hit) {
-				if (rh.transform != null && rh.transform.gameObject) {
-					if (used.Contains(rh.transform.gameObject.GetInstanceID()))
-						continue;
-					bool wasHit = rh.transform.gameObject == impacted;
-					used.Add(rh.transform.gameObject.GetInstanceID());
-					Player p = rh.transform.GetComponent<Player>();
-					if (p && !p.IsSwimming())
-						continue;
-					LiveMixin lv = rh.transform.GetComponent<LiveMixin>();
-					if (lv && lv.IsAlive()) {
-						float amt = wasHit ? 100 : 20;
-						SubRoot sub = rh.transform.GetComponent<SubRoot>();
-						if (sub && sub.isCyclops)
-							amt = wasHit ? 150 : 45;
-						Vehicle v = rh.transform.GetComponent<Vehicle>();
-						if (v && v is SeaMoth)
-							amt = wasHit ? 60 : 18;
-						else if (v && v is Exosuit)
-							amt = wasHit ? 100 : 35;
-						if (!wasHit) {
-							float f = (Vector3.Distance(rh.transform.position, transform.position))/15F;
-							amt *= Mathf.Clamp01(1.5F-f*f);
+			float pdist = Vector3.Distance(transform.position, Player.main.transform.position);
+			if (pdist <= 80) {
+				SoundManager.playSoundAt(impactSound, transform.position, false, 40);
+				HashSet<int> used = new HashSet<int>();
+				RaycastHit[] hit = Physics.SphereCastAll(transform.position, 15, new Vector3(1, 1, 1), 15);
+				foreach (RaycastHit rh in hit) {
+					if (rh.transform != null && rh.transform.gameObject) {
+						if (used.Contains(rh.transform.gameObject.GetInstanceID()))
+							continue;
+						bool wasHit = rh.transform.gameObject == impacted;
+						used.Add(rh.transform.gameObject.GetInstanceID());
+						Player p = rh.transform.GetComponent<Player>();
+						if (p && !p.IsSwimming())
+							continue;
+						LiveMixin lv = rh.transform.GetComponent<LiveMixin>();
+						if (lv && lv.IsAlive()) {
+							float amt = wasHit ? 100 : 20;
+							SubRoot sub = rh.transform.GetComponent<SubRoot>();
+							if (sub && sub.isCyclops)
+								amt = wasHit ? 150 : 45;
+							Vehicle v = rh.transform.GetComponent<Vehicle>();
+							if (v && v is SeaMoth)
+								amt = wasHit ? 60 : 18;
+							else if (v && v is Exosuit)
+								amt = wasHit ? 100 : 35;
+							if (!wasHit) {
+								float f = (Vector3.Distance(rh.transform.position, transform.position))/15F;
+								amt *= Mathf.Clamp01(1.5F-f*f);
+							}
+							amt *= 0.5F+0.5F*getIntensity();
+							amt *= EcoceanMod.config.getFloat(ECConfig.ConfigEntries.BOMBDMG);
+							lv.TakeDamage(amt, rh.transform.position, DamageType.Heat, gameObject);
 						}
-						amt *= 0.5F+0.5F*getIntensity();
-						amt *= EcoceanMod.config.getFloat(ECConfig.ConfigEntries.BOMBDMG);
-						lv.TakeDamage(amt, rh.transform.position, DamageType.Heat, gameObject);
 					}
 				}
 			}
 			isCollided = true;
-			WorldUtil.spawnParticlesAt(transform.position, "db6907f8-2c37-4d0b-8eac-1b1e3b59fa71", 0.5F);
+			if (pdist <= 200)
+				WorldUtil.spawnParticlesAt(transform.position, "db6907f8-2c37-4d0b-8eac-1b1e3b59fa71", 0.5F);
+			
+			if (impacted)
+				SNUtil.writeToChat("Destroyed lava bomb during explode on "+impacted);
 			UnityEngine.Object.Destroy(gameObject);
 		}
 		

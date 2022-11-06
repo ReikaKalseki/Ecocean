@@ -55,6 +55,10 @@ namespace ReikaKalseki.Ecocean {
 			return 1.5F;
 		}
 		
+		protected override float getFireDistance() {
+			return 200;
+		}
+		
 		protected override GameObject createProjectile() {
 			GameObject go = ObjectUtil.createWorldObject(EcoceanMod.lavaBomb.ClassID);
 			return go;

@@ -144,14 +144,16 @@ namespace ReikaKalseki.Ecocean {
 			}
 			else {
 				float dT = nextEmitTime-time;
-				if (dT <= 0 && Vector3.Distance(transform.position, Player.main.transform.position) <= 300) {
+				if (dT <= 0 && Vector3.Distance(transform.position, Player.main.transform.position) <= getFireDistance()) {
 					emit(time);
 				}
 				else {
 					float dT2 = time-lastEmitTime;
-					if (dT <= 1)
-						setBrightness(1-dT*2);
-					if (dT <= 20)
+					if (dT <= 0)
+						setBrightness(1);
+					else if (dT <= 1)
+						setBrightness(1-dT/2);
+					else if (dT <= 20)
 						setBrightness(0.5F-dT/40F);
 					else if (dT2 <= 1)
 						setBrightness(1-dT2);
@@ -208,6 +210,10 @@ namespace ReikaKalseki.Ecocean {
 		
 		protected virtual float getSize() {
 			return 1;
+		}
+		
+		protected virtual float getFireDistance() {
+			return 300;
 		}
 		
 		protected virtual float getNextFireInterval() {
