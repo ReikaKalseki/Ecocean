@@ -52,19 +52,25 @@ namespace ReikaKalseki.Ecocean
 			}
 			if (isExploded) {
 				isGrown = false;
-				if (UnityEngine.Random.Range(0F, 1F) <= 0.01F) {
+				if (UnityEngine.Random.Range(0F, 1F) <= 0.01F && time-lastExplodeTime >= 4) {
 					isExploded = false;
-					podGO.SetActive(true);
-					foreach (Collider c in colliders) {
-						c.enabled = true;
-						c.gameObject.SetActive(true);
-					}
-					lastRegenTime = time;
+					Invoke("showPod", 2.5F);
+					//lastRegenTime = time;
+					spawnParticleShell("f39e56b9-9a11-4582-875f-c37f1ed37314"/*"a5b073a5-4bce-4bcf-8aaf-1e7f57851ba0"*/, 2, Vector3.down*2);
+					isGrown = true;
 				}
 			}
 			else if (!isExploded && isGrown && time-lastRegenTime >= 10) {
 				if ((explodeIn > 0 && time >= explodeIn && isPlayerInRange(2)) || (UnityEngine.Random.Range(0F, 1F) <= 0.000004F && isPlayerInRange()))
 					explode();
+			}
+		}
+		
+		void showPod() {
+			podGO.SetActive(true);
+			foreach (Collider c in colliders) {
+				c.enabled = true;
+				c.gameObject.SetActive(true);
 			}
 		}
 		
@@ -89,19 +95,53 @@ namespace ReikaKalseki.Ecocean
 	        	explode();
 	    }
 		
+		private void spawnParticleShell(string prefab, float dur, Vector3 offset) {
+			if (Vector3.Distance(transform.position, Player.main.transform.position) <= 100) {
+				for (int i = 0; i < 8; i++) {
+					Vector3 pos = MathUtil.getRandomVectorAround(effectivePodCenter+Vector3.down*3.5F+offset, 7.5F);
+					ParticleSystem go = WorldUtil.spawnParticlesAt(pos, prefab, dur); //burst FX
+					if (go) {
+						ParticleSystem.SizeOverLifetimeModule sz = go.sizeOverLifetime;
+						sz.sizeMultiplier *= 2;
+					}
+					//if (go)
+					//	go.transform.localScale = Vector3.one*4;
+				}
+			}
+		}
+		
 		internal void explode() {
+			spawnParticleShell("f39e56b9-9a11-4582-875f-c37f1ed37314", 0.5F, Vector3.zero);
+			Invoke("explodePart2", 0.5F);
+		}
+		
+		internal void explodePart2() {
 			float time = DayNightCycle.main.timePassedAsFloat;
 			if (isExploded || !isGrown || time-lastRegenTime < 10)
 				return;
 			explodeIn = -1;
 			lastExplodeTime = time;
 			isExploded = true;
-			SoundManager.playSoundAt(explosionSound, effectivePodCenter, false, 64);
 			podGO.SetActive(false);
 			foreach (Collider c in colliders) {
 				c.enabled = false;
 				c.gameObject.SetActive(false);
 			}
+			GameObject coral;
+			UWE.PrefabDatabase.TryGetPrefab("171c6a5b-879b-4785-be7a-6584b2c8c442", out coral);
+			IntermittentInstantiate ii = coral.GetComponent<IntermittentInstantiate>();
+			GameObject bubble = ii.prefab;
+			int n = UnityEngine.Random.Range(8, 12);
+			for (int i = 0; i < n; i++) {
+				Vector3 pos = MathUtil.getRandomVectorAround(effectivePodCenter, 4F);
+				GameObject go = UnityEngine.Object.Instantiate(bubble);
+				go.transform.position = pos;
+				float f = UnityEngine.Random.Range(1.5F, 3F);
+				go.transform.localScale = Vector3.one*f;
+				Bubble b = go.GetComponent<Bubble>();
+				b.oxygenSeconds *= f;
+			}
+			SoundManager.playSoundAt(explosionSound, effectivePodCenter, false, 64);
 			RaycastHit[] hit = Physics.SphereCastAll(effectivePodCenter, 35, new Vector3(1, 1, 1), 35);
 			HashSet<int> used = new HashSet<int>();
 			foreach (RaycastHit rh in hit) {

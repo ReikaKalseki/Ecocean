@@ -126,17 +126,17 @@ namespace ReikaKalseki.Ecocean {
 			
 			if (mainBody && mainBody.velocity.magnitude < 0.1F) {
 				explode(null);
-				SNUtil.writeToChat("Destroyed lava bomb because zero speed");
+				//SNUtil.writeToChat("Destroyed lava bomb because zero speed");
 			}
 			else if (spawnTime > 0 && time-spawnTime >= 45) {
 				explode(null);
-				SNUtil.writeToChat("Destroyed lava bomb because age");
+				//SNUtil.writeToChat("Destroyed lava bomb because age");
 			}
 			else if (time-lastPLayerDistanceCheckTime >= 0.5) {
 				lastPLayerDistanceCheckTime = time;
 				if (Vector3.Distance(transform.position, Player.main.transform.position) > 250) {
 					UnityEngine.Object.DestroyImmediate(gameObject);
-					SNUtil.writeToChat("Destroyed lava bomb because far");
+					//SNUtil.writeToChat("Destroyed lava bomb because far");
 				}
 			}
 			
@@ -152,7 +152,7 @@ namespace ReikaKalseki.Ecocean {
 			}
 			if (isCollided) {
 				UnityEngine.Object.DestroyImmediate(gameObject);
-				SNUtil.writeToChat("Destroyed lava bomb because collided");
+				//SNUtil.writeToChat("Destroyed lava bomb because collided");
 			}
 		}
 		
@@ -240,8 +240,8 @@ namespace ReikaKalseki.Ecocean {
 			if (pdist <= 200)
 				WorldUtil.spawnParticlesAt(transform.position, "db6907f8-2c37-4d0b-8eac-1b1e3b59fa71", 0.5F);
 			
-			if (impacted)
-				SNUtil.writeToChat("Destroyed lava bomb during explode on "+impacted);
+			//if (impacted)
+			//	SNUtil.writeToChat("Destroyed lava bomb during explode on "+impacted);
 			UnityEngine.Object.Destroy(gameObject);
 		}
 		

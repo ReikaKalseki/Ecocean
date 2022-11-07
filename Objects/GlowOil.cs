@@ -177,6 +177,7 @@ namespace ReikaKalseki.Ecocean {
 		private Renderer mainRender;
 		private PrefabIdentifier prefab;
 		private Rigidbody mainBody;
+		private Collider mainHitbox;
 		
 		//private GameObject bubble;
 		
@@ -190,6 +191,8 @@ namespace ReikaKalseki.Ecocean {
 		
 		private float spawnTime;
 		
+		private bool isExploding = false;
+		
 		private readonly List<GlowSeed> seeds = new List<GlowSeed>();
 		
 		void Update() {
@@ -198,6 +201,9 @@ namespace ReikaKalseki.Ecocean {
 			}
 			if (!mainBody) {
 				mainBody = GetComponentInChildren<Rigidbody>();
+			}
+			if (!mainHitbox) {
+				mainHitbox = GetComponentInChildren<Collider>();
 			}
 			if (!prefab) {
 				prefab = GetComponentInChildren<PrefabIdentifier>();
@@ -236,6 +242,8 @@ namespace ReikaKalseki.Ecocean {
 				lastGlowUpdate = time;
 				updateGlowStrength(time, dT);
 			}
+			if (spawnTime <= 0)
+				spawnTime = time;
 			if (spawnTime > 0 && time-lastPLayerDistanceCheckTime >= 0.5) {
 				lastPLayerDistanceCheckTime = time;
 				if (Player.main && Vector3.Distance(transform.position, Player.main.transform.position) > 250) {
@@ -243,7 +251,7 @@ namespace ReikaKalseki.Ecocean {
 				}
 			}
 			if (spawnTime > 0 && time-spawnTime >= 600) {
-				UnityEngine.Object.DestroyImmediate(gameObject);
+				explode();
 			}
 			dT = Time.deltaTime;
 			if (time-lastRepelTime >= 0.5) {
@@ -283,31 +291,62 @@ namespace ReikaKalseki.Ecocean {
 						}
 						//SNUtil.writeToChat("Mot="+g.motion);
 						//SNUtil.log("Mot="+g.motion);
-						g.motion = g.motion-(norm*d*6F*dT);
+						if (isExploding) {
+							g.motion = g.motion*0.998F+norm*0.5F*dT;
+						}
+						else {
+							g.motion = g.motion-(norm*d*6F*dT);
+						}
 						float maxD = 2.0F*transform.localScale.magnitude;
 						if (float.IsNaN(maxD)) {
 							//SNUtil.writeToChat("NaN maxD");
 							//SNUtil.log("NaN maxD");
 							maxD = 0;
 						}
-						if (d > maxD) {
+						if (!isExploding && d > maxD) {
 							g.go.transform.position = norm*maxD;
 						}
 					}
 					g.go.transform.localPosition = g.go.transform.localPosition+g.motion*dT;
+					if (isExploding && g.go.transform.position.y > -0.5)
+						g.go.transform.position = g.go.transform.position.setY(-0.5F);
 					g.go.transform.Rotate(g.rotation, Space.Self);
 				}
 				RenderUtil.setEmissivity(g.render.materials[1], 0.05F+glowIntensity*8.95F, "GlowStrength");
 			}
-			RenderUtil.setEmissivity(mainRender.materials[0], glowIntensity*5F, "GlowStrength");
+			if (isExploding) {
+				mainRender.gameObject.SetActive(false);
+				lastLitTime = -1;
+				mainBody.velocity = Vector3.zero;
+				mainBody.constraints = RigidbodyConstraints.FreezeAll;
+				mainHitbox.enabled = false;
+			}
+			else {
+				RenderUtil.setEmissivity(mainRender.materials[0], glowIntensity*5F, "GlowStrength");
+			}
 			if (light) {
 				light.intensity = glowIntensity*GlowOil.MAX_GLOW;
 				light.range = GlowOil.MAX_RADIUS*(0.5F+glowIntensity/2F);
 			}
 		}
+
+	    void OnCollisionEnter(Collision c) {
+			//SNUtil.writeToChat("Collided with "+c.gameObject+" at speed "+c.relativeVelocity.magnitude);
+	        if (spawnTime > 0 && DayNightCycle.main.timePassedAsFloat-spawnTime >= 0.1 && c.relativeVelocity.magnitude >= 6) {
+				if (c.gameObject.FindAncestor<Vehicle>() || c.gameObject.FindAncestor<SubRoot>())
+					explode();
+			}
+	    }
+		
+		internal void explode() {
+			if (Vector3.Distance(transform.position, Player.main.transform.position) <= 100)
+				WorldUtil.spawnParticlesAt(transform.position, "0dbd3431-62cc-4dd2-82d5-7d60c71a9edf", 0.1F); //burst FX
+			isExploding = true;
+			UnityEngine.Object.Destroy(gameObject, 7.5F);
+		}
 		
 		private void updateGlowStrength(float time, float dT) {
-			float delta = time-lastLitTime < 1.5F ? 0.5F : -0.15F;
+			float delta = time-lastLitTime < 1.5F ? 0.5F : (isExploding ? -0.2F : -0.15F);
 			glowIntensity = Mathf.Clamp01(glowIntensity+delta*dT);
 		}
 		
@@ -319,7 +358,8 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		internal void onLit() {
-			lastLitTime = DayNightCycle.main.timePassedAsFloat;
+			if (!isExploding)
+				lastLitTime = DayNightCycle.main.timePassedAsFloat;
 		}
 		
 		internal void onFired() {
