@@ -142,42 +142,40 @@ namespace ReikaKalseki.Ecocean
 				b.oxygenSeconds *= f;
 			}
 			SoundManager.playSoundAt(explosionSound, effectivePodCenter, false, 64);
-			RaycastHit[] hit = Physics.SphereCastAll(effectivePodCenter, 35, new Vector3(1, 1, 1), 35);
+			HashSet<GameObject> set = WorldUtil.getObjectsNear(transform.position, 35);
 			HashSet<int> used = new HashSet<int>();
-			foreach (RaycastHit rh in hit) {
-				if (rh.transform != null && rh.transform.gameObject) {
-					if (used.Contains(rh.transform.gameObject.GetInstanceID()))
-						continue;
-					used.Add(rh.transform.gameObject.GetInstanceID());
-					Player p = rh.transform.GetComponent<Player>();
-					if (p && !p.IsSwimming())
-						continue;
-					float dd = Vector3.Distance(rh.transform.position, effectivePodCenter);
-					ExplodingAnchorPod pod = rh.transform.GetComponent<ExplodingAnchorPod>();
-					if (pod && !pod.isExploded && pod.isGrown && UnityEngine.Random.Range(0F, 1F) <= 0.5F*Mathf.Max(0, 1-dd/30F)) {
-						pod.scheduleExplode(UnityEngine.Random.Range(0.2F, 0.67F));
-						continue;
-					}
-					LiveMixin lv = rh.transform.GetComponent<LiveMixin>();
-					if (lv && lv.IsAlive()) {
-						float amt = 15;
-						SubRoot sub = rh.transform.GetComponent<SubRoot>();
-						if (sub && sub.isCyclops)
-							amt = 60;
-						Vehicle v = rh.transform.GetComponent<Vehicle>();
-						if (v && v is SeaMoth)
-							amt = 20;
-						else if (v && v is Exosuit)
-							amt = 50;
-						float f = (dd-10)/35F;
-						amt *= Mathf.Clamp01(1.5F-f*f);
-						amt *= EcoceanMod.config.getFloat(ECConfig.ConfigEntries.ANCHORDMG);
-						lv.TakeDamage(amt, rh.transform.position, DamageType.Explosive, gameObject);
-						Rigidbody rb = rh.transform.GetComponent<Rigidbody>();
-						if (rb) {
-							Vector3 vec = rh.transform.position-effectivePodCenter;
-							rb.AddForce(vec.normalized*140/vec.magnitude, ForceMode.VelocityChange);
-						}
+			foreach (GameObject go in set) {
+				if (used.Contains(go.GetInstanceID()))
+					continue;
+				used.Add(go.GetInstanceID());
+				Player p = go.GetComponent<Player>();
+				if (p && !p.IsSwimming())
+					continue;
+				float dd = Vector3.Distance(go.transform.position, effectivePodCenter);
+				ExplodingAnchorPod pod = go.GetComponent<ExplodingAnchorPod>();
+				if (pod && !pod.isExploded && pod.isGrown && UnityEngine.Random.Range(0F, 1F) <= 0.5F*Mathf.Max(0, 1-dd/30F)) {
+					pod.scheduleExplode(UnityEngine.Random.Range(0.2F, 0.67F));
+					continue;
+				}
+				LiveMixin lv = go.GetComponent<LiveMixin>();
+				if (lv && lv.IsAlive()) {
+					float amt = 15;
+					SubRoot sub = go.GetComponent<SubRoot>();
+					if (sub && sub.isCyclops)
+						amt = 60;
+					Vehicle v =go.GetComponent<Vehicle>();
+					if (v && v is SeaMoth)
+						amt = 20;
+					else if (v && v is Exosuit)
+						amt = 50;
+					float f = (dd-10)/35F;
+					amt *= Mathf.Clamp01(1.5F-f*f);
+					amt *= EcoceanMod.config.getFloat(ECConfig.ConfigEntries.ANCHORDMG);
+					lv.TakeDamage(amt, go.transform.position, DamageType.Explosive, gameObject);
+					Rigidbody rb = go.GetComponent<Rigidbody>();
+					if (rb) {
+						Vector3 vec = go.transform.position-effectivePodCenter;
+						rb.AddForce(vec.normalized*140/vec.magnitude, ForceMode.VelocityChange);
 					}
 				}
 			}

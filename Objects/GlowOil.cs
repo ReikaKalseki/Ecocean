@@ -256,12 +256,9 @@ namespace ReikaKalseki.Ecocean {
 			dT = Time.deltaTime;
 			if (time-lastRepelTime >= 0.5) {
 				lastRepelTime = time;
-				foreach (RaycastHit hit in Physics.SphereCastAll(transform.position, 8F, Vector3.one, 8)) {
-					if (hit.transform && hit.transform != transform) {
-						GlowOilTag g = hit.transform.GetComponentInParent<GlowOilTag>();
-						if (g && g.mainBody)
-							repel(g, dT);
-					}
+				foreach (GlowOilTag g in WorldUtil.getObjectsNearWithComponent<GlowOilTag>(transform.position, 8)) {
+					if (g != this && g.mainBody)
+						repel(g, dT);
 				}
 			}
 			

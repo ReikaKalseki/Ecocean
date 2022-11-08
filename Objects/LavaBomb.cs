@@ -204,35 +204,33 @@ namespace ReikaKalseki.Ecocean {
 			if (pdist <= 80) {
 				SoundManager.playSoundAt(impactSound, transform.position, false, 40);
 				HashSet<int> used = new HashSet<int>();
-				RaycastHit[] hit = Physics.SphereCastAll(transform.position, 15, new Vector3(1, 1, 1), 15);
-				foreach (RaycastHit rh in hit) {
-					if (rh.transform != null && rh.transform.gameObject) {
-						if (used.Contains(rh.transform.gameObject.GetInstanceID()))
-							continue;
-						bool wasHit = rh.transform.gameObject == impacted;
-						used.Add(rh.transform.gameObject.GetInstanceID());
-						Player p = rh.transform.GetComponent<Player>();
-						if (p && !p.IsSwimming())
-							continue;
-						LiveMixin lv = rh.transform.GetComponent<LiveMixin>();
-						if (lv && lv.IsAlive()) {
-							float amt = wasHit ? 100 : 20;
-							SubRoot sub = rh.transform.GetComponent<SubRoot>();
-							if (sub && sub.isCyclops)
-								amt = wasHit ? 150 : 45;
-							Vehicle v = rh.transform.GetComponent<Vehicle>();
-							if (v && v is SeaMoth)
-								amt = wasHit ? 60 : 18;
-							else if (v && v is Exosuit)
-								amt = wasHit ? 100 : 35;
-							if (!wasHit) {
-								float f = (Vector3.Distance(rh.transform.position, transform.position))/15F;
-								amt *= Mathf.Clamp01(1.5F-f*f);
-							}
-							amt *= 0.5F+0.5F*getIntensity();
-							amt *= EcoceanMod.config.getFloat(ECConfig.ConfigEntries.BOMBDMG);
-							lv.TakeDamage(amt, rh.transform.position, DamageType.Heat, gameObject);
+				HashSet<GameObject> set = WorldUtil.getObjectsNear(transform.position, 15);
+				foreach (GameObject go in set) {
+					if (used.Contains(go.GetInstanceID()))
+						continue;
+					bool wasHit = go == impacted;
+					used.Add(go.GetInstanceID());
+					Player p = go.GetComponent<Player>();
+					if (p && !p.IsSwimming())
+						continue;
+					LiveMixin lv = go.GetComponent<LiveMixin>();
+					if (lv && lv.IsAlive()) {
+						float amt = wasHit ? 100 : 20;
+						SubRoot sub = go.GetComponent<SubRoot>();
+						if (sub && sub.isCyclops)
+							amt = wasHit ? 150 : 45;
+						Vehicle v = go.GetComponent<Vehicle>();
+						if (v && v is SeaMoth)
+							amt = wasHit ? 60 : 18;
+						else if (v && v is Exosuit)
+							amt = wasHit ? 100 : 35;
+						if (!wasHit) {
+							float f = (Vector3.Distance(go.transform.position, transform.position))/15F;
+							amt *= Mathf.Clamp01(1.5F-f*f);
 						}
+						amt *= 0.5F+0.5F*getIntensity();
+						amt *= EcoceanMod.config.getFloat(ECConfig.ConfigEntries.BOMBDMG);
+						lv.TakeDamage(amt, go.transform.position, DamageType.Heat, gameObject);
 					}
 				}
 			}

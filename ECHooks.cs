@@ -126,27 +126,24 @@ namespace ReikaKalseki.Ecocean {
 				noise.noiseScalar *= isHorn ? 6 : 2;
 				noise.Invoke("RecalculateNoiseValues", isHorn ? 15 : 10);
 			}
-			RaycastHit[] hit = Physics.SphereCastAll(obj.transform.position, 400, new Vector3(1, 1, 1), 400);
-			foreach (RaycastHit rh in hit) {
-				if (rh.transform != null && rh.transform.gameObject) {
-					Creature c = rh.transform.gameObject.GetComponent<Creature>();
-					if (c && !c.gameObject.GetComponent<WaterParkCreature>()) {
-						float chance = Mathf.Clamp01(1F-Vector3.Distance(rh.transform.position, obj.transform.position)/400F);
-						if (isHorn) {
-							chance *= 2;
-							chance = Mathf.Min(chance, 0.05F);
-							if (c is Reefback || c is GhostLeviathan || c is GhostLeviatanVoid || c is ReaperLeviathan || c is SeaDragon) {
-								chance *= 5;
-								chance = Mathf.Min(chance, 0.25F);
-							}
-							if (c is Reefback && isHorn) {
-								chance *= 5;
-								chance = Mathf.Min(chance, 0.5F);
-							}
+			HashSet<Creature> set = WorldUtil.getObjectsNearWithComponent<Creature>(obj.transform.position, 400);
+			foreach (Creature c in set) {
+				if (!c.GetComponent<WaterParkCreature>()) {
+					float chance = Mathf.Clamp01(1F-Vector3.Distance(c.transform.position, obj.transform.position)/400F);
+					if (isHorn) {
+						chance *= 2;
+						chance = Mathf.Min(chance, 0.05F);
+						if (c is Reefback || c is GhostLeviathan || c is GhostLeviatanVoid || c is ReaperLeviathan || c is SeaDragon) {
+							chance *= 5;
+							chance = Mathf.Min(chance, 0.25F);
 						}
-						if (UnityEngine.Random.Range(0F, 1F) <= chance)
-							attractCreatureToSoundSource(c, obj, isHorn);
+						if (c is Reefback && isHorn) {
+							chance *= 5;
+							chance = Mathf.Min(chance, 0.5F);
+						}
 					}
+					if (UnityEngine.Random.Range(0F, 1F) <= chance)
+						attractCreatureToSoundSource(c, obj, isHorn);
 				}
 			}
 		}
