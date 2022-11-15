@@ -209,6 +209,8 @@ namespace ReikaKalseki.Ecocean {
 				prefab = GetComponentInChildren<PrefabIdentifier>();
 			}
 			int hash = prefab.Id.GetHashCode();
+			if (!transform)
+				return;
 			while (seeds.Count < 4+((hash%5)+5)%5) {
 				GameObject go = ObjectUtil.createWorldObject("18229b4b-3ed3-4b35-ae30-43b1c31a6d8d");
 				RenderUtil.convertToModel(go);
