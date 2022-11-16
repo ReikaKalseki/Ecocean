@@ -61,6 +61,41 @@
 			
 		</header>
 	</LavaBomb>
+	<plankton>
+		<name>
+			Phytoplankton Cluster
+		</name>
+		<desc>
+			
+		</desc>
+		<pda>
+			This is a long pda page
+			
+			some new text
+		</pda>
+	</plankton>
+	<planktonItem>
+		<name>
+			Phytoplankton Samples
+		</name>
+		<desc>
+			A quantity of wild phytoplankton with motion-sensing properties.
+		</desc>
+		<pda>
+			
+		</pda>
+	</planktonItem>
+	<PlanktonScoop>
+		<name>
+			Seamoth Water Sampling Scoop
+		</name>
+		<desc>
+			A module designed to collect and filter plankton-laden ocean water.
+		</desc>
+		<pda>
+			
+		</pda>
+	</PlanktonScoop>
 	<enum>
 		<name>
 			

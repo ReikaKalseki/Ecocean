@@ -32,6 +32,13 @@ namespace ReikaKalseki.Ecocean
     
     internal static LavaBombMushroom lavaShroom;
     internal static LavaBomb lavaBomb;
+    
+    internal static PlanktonCloud plankton;
+    internal static PlanktonItem planktonItem;
+    
+    internal static SeamothPlanktonScoop planktonScoop;
+    
+    public static bool lockPlanktonScoop = false;
 		
 	internal static readonly Vector3 reaperlessTripleVent = new Vector3(-1150, -240, -258);
 	internal static readonly Vector3 northDuneBit = new Vector3(-1151, -340, 1444);
@@ -64,6 +71,13 @@ namespace ReikaKalseki.Ecocean
 	    
 	    lavaBomb = new LavaBomb(locale.getEntry("LavaBomb"));
 	    lavaBomb.Patch();
+	    
+	    plankton = new PlanktonCloud(locale.getEntry("plankton"));
+	    plankton.register();
+	    planktonItem = new PlanktonItem(locale.getEntry("planktonItem"));
+	    planktonItem.register();
+	    
+	    planktonScoop = new SeamothPlanktonScoop();
 		
         glowShroom = new GlowOilMushroom();
 		glowShroom.Patch();	
@@ -87,6 +101,11 @@ namespace ReikaKalseki.Ecocean
 		GenUtil.registerWorldgen(new PositionedPrefab(VanillaCreatures.REAPER.prefab, northDuneBit.setY(-320)));
 		
 		System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(ECHooks).TypeHandle);
+    }
+    
+    [QModPostPatch]
+    public static void PostLoad() {
+	    planktonScoop.register();
     }
 
   }
