@@ -26,6 +26,10 @@ namespace ReikaKalseki.Ecocean {
 				return QuickSlotType.Passive;
 			}
 		}
+
+		public override SeamothModule.SeamothModuleStorage getStorage() {
+			return new SeamothModule.SeamothModuleStorage("SCOOP STORAGE", 6, 6);
+		}
 		
 		public void register() {
 			addIngredient(TechType.VehicleStorageModule, 1);

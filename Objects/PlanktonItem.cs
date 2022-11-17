@@ -18,10 +18,11 @@ namespace ReikaKalseki.Ecocean {
 	public class PlanktonItem : BasicCraftingItem {
 	        
 	    internal PlanktonItem(XMLLocale.LocaleEntry e) : base(e, "18229b4b-3ed3-4b35-ae30-43b1c31a6d8d") {
+			sprite = TextureManager.getSprite(EcoceanMod.modDLL, "Textures/Items/PlanktonItem");
 	    }
 		
 		public override Vector2int SizeInInventory {
-			get { return new Vector2int(2, 2); }
+			get { return new Vector2int(2, 1); }
 		}
 /*
 		protected sealed override Atlas.Sprite GetItemSprite() {

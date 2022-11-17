@@ -62,6 +62,7 @@ namespace ReikaKalseki.Ecocean {
 			e.encyclopedia = pdaPage.id;
 			PDAHandler.AddCustomScannerEntry(e);
 			ItemRegistry.instance.addItem(this);
+			//GenUtil.registerSlotWorldgen(ClassID, PrefabFileName, TechType, EntitySlot.Type.Creature, LargeWorldEntity.CellLevel.Far, BiomeType.CragField_OpenDeep_CreatureOnly, 1, 1F);
 		}
 			
 	}
@@ -91,6 +92,8 @@ namespace ReikaKalseki.Ecocean {
 		private float minParticleSize = 2;
 		private float maxParticleSize = 5;
 		
+		private bool isDead = false;
+		
 		private float activation = 0;
 		
 		void Update() {
@@ -118,8 +121,13 @@ namespace ReikaKalseki.Ecocean {
 			float dscl = time-lastScoopTime;
 			
 			float dT = Time.deltaTime;
-			if (dtl <= 2) {
+			if (isDead) {
+				activation = Mathf.Clamp01(activation-2F*dT);
+				touchIntensity = Mathf.Clamp01(activation-2F*dT);
+			}
+			else if (touchIntensity > 0) {
 				activation += 2*dT;
+				touchIntensity = Mathf.Clamp01(touchIntensity-0.1F*dT);
 			}
 			else {
 				activation *= (1-0.2F*dT);
@@ -147,9 +155,9 @@ namespace ReikaKalseki.Ecocean {
 				f2 = 1-dscl/10F;
 				tgt = Color.Lerp(tgt, scoopColor, f2);
 			}
-			else if (dtl <= 5) {
-				f2 = 1-dtl/5F;
-				tgt = Color.Lerp(tgt, touchColor, f2);
+			else if (touchIntensity > 0) {
+				f2 = touchIntensity;
+				tgt = Color.Lerp(tgt, touchColor, touchIntensity);
 			}
 			currentColor = Color.Lerp(currentColor, tgt, dT*5);
 			aoe.center = Vector3.zero;
@@ -169,25 +177,40 @@ namespace ReikaKalseki.Ecocean {
 	    private void OnTriggerStay(Collider other) { //scoop with seamoth
 			if (other.gameObject != gameObject) {
 				Vehicle v = other.gameObject.FindAncestor<Vehicle>();
+				Player ep = other.gameObject.FindAncestor<Player>();
 				float dT = Time.deltaTime;
-				if (v || other.gameObject.FindAncestor<Player>() || other.gameObject.FindAncestor<Creature>() || other.gameObject.FindAncestor<SubRoot>())
-					touchIntensity = Mathf.Clamp01(touchIntensity+0.1F*dT);//lastContactTime = DayNightCycle.main.timePassedAsFloat;
+				if (v || ep || other.gameObject.FindAncestor<Creature>() || other.gameObject.FindAncestor<SubRoot>())
+					touchIntensity = Mathf.Clamp01(touchIntensity+2F*dT);//lastContactTime = DayNightCycle.main.timePassedAsFloat;
 				if (v is SeaMoth)
 					checkAndTryScoop((SeaMoth)v, dT);
+				if (ep)
+					ep.liveMixin.TakeDamage(2*dT, ep.transform.position, DamageType.Poison, gameObject);
 			}
 			//SNUtil.writeToChat(other+" touch plankton @ "+this.transform.position+" @ "+lastContactTime);
 	    }
 		
 		private void checkAndTryScoop(SeaMoth sm, float dT) {
-			if (sm.GetComponent<Rigidbody>().velocity.magnitude >= 4 && InventoryUtil.vehicleHasUpgrade(sm, EcoceanMod.planktonScoop.TechType)) {
+			if (sm.GetComponent<Rigidbody>().velocity.magnitude >= 4 && Vector3.Distance(sm.transform.position, transform.position) <= 5 && InventoryUtil.vehicleHasUpgrade(sm, EcoceanMod.planktonScoop.TechType)) {
 				lastScoopTime = DayNightCycle.main.timePassedAsFloat;
-				if (UnityEngine.Random.Range(0F, 1F) < 0.1F*dT) {
-					SeamothStorageContainer sc = sm.GetComponentInChildren<SeamothStorageContainer>();
-					GameObject go = CraftData.GetPrefabForTechType(EcoceanMod.planktonItem.TechType);
-					go = UnityEngine.Object.Instantiate(go);
-					sc.container.AddItem(go.GetComponentInChildren<Pickupable>());
+				if (UnityEngine.Random.Range(0F, 1F) < 0.075F*dT) {
+					foreach (SeamothStorageContainer sc in sm.GetComponentsInChildren<SeamothStorageContainer>(true)) {
+						TechTag tt = sc.GetComponent<TechTag>();
+						if (tt && tt.type == EcoceanMod.planktonScoop.TechType) {
+							GameObject go = CraftData.GetPrefabForTechType(EcoceanMod.planktonItem.TechType);
+							go = UnityEngine.Object.Instantiate(go);
+							sc.container.AddItem(go.GetComponentInChildren<Pickupable>());
+							break;
+						}
+					}
 				}
-				health.TakeDamage(health.maxHealth*0.05F*dT, sm.transform.position, DamageType.Drill, sm.gameObject);
+				if (health.health < health.maxHealth*0.1F) {
+					isDead = true;
+					particles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
+					UnityEngine.Object.Destroy(gameObject, 10);
+				}
+				else {
+					health.TakeDamage(health.maxHealth*0.05F*dT, sm.transform.position, DamageType.Drill, sm.gameObject);
+				}
 			}
 		}
 		
