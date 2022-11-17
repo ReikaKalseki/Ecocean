@@ -184,7 +184,7 @@ namespace ReikaKalseki.Ecocean {
 				if (v is SeaMoth)
 					checkAndTryScoop((SeaMoth)v, dT);
 				if (ep)
-					ep.liveMixin.TakeDamage(2*dT, ep.transform.position, DamageType.Poison, gameObject);
+					ep.liveMixin.TakeDamage(5*dT, ep.transform.position, DamageType.Poison, gameObject);
 			}
 			//SNUtil.writeToChat(other+" touch plankton @ "+this.transform.position+" @ "+lastContactTime);
 	    }

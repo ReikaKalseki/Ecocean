@@ -18,7 +18,8 @@ namespace ReikaKalseki.Ecocean {
 	public class SeamothPlanktonScoop : SeamothModule {
 		
 	    internal SeamothPlanktonScoop() : base(EcoceanMod.locale.getEntry("PlanktonScoop"), "d290b5da-7370-4fb8-81bc-656c6bde78f8") {
-			//preventNaturalUnlock();
+			if (QModManager.API.QModServices.Main.ModPresent("SeaToSea"))
+				preventNaturalUnlock();
 	    }
 
 		public override QuickSlotType QuickSlotType {
@@ -35,8 +36,6 @@ namespace ReikaKalseki.Ecocean {
 			addIngredient(TechType.VehicleStorageModule, 1);
 			addIngredient(TechType.PropulsionCannon, 1);
 			addIngredient(TechType.FiberMesh, 2);
-			if (EcoceanMod.lockPlanktonScoop)
-				preventNaturalUnlock();
 			Patch();
 		}
 	}
