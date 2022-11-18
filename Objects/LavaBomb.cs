@@ -193,6 +193,7 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		void OnDisable() {
+			UnityEngine.Object.Destroy(gameObject);
 			LavaBomb.activeLavaBombs.Remove(this);
 		}
 		

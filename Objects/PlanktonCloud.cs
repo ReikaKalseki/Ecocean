@@ -17,9 +17,16 @@ namespace ReikaKalseki.Ecocean {
 	public class PlanktonCloud : Spawnable {
 		
 		private readonly XMLLocale.LocaleEntry locale;
+		
+		private readonly Dictionary<string, BiomeSpawnData> spawnData = new Dictionary<string, BiomeSpawnData>();
 	        
 	    internal PlanktonCloud(XMLLocale.LocaleEntry e) : base(e.key, e.name, e.desc) {
 			locale = e;
+			
+			spawnData["sparsereef"] = new BiomeSpawnData(3, 0.33F, 100);
+			spawnData["mountains"] = new BiomeSpawnData(5, 0.7F, 200);
+			spawnData["cragfield"] = new BiomeSpawnData(8, 1, 100);
+			spawnData["void"] = new BiomeSpawnData(15, 1, 400);
 	    }
 			
 	    public override GameObject GetGameObject() {
@@ -64,7 +71,55 @@ namespace ReikaKalseki.Ecocean {
 			ItemRegistry.instance.addItem(this);
 			//GenUtil.registerSlotWorldgen(ClassID, PrefabFileName, TechType, EntitySlot.Type.Creature, LargeWorldEntity.CellLevel.Far, BiomeType.CragField_OpenDeep_CreatureOnly, 1, 1F);
 		}
+		
+		internal void tickSpawner(Player ep, float dT) {
+	    	string biome = ep.GetBiomeString();
+	    	//SNUtil.writeToChat("Doing plankton spawn check - "+biome);
+	    	BiomeSpawnData data = getSpawnData(biome);
+	    	if (data != null) {
+				HashSet<PlanktonCloudTag> clouds = WorldUtil.getObjectsNearWithComponent<PlanktonCloudTag>(ep.transform.position, 120);
+				//SNUtil.writeToChat(data.spawnSuccessRate+" > "+clouds.Count+"/"+data.maxDensity);
+				if (clouds.Count < data.maxDensity) {
+					for (int i = 0; i < 16; i++) {
+						Vector3 pos = MathUtil.getRandomVectorAround(ep.transform.position, 120);
+						Vector3 dist = pos-ep.transform.position;
+						pos = ep.transform.position+dist.setLength(UnityEngine.Random.Range(50F, 120F));
+						BiomeSpawnData data2 = getSpawnData(WaterBiomeManager.main.GetBiome(pos, false));
+		    			if (data2 != null && UnityEngine.Random.Range(0F, 1F) <= data2.spawnSuccessRate) {
+							GameObject go = ObjectUtil.createWorldObject(ClassID);
+							go.transform.position = pos.setY(-UnityEngine.Random.Range(data.minDepth, data.maxDepth));
+							ObjectUtil.fullyEnable(go);
+							//SNUtil.writeToChat("spawned at "+go.transform.position);
+							break;
+		    			}
+					}
+		    	}
+	    	}
+		}
+		
+		private BiomeSpawnData getSpawnData(string biome) {
+			if (string.IsNullOrEmpty(biome))
+				biome = "void";
+			biome = biome.ToLowerInvariant();
+			return spawnData.ContainsKey(biome) ? spawnData[biome] : null;
+		}
 			
+	}
+	
+	class BiomeSpawnData {
+		
+		public readonly int maxDensity;
+		public readonly float spawnSuccessRate;
+		public readonly int minDepth;
+		public readonly int maxDepth;
+		
+		internal BiomeSpawnData(int d, float r, int maxd, int mind = 15) {
+			maxDensity = d;
+			spawnSuccessRate = r;
+			minDepth = mind;
+			maxDepth = maxd;
+		}
+		
 	}
 		
 	public class PlanktonCloudTag : MonoBehaviour {
@@ -78,7 +133,7 @@ namespace ReikaKalseki.Ecocean {
 		private LiveMixin health;
 		private SphereCollider aoe;
 		
-		private static readonly Color glowNew = new Color(0, 0.5F, 0.1F, 1F);
+		private static readonly Color glowNew = new Color(0, 0.75F, 0.1F, 1F);
 		private static readonly Color glowFinal = new Color(0.4F, 1F, 0.8F, 1);
 		private static readonly Color touchColor = new Color(0.15F, 0.5F, 1F, 1);
 		private static readonly Color scoopColor = new Color(0.75F, 0.25F, 1F, 1);
@@ -163,15 +218,23 @@ namespace ReikaKalseki.Ecocean {
 			aoe.center = Vector3.zero;
 			aoe.radius = 5+5*f;
 			particleCore.startColor = currentColor;
-			particleCore.startSize = (minParticleSize + (maxParticleSize - minParticleSize) * f)*(1+f2);
+			particleCore.startSize = ((minParticleSize + (maxParticleSize - minParticleSize) * f)*(1+f2))*1.5F;
 			particleCore.startLifetimeMultiplier = 1+f*1.5F+f2*2.5F;
 			ParticleSystem.EmissionModule emit = particles.emission;
 			emit.rateOverTimeMultiplier = 2+f+2*f2;
 			ParticleSystem.ShapeModule shape = particles.shape;
-			shape.radius = aoe.radius;
+			shape.radius = aoe.radius*2;
 			light.intensity = f+Mathf.Max(0, 2*f2);
 			light.color = currentColor;
 			light.range = f*16+f2*16;
+		}
+		
+		void OnDestroy() {
+			
+		}
+		
+		void OnDisable() {
+			UnityEngine.Object.Destroy(gameObject);
 		}
 
 	    private void OnTriggerStay(Collider other) { //scoop with seamoth

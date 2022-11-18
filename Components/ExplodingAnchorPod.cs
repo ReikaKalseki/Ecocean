@@ -46,6 +46,7 @@ namespace ReikaKalseki.Ecocean
 			float time = DayNightCycle.main.timePassedAsFloat;
 			if (podGO.activeSelf) {
 				float f = Mathf.Clamp01((time-lastRegenTime)/REGEN_DURATION);
+				f = 1;
 				podGO.transform.localPosition = Vector3.up*(1-f)*15;
 				podGO.transform.localScale = Vector3.one*f;
 				isGrown = f >= 1;

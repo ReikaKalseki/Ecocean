@@ -66,6 +66,12 @@ namespace ReikaKalseki.Ecocean {
 	    
 	    public static void tickPlayer(Player ep) {	    	
 	    	GlowOil.checkPlayerLightTick(ep);
+	    	
+	    	float dT = Time.deltaTime;
+	    	float f = 0.15F-DayNightCycle.main.GetLightScalar()*0.05F;
+	    	if (UnityEngine.Random.Range(0F, 1F) <= f*dT) {
+	    		EcoceanMod.plankton.tickSpawner(ep, dT);
+	    	}
 		}
 		
 		public static void onTakeDamage(DIHooks.DamageToDeal dmg) {

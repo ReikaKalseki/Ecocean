@@ -371,6 +371,14 @@ namespace ReikaKalseki.Ecocean {
 			lastLitTime = -1;
 		}
 		
+		void OnDestroy() {
+			
+		}
+		
+		void OnDisable() {
+			UnityEngine.Object.Destroy(gameObject);
+		}
+		
 		class GlowSeed {
 			
 			internal GameObject go;
