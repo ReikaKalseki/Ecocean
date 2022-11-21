@@ -114,6 +114,24 @@ namespace ReikaKalseki.Ecocean {
 	    	}
 	    }
 		
+		public static void tickObjectInGeyser(Geyser g, Collider c) {
+			if (g.erupting) {
+				Vehicle v = c.gameObject.FindAncestor<Vehicle>();
+				if (v) {
+					float f = v is Exosuit ? 1 : 0.2F;
+					v.liveMixin.TakeDamage(g.damage*f*Time.deltaTime, c.transform.position, DamageType.Fire, g.gameObject);
+					if (v is SeaMoth) {
+						v.GetComponent<DIHooks.LavaWarningTriggerDetector>().markLavaDetected();
+					}
+				}
+				SubRoot sub = c.gameObject.FindAncestor<SubRoot>();
+				if (sub && sub.isCyclops && sub.thermalReactorUpgrade) {
+					float num;
+					sub.powerRelay.AddEnergy(5*Time.deltaTime, out num);
+				}
+			}
+		}
+		
 		public static void honkCyclopsHorn(CyclopsHornButton b) {
 			attractToSoundPing(b.gameObject.FindAncestor<SubRoot>(), true);
 		}
