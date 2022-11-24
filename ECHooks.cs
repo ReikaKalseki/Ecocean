@@ -68,9 +68,13 @@ namespace ReikaKalseki.Ecocean {
 	    	GlowOil.checkPlayerLightTick(ep);
 	    	
 	    	float dT = Time.deltaTime;
-	    	float f = 0.15F-DayNightCycle.main.GetLightScalar()*0.05F;
-	    	if (UnityEngine.Random.Range(0F, 1F) <= f*dT) {
-	    		EcoceanMod.plankton.tickSpawner(ep, dT);
+	    	float f = 0.3F-DayNightCycle.main.GetLightScalar()*0.15F;
+		    string biome = ep.GetBiomeString();
+		    	//SNUtil.writeToChat("Doing plankton spawn check - "+biome);
+		    BiomeSpawnData data = EcoceanMod.plankton.getSpawnData(biome);
+		    if (data != null) {
+	    		if (UnityEngine.Random.Range(0F, 1F) <= f*dT*data.spawnSuccessRate)
+	    			EcoceanMod.plankton.tickSpawner(ep, data, dT);
 	    	}
 		}
 		
@@ -111,6 +115,8 @@ namespace ReikaKalseki.Ecocean {
 	    			go.EnsureComponent<ExplodingAnchorPod>();
 	    		else if (bloodVine.Contains(pi.ClassId))
 	    			go.EnsureComponent<PredatoryBloodvine>();
+	    		else if (pi.classId == "8d3d3c8b-9290-444a-9fea-8e5493ecd6fe") //reefback
+	    			go.EnsureComponent<ReefbackJetSuctionManager>();
 	    	}
 	    }
 		
@@ -118,10 +124,11 @@ namespace ReikaKalseki.Ecocean {
 			if (g.erupting) {
 				Vehicle v = c.gameObject.FindAncestor<Vehicle>();
 				if (v) {
-					float f = v is Exosuit ? 1 : 0.2F;
-					v.liveMixin.TakeDamage(g.damage*f*Time.deltaTime, c.transform.position, DamageType.Fire, g.gameObject);
-					if (v is SeaMoth) {
-						v.GetComponent<DIHooks.LavaWarningTriggerDetector>().markLavaDetected();
+					if (v is SeaMoth) { //will set temp and do a ton of damage
+						v.GetComponentInChildren<DIHooks.LavaWarningTriggerDetector>().markGeyserDetected();
+					}
+					else if (v is Exosuit) {
+						v.liveMixin.TakeDamage(g.damage*0.04F*Time.deltaTime, c.transform.position, DamageType.Fire, g.gameObject);
 					}
 				}
 				SubRoot sub = c.gameObject.FindAncestor<SubRoot>();

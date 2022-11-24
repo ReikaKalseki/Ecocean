@@ -69,10 +69,11 @@
 			
 		</desc>
 		<pda>
-			This is a long pda page
-			
-			some new text
+			Rather than a single organism, this entity is a large cluster of migrating phytoplankton. Interestingly, 
 		</pda>
+		<header>
+			Plankton
+		</header>
 	</plankton>
 	<planktonItem>
 		<name>

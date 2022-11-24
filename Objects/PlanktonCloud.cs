@@ -18,15 +18,22 @@ namespace ReikaKalseki.Ecocean {
 		
 		private readonly XMLLocale.LocaleEntry locale;
 		
+		internal static readonly float BASE_RANGE = 5;
+		internal static readonly float MAX_RANGE = 10;
+		internal static readonly float VOID_RANGE_SCALE = 2;
+		internal static readonly float LEVI_RANGE_SCALE = 3;
+		
+		internal static readonly Simplex3DGenerator densityNoise = (Simplex3DGenerator)new Simplex3DGenerator(3340487).setFrequency(0.1);
+		
 		private readonly Dictionary<string, BiomeSpawnData> spawnData = new Dictionary<string, BiomeSpawnData>();
 	        
 	    internal PlanktonCloud(XMLLocale.LocaleEntry e) : base(e.key, e.name, e.desc) {
 			locale = e;
 			
-			spawnData["sparsereef"] = new BiomeSpawnData(3, 0.33F, 100);
-			spawnData["mountains"] = new BiomeSpawnData(5, 0.7F, 200);
-			spawnData["cragfield"] = new BiomeSpawnData(8, 1, 100);
-			spawnData["void"] = new BiomeSpawnData(15, 1, 400);
+			spawnData["sparsereef"] = new BiomeSpawnData(/*5*/9, 0.5F, 1F, 190);
+			spawnData["mountains"] = new BiomeSpawnData(/*8*/30, 1F, 0F, 250);
+			spawnData["cragfield"] = new BiomeSpawnData(/*12*/18, 1, 0.5F, 100);
+			spawnData["void"] = new BiomeSpawnData(/*22*/45, 4, 1, 400);
 	    }
 			
 	    public override GameObject GetGameObject() {
@@ -34,6 +41,11 @@ namespace ReikaKalseki.Ecocean {
 			world.EnsureComponent<TechTag>().type = TechType;
 			world.EnsureComponent<PrefabIdentifier>().ClassId = ClassID;
 			world.GetComponent<Rigidbody>().isKinematic = true;
+			ObjectUtil.removeComponent<Collider>(world);
+			SphereCollider rootCollide = world.EnsureComponent<SphereCollider>();
+			rootCollide.center = Vector3.zero;
+			rootCollide.radius = 8;
+			rootCollide.isTrigger = true;
 			//ObjectUtil.removeComponent<BloomCreature>(world);
 			ObjectUtil.removeComponent<SwimRandom>(world);
 			ObjectUtil.removeComponent<SwimBehaviour>(world);
@@ -51,8 +63,9 @@ namespace ReikaKalseki.Ecocean {
 			SphereCollider sc = world.EnsureComponent<SphereCollider>();
 			sc.isTrigger = true;
 			sc.center = Vector3.zero;
-			sc.radius = 5;
-			//world.EnsureComponent<LargeWorldEntity>().cellLevel = LargeWorldEntity.CellLevel.Far;
+			sc.radius = BASE_RANGE;
+			world.EnsureComponent<LargeWorldEntity>().cellLevel = LargeWorldEntity.CellLevel.VeryFar;
+			world.layer = LayerID.Useable;
 			return world;
 	    }
 		
@@ -72,32 +85,28 @@ namespace ReikaKalseki.Ecocean {
 			//GenUtil.registerSlotWorldgen(ClassID, PrefabFileName, TechType, EntitySlot.Type.Creature, LargeWorldEntity.CellLevel.Far, BiomeType.CragField_OpenDeep_CreatureOnly, 1, 1F);
 		}
 		
-		internal void tickSpawner(Player ep, float dT) {
-	    	string biome = ep.GetBiomeString();
-	    	//SNUtil.writeToChat("Doing plankton spawn check - "+biome);
-	    	BiomeSpawnData data = getSpawnData(biome);
-	    	if (data != null) {
-				HashSet<PlanktonCloudTag> clouds = WorldUtil.getObjectsNearWithComponent<PlanktonCloudTag>(ep.transform.position, 120);
-				//SNUtil.writeToChat(data.spawnSuccessRate+" > "+clouds.Count+"/"+data.maxDensity);
-				if (clouds.Count < data.maxDensity) {
-					for (int i = 0; i < 16; i++) {
-						Vector3 pos = MathUtil.getRandomVectorAround(ep.transform.position, 120);
-						Vector3 dist = pos-ep.transform.position;
-						pos = ep.transform.position+dist.setLength(UnityEngine.Random.Range(50F, 120F));
-						BiomeSpawnData data2 = getSpawnData(WaterBiomeManager.main.GetBiome(pos, false));
-		    			if (data2 != null && UnityEngine.Random.Range(0F, 1F) <= data2.spawnSuccessRate) {
-							GameObject go = ObjectUtil.createWorldObject(ClassID);
-							go.transform.position = pos.setY(-UnityEngine.Random.Range(data.minDepth, data.maxDepth));
-							ObjectUtil.fullyEnable(go);
-							//SNUtil.writeToChat("spawned at "+go.transform.position);
+		internal void tickSpawner(Player ep, BiomeSpawnData data, float dT) {
+			HashSet<PlanktonCloudTag> clouds = WorldUtil.getObjectsNearWithComponent<PlanktonCloudTag>(ep.transform.position, 120);
+			//SNUtil.writeToChat(data.spawnSuccessRate+" > "+clouds.Count+"/"+data.maxDensity);
+			float f = (float)(1+densityNoise.getValue(ep.transform.position))*data.densityNoiseIntensity;
+			if (clouds.Count < data.maxDensity*f) {
+				for (int i = 0; i < 16; i++) {
+					Vector3 pos = MathUtil.getRandomVectorAround(ep.transform.position, 120);
+					Vector3 dist = pos-ep.transform.position;
+					pos = ep.transform.position+dist.setLength(UnityEngine.Random.Range(50F, 120F));
+					BiomeSpawnData data2 = getSpawnData(WaterBiomeManager.main.GetBiome(pos, false));
+		    		if (data2 != null && UnityEngine.Random.Range(0F, 1F) <= data2.spawnSuccessRate) {
+						GameObject go = ObjectUtil.createWorldObject(ClassID);
+						go.transform.position = pos.setY(-UnityEngine.Random.Range(data2.minDepth, data2.maxDepth));
+						ObjectUtil.fullyEnable(go);
+						//SNUtil.writeToChat("spawned at "+go.transform.position);
 							break;
-		    			}
-					}
-		    	}
-	    	}
+		    		}
+				}
+		    }
 		}
 		
-		private BiomeSpawnData getSpawnData(string biome) {
+		internal BiomeSpawnData getSpawnData(string biome) {
 			if (string.IsNullOrEmpty(biome))
 				biome = "void";
 			biome = biome.ToLowerInvariant();
@@ -110,15 +119,28 @@ namespace ReikaKalseki.Ecocean {
 		
 		public readonly int maxDensity;
 		public readonly float spawnSuccessRate;
+		public readonly float densityNoiseIntensity;
 		public readonly int minDepth;
 		public readonly int maxDepth;
 		
-		internal BiomeSpawnData(int d, float r, int maxd, int mind = 15) {
+		internal BiomeSpawnData(int d, float r, float n, int maxd, int mind = 15) {
 			maxDensity = d;
 			spawnSuccessRate = r;
+			densityNoiseIntensity = n;
 			minDepth = mind;
 			maxDepth = maxd;
 		}
+		
+	}
+	
+	public class PlanktonCloudLeviDetector : MonoBehaviour {
+
+	    private void OnTriggerStay(Collider other) { //scoop with seamoth
+			Creature c = other.gameObject.FindAncestor<Creature>();
+			if (c && (c is ReaperLeviathan || c is GhostLeviatanVoid || c is GhostLeviathan || c is SeaDragon/* || c is Reefback*/)) {
+				gameObject.FindAncestor<PlanktonCloudTag>().touch(Time.deltaTime);
+			}
+	    }
 		
 	}
 		
@@ -132,6 +154,9 @@ namespace ReikaKalseki.Ecocean {
 		private Rigidbody mainBody;
 		private LiveMixin health;
 		private SphereCollider aoe;
+		private SphereCollider leviAOE;
+		
+		private GameObject leviSphere;
 		
 		private static readonly Color glowNew = new Color(0, 0.75F, 0.1F, 1F);
 		private static readonly Color glowFinal = new Color(0.4F, 1F, 0.8F, 1);
@@ -167,9 +192,26 @@ namespace ReikaKalseki.Ecocean {
 			if (!aoe)
 				aoe = GetComponentInChildren<SphereCollider>();
 			
+			if (!leviSphere) {
+				leviSphere = ObjectUtil.getChildObject(gameObject, "leviSphere");
+				if (!leviSphere) {
+					leviSphere = new GameObject("leviSphere");
+					leviSphere.transform.SetParent(transform);
+					leviSphere.transform.localPosition = Vector3.zero;
+					leviAOE = leviSphere.EnsureComponent<SphereCollider>();
+					leviAOE.isTrigger = true;
+					leviSphere.EnsureComponent<PlanktonCloudLeviDetector>();
+				}
+			}
+			
+			leviAOE.center = Vector3.zero;
+			leviSphere.transform.localPosition = Vector3.zero;
 			transform.localScale = Vector3.one*0.5F;
 			
 			mainBody.constraints = RigidbodyConstraints.FreezeAll;
+			
+			string biome = WaterBiomeManager.main.GetBiome(transform.position);
+			bool isVoid = string.IsNullOrEmpty(biome) || biome.ToLowerInvariant().Contains("void");
 			
 			float time = DayNightCycle.main.timePassedAsFloat;
 			//float dtl = time-lastContactTime;
@@ -202,7 +244,7 @@ namespace ReikaKalseki.Ecocean {
 					}
 				}
 			}
-			activation = Mathf.Clamp(activation, 0F, 2F);
+			activation = Mathf.Clamp(activation, isVoid ? 0.25F : 0F, 2F);
 			float f = Mathf.Clamp01(activation);
 			float f2 = 0;
 			Color tgt = Color.Lerp(glowNew, glowFinal, f);
@@ -214,9 +256,10 @@ namespace ReikaKalseki.Ecocean {
 				f2 = touchIntensity;
 				tgt = Color.Lerp(tgt, touchColor, touchIntensity);
 			}
+			float f3 = isVoid ? PlanktonCloud.VOID_RANGE_SCALE : 1;
 			currentColor = Color.Lerp(currentColor, tgt, dT*5);
 			aoe.center = Vector3.zero;
-			aoe.radius = 5+5*f;
+			aoe.radius = (float)MathUtil.linterpolate(f, 0, 1, PlanktonCloud.BASE_RANGE, PlanktonCloud.MAX_RANGE)*f3;
 			particleCore.startColor = currentColor;
 			particleCore.startSize = ((minParticleSize + (maxParticleSize - minParticleSize) * f)*(1+f2))*1.5F;
 			particleCore.startLifetimeMultiplier = 1+f*1.5F+f2*2.5F;
@@ -226,7 +269,8 @@ namespace ReikaKalseki.Ecocean {
 			shape.radius = aoe.radius*2;
 			light.intensity = f+Mathf.Max(0, 2*f2);
 			light.color = currentColor;
-			light.range = f*16+f2*16;
+			light.range = f*16+f2*16*f3;
+			leviAOE.radius = aoe.radius*PlanktonCloud.LEVI_RANGE_SCALE;
 		}
 		
 		void OnDestroy() {
@@ -243,7 +287,7 @@ namespace ReikaKalseki.Ecocean {
 				Player ep = other.gameObject.FindAncestor<Player>();
 				float dT = Time.deltaTime;
 				if (v || ep || other.gameObject.FindAncestor<Creature>() || other.gameObject.FindAncestor<SubRoot>())
-					touchIntensity = Mathf.Clamp01(touchIntensity+2F*dT);//lastContactTime = DayNightCycle.main.timePassedAsFloat;
+					touch(dT);//lastContactTime = DayNightCycle.main.timePassedAsFloat;
 				if (v is SeaMoth)
 					checkAndTryScoop((SeaMoth)v, dT);
 				if (ep)
@@ -251,6 +295,10 @@ namespace ReikaKalseki.Ecocean {
 			}
 			//SNUtil.writeToChat(other+" touch plankton @ "+this.transform.position+" @ "+lastContactTime);
 	    }
+		
+		internal void touch(float dT) {
+			touchIntensity = Mathf.Clamp01(touchIntensity+2F*dT);
+		}
 		
 		private void checkAndTryScoop(SeaMoth sm, float dT) {
 			if (sm.GetComponent<Rigidbody>().velocity.magnitude >= 4 && Vector3.Distance(sm.transform.position, transform.position) <= 5 && InventoryUtil.vehicleHasUpgrade(sm, EcoceanMod.planktonScoop.TechType)) {
