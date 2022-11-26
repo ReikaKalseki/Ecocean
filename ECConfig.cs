@@ -17,6 +17,7 @@ namespace ReikaKalseki.Ecocean
 			[ConfigEntry("Bloodvine Attack Damage Factor", typeof(float), 1, 0.1F, 10F, 1)]BLOODDMG,
 			[ConfigEntry("Anchor Pod Detonation Damage Factor", typeof(float), 1, 0.1F, 10F, 1)]ANCHORDMG,
 			[ConfigEntry("Lava Bomb Damage Factor", typeof(float), 1, 0.1F, 10F, 1)]BOMBDMG,
+			[ConfigEntry("Plankton Collection Multiplier", typeof(float), 1, 0.1F, 10F, 1)]PLANKTONRATE,
 		}
 	}
 }

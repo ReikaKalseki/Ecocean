@@ -33,7 +33,7 @@ namespace ReikaKalseki.Ecocean {
 			spawnData["sparsereef"] = new BiomeSpawnData(/*5*/9, 0.5F, 1F, 190);
 			spawnData["mountains"] = new BiomeSpawnData(/*8*/30, 1F, 0F, 250);
 			spawnData["cragfield"] = new BiomeSpawnData(/*12*/18, 1, 0.5F, 100);
-			spawnData["void"] = new BiomeSpawnData(/*22*/45, 4, 1, 400);
+			spawnData["void"] = new BiomeSpawnData(/*22*/45, 4, 1, 500);
 	    }
 			
 	    public override GameObject GetGameObject() {
@@ -138,7 +138,7 @@ namespace ReikaKalseki.Ecocean {
 	    private void OnTriggerStay(Collider other) { //scoop with seamoth
 			Creature c = other.gameObject.FindAncestor<Creature>();
 			if (c && (c is ReaperLeviathan || c is GhostLeviatanVoid || c is GhostLeviathan || c is SeaDragon/* || c is Reefback*/)) {
-				gameObject.FindAncestor<PlanktonCloudTag>().touch(Time.deltaTime);
+				gameObject.FindAncestor<PlanktonCloudTag>().touch(Time.deltaTime, other);
 			}
 	    }
 		
@@ -157,6 +157,9 @@ namespace ReikaKalseki.Ecocean {
 		private SphereCollider leviAOE;
 		
 		private GameObject leviSphere;
+		
+		public static event Action<PlanktonCloudTag, Collider> onPlanktonActivationEvent;
+		public static event Action<PlanktonCloudTag, SeaMoth> onPlanktonScoopEvent;
 		
 		private static readonly Color glowNew = new Color(0, 0.75F, 0.1F, 1F);
 		private static readonly Color glowFinal = new Color(0.4F, 1F, 0.8F, 1);
@@ -287,7 +290,7 @@ namespace ReikaKalseki.Ecocean {
 				Player ep = other.gameObject.FindAncestor<Player>();
 				float dT = Time.deltaTime;
 				if (v || ep || other.gameObject.FindAncestor<Creature>() || other.gameObject.FindAncestor<SubRoot>())
-					touch(dT);//lastContactTime = DayNightCycle.main.timePassedAsFloat;
+					touch(dT, other);//lastContactTime = DayNightCycle.main.timePassedAsFloat;
 				if (v is SeaMoth)
 					checkAndTryScoop((SeaMoth)v, dT);
 				if (ep)
@@ -296,14 +299,16 @@ namespace ReikaKalseki.Ecocean {
 			//SNUtil.writeToChat(other+" touch plankton @ "+this.transform.position+" @ "+lastContactTime);
 	    }
 		
-		internal void touch(float dT) {
+		internal void touch(float dT, Collider touch) {
 			touchIntensity = Mathf.Clamp01(touchIntensity+2F*dT);
+			if (onPlanktonActivationEvent != null)
+				onPlanktonActivationEvent.Invoke(this, touch);
 		}
 		
 		private void checkAndTryScoop(SeaMoth sm, float dT) {
 			if (sm.GetComponent<Rigidbody>().velocity.magnitude >= 4 && Vector3.Distance(sm.transform.position, transform.position) <= 5 && InventoryUtil.vehicleHasUpgrade(sm, EcoceanMod.planktonScoop.TechType)) {
 				lastScoopTime = DayNightCycle.main.timePassedAsFloat;
-				if (UnityEngine.Random.Range(0F, 1F) < 0.075F*dT) {
+				if (UnityEngine.Random.Range(0F, 1F) < 0.075F*dT*EcoceanMod.config.getFloat(ECConfig.ConfigEntries.PLANKTONRATE)) {
 					foreach (SeamothStorageContainer sc in sm.GetComponentsInChildren<SeamothStorageContainer>(true)) {
 						TechTag tt = sc.GetComponent<TechTag>();
 						if (tt && tt.type == EcoceanMod.planktonScoop.TechType) {
@@ -322,6 +327,8 @@ namespace ReikaKalseki.Ecocean {
 				else {
 					health.TakeDamage(health.maxHealth*0.05F*dT, sm.transform.position, DamageType.Drill, sm.gameObject);
 				}
+				if (onPlanktonScoopEvent != null)
+					onPlanktonScoopEvent.Invoke(this, sm);
 			}
 		}
 		
