@@ -62,7 +62,7 @@ namespace ReikaKalseki.Ecocean
 				}
 			}
 			else if (!isExploded && isGrown && time-lastRegenTime >= 10) {
-				if ((explodeIn > 0 && time >= explodeIn && isPlayerInRange(2)) || (UnityEngine.Random.Range(0F, 1F) <= 0.000004F && isPlayerInRange()))
+				if ((explodeIn > 0 && time >= explodeIn && isPlayerInRange(2)) || (UnityEngine.Random.Range(0F, 1F) <= 0.0000015F && isPlayerInRange()))
 					explode();
 			}
 		}
@@ -86,12 +86,15 @@ namespace ReikaKalseki.Ecocean
 	    void OnCollisionEnter(Collision c) {
 			//SNUtil.writeToChat("Collided at speed "+c.relativeVelocity.magnitude);
 			GameObject collider = c.gameObject;
-			if (collider.GetComponent<Player>())
+			if (collider.gameObject.FindAncestor<Player>())
 				return;
 			float thresh = 4;
-			SubRoot sub = collider.GetComponent<SubRoot>();
+			Creature cc = collider.gameObject.FindAncestor<Creature>();
+			if (cc)
+				thresh = cc is ReaperLeviathan || cc is GhostLeviathan || cc is GhostLeviatanVoid ? 6 : 10;
+			SubRoot sub = collider.gameObject.FindAncestor<SubRoot>();
 			if (sub && sub.isCyclops)
-				thresh = 0;
+				thresh = 1F;
 	        if (!isExploded && isGrown && c.relativeVelocity.magnitude >= thresh && isPlayerInRange())
 	        	explode();
 	    }
@@ -163,12 +166,12 @@ namespace ReikaKalseki.Ecocean
 					float amt = 15;
 					SubRoot sub = go.GetComponent<SubRoot>();
 					if (sub && sub.isCyclops)
-						amt = 60;
+						amt = 30;
 					Vehicle v =go.GetComponent<Vehicle>();
 					if (v && v is SeaMoth)
-						amt = 20;
+						amt = 15;
 					else if (v && v is Exosuit)
-						amt = 50;
+						amt = 30;
 					float f = (dd-10)/35F;
 					amt *= Mathf.Clamp01(1.5F-f*f);
 					amt *= EcoceanMod.config.getFloat(ECConfig.ConfigEntries.ANCHORDMG);

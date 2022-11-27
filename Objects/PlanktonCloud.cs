@@ -18,8 +18,8 @@ namespace ReikaKalseki.Ecocean {
 		
 		private readonly XMLLocale.LocaleEntry locale;
 		
-		internal static readonly float BASE_RANGE = 5;
-		internal static readonly float MAX_RANGE = 10;
+		internal static readonly float BASE_RANGE = 4;
+		internal static readonly float MAX_RANGE = 8;
 		internal static readonly float VOID_RANGE_SCALE = 2;
 		internal static readonly float LEVI_RANGE_SCALE = 3;
 		
@@ -33,7 +33,7 @@ namespace ReikaKalseki.Ecocean {
 			spawnData["sparsereef"] = new BiomeSpawnData(/*5*/9, 0.5F, 1F, 190);
 			spawnData["mountains"] = new BiomeSpawnData(/*8*/30, 1F, 0F, 250);
 			spawnData["cragfield"] = new BiomeSpawnData(/*12*/18, 1, 0.5F, 100);
-			spawnData["void"] = new BiomeSpawnData(/*22*/45, 4, 1, 500);
+			spawnData["void"] = new BiomeSpawnData(/*22*/45, 4, 1, 400);
 	    }
 			
 	    public override GameObject GetGameObject() {
@@ -262,18 +262,19 @@ namespace ReikaKalseki.Ecocean {
 			float f3 = isVoid ? PlanktonCloud.VOID_RANGE_SCALE : 1;
 			currentColor = Color.Lerp(currentColor, tgt, dT*5);
 			aoe.center = Vector3.zero;
-			aoe.radius = (float)MathUtil.linterpolate(f, 0, 1, PlanktonCloud.BASE_RANGE, PlanktonCloud.MAX_RANGE)*f3;
+			float r = (float)MathUtil.linterpolate(f, 0, 1, PlanktonCloud.BASE_RANGE, PlanktonCloud.MAX_RANGE)*f3;
+			aoe.radius = r*0.75F;
 			particleCore.startColor = currentColor;
 			particleCore.startSize = ((minParticleSize + (maxParticleSize - minParticleSize) * f)*(1+f2))*1.5F;
 			particleCore.startLifetimeMultiplier = 1+f*1.5F+f2*2.5F;
 			ParticleSystem.EmissionModule emit = particles.emission;
 			emit.rateOverTimeMultiplier = 2+f+2*f2;
 			ParticleSystem.ShapeModule shape = particles.shape;
-			shape.radius = aoe.radius*2;
+			shape.radius = r*2;
 			light.intensity = f+Mathf.Max(0, 2*f2);
 			light.color = currentColor;
 			light.range = f*16+f2*16*f3;
-			leviAOE.radius = aoe.radius*PlanktonCloud.LEVI_RANGE_SCALE;
+			leviAOE.radius = r*PlanktonCloud.LEVI_RANGE_SCALE;
 		}
 		
 		void OnDestroy() {
