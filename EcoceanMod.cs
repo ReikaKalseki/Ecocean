@@ -107,6 +107,11 @@ namespace ReikaKalseki.Ecocean
 		
 		System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(ECHooks).TypeHandle);
     }
+    
+    [QModPostPatch]
+    public static void Load() {
+        
+    }
 
   }
 }

@@ -80,6 +80,12 @@ namespace ReikaKalseki.Ecocean {
 		
 		public static void onTakeDamage(DIHooks.DamageToDeal dmg) {
 			//dmg.target.GetComponent<ExplodingAnchorPod>());
+			Player ep = dmg.target.gameObject.FindAncestor<Player>();
+			if (ep) {
+				foreach (Biter b in WorldUtil.getObjectsNearWithComponent<Biter>(ep.transform.position, 90)) {
+					attractCreatureToTarget(b, ep, false);
+				}
+			}
 		}
 		
 		public static void onKnifed(GameObject go) {
@@ -111,7 +117,7 @@ namespace ReikaKalseki.Ecocean {
 	    	GameObject go = pk.gameObject;
 	    	PrefabIdentifier pi = go.GetComponentInParent<PrefabIdentifier>();
 	    	if (pi) {
-	    		if (anchorPods.Contains(pi.ClassId))
+	    		if (anchorPods.Contains(pi.ClassId) && !go.GetFullHierarchyPath().Contains("ACUDecoHolder"))
 	    			go.EnsureComponent<ExplodingAnchorPod>();
 	    		else if (bloodVine.Contains(pi.ClassId))
 	    			go.EnsureComponent<PredatoryBloodvine>();
@@ -174,12 +180,12 @@ namespace ReikaKalseki.Ecocean {
 						}
 					}
 					if (UnityEngine.Random.Range(0F, 1F) <= chance)
-						attractCreatureToSoundSource(c, obj, isHorn);
+						attractCreatureToTarget(c, obj, isHorn);
 				}
 			}
 		}
 		
-		private static void attractCreatureToSoundSource(Creature c, MonoBehaviour obj, bool isHorn) {
+		internal static void attractCreatureToTarget(Creature c, MonoBehaviour obj, bool isHorn) {
 			AttractToTarget ac = c.gameObject.EnsureComponent<AttractToTarget>();
 			ac.fire(obj, isHorn);
 			if (c is Reefback && isHorn)
