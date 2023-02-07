@@ -62,7 +62,7 @@ namespace ReikaKalseki.Ecocean
 				}
 			}
 			else if (!isExploded && isGrown && time-lastRegenTime >= 10) {
-				if ((explodeIn > 0 && time >= explodeIn && isPlayerInRange(2)) || (UnityEngine.Random.Range(0F, 1F) <= 0.0000015F && isPlayerInRange()))
+				if ((explodeIn > 0 && time >= explodeIn && isPlayerInRange(2)) || (UnityEngine.Random.Range(0F, 1F) <= 0.0000015F && canExplodeRandom()))
 					explode();
 			}
 		}
@@ -77,6 +77,10 @@ namespace ReikaKalseki.Ecocean
 		
 		private bool isPlayerInRange(float sc = 1) {
 			return Vector3.Distance(Player.main.transform.position, transform.position) <= 120*sc;
+		}
+		
+		private bool canExplodeRandom() {
+			return isPlayerInRange(transform.position.y <= -500 ? 0.4F : 1);
 		}
 		
 		private void scheduleExplode(float sec) {
@@ -115,8 +119,14 @@ namespace ReikaKalseki.Ecocean
 		}
 		
 		internal void explode() {
+			if (!canExplode())
+				return;
 			spawnParticleShell("f39e56b9-9a11-4582-875f-c37f1ed37314", 0.5F, Vector3.zero);
 			Invoke("explodePart2", 0.5F);
+		}
+		
+		internal bool canExplode() {
+			return !gameObject.GetFullHierarchyPath().Contains("ACUDecoHolder") && transform.position.y <= -100;
 		}
 		
 		internal void explodePart2() {
@@ -163,17 +173,13 @@ namespace ReikaKalseki.Ecocean
 				}
 				LiveMixin lv = go.GetComponent<LiveMixin>();
 				if (lv && lv.IsAlive()) {
-					float amt = 15;
-					SubRoot sub = go.GetComponent<SubRoot>();
-					if (sub && sub.isCyclops)
-						amt = 30;
-					Vehicle v =go.GetComponent<Vehicle>();
-					if (v && v is SeaMoth)
-						amt = 15;
-					else if (v && v is Exosuit)
-						amt = 30;
+					float amt = getDamageToDeal(go);
+					if (amt < 0.1F)
+						continue;
 					float f = (dd-10)/35F;
 					amt *= Mathf.Clamp01(1.5F-f*f);
+					float depth2 = (-(go.transform.position.y))-400;
+					amt *= 1+depth2/400F;
 					amt *= EcoceanMod.config.getFloat(ECConfig.ConfigEntries.ANCHORDMG);
 					lv.TakeDamage(amt, go.transform.position, DamageType.Explosive, gameObject);
 					Rigidbody rb = go.GetComponent<Rigidbody>();
@@ -183,6 +189,24 @@ namespace ReikaKalseki.Ecocean
 					}
 				}
 			}
+		}
+		
+		private float getDamageToDeal(GameObject go) {
+			BaseCell b = go.GetComponent<BaseCell>();
+			if (b)
+				return 10;
+			Constructable c = go.FindAncestor<Constructable>();
+			if (c)
+				return 0;//c.constructedAmount >= 1 && ObjectUtil.isBaseModule(c.techType, false) ? 10 : 0;
+			SubRoot sub = go.GetComponent<SubRoot>();
+			if (sub)
+				return sub.isCyclops ? 30 : 0;
+			Vehicle v = go.GetComponent<Vehicle>();
+			if (v && v is SeaMoth)
+				return 15;
+			else if (v && v is Exosuit)
+				return 30;
+			return 15;
 		}
 		
 	}

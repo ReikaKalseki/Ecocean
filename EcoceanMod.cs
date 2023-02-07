@@ -109,7 +109,7 @@ namespace ReikaKalseki.Ecocean
     }
     
     [QModPostPatch]
-    public static void Load() {
+    public static void PostLoad() {
         
     }
 

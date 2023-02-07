@@ -32,7 +32,7 @@ namespace ReikaKalseki.Ecocean {
 	    
 	    static ECHooks() {
 	    	DIHooks.onSkyApplierSpawnEvent += onSkyApplierSpawn;
-	    	//DIHooks.onDamageEvent += onTakeDamage;
+	    	DIHooks.onDamageEvent += onTakeDamage;
 	    	DIHooks.onKnifedEvent += onKnifed;
 	    	DIHooks.onItemPickedUpEvent += onPickup;
 			
@@ -81,9 +81,11 @@ namespace ReikaKalseki.Ecocean {
 		public static void onTakeDamage(DIHooks.DamageToDeal dmg) {
 			//dmg.target.GetComponent<ExplodingAnchorPod>());
 			Player ep = dmg.target.gameObject.FindAncestor<Player>();
+			//SNUtil.writeToChat("Player '"+ep+"' took damage");
 			if (ep) {
-				foreach (Biter b in WorldUtil.getObjectsNearWithComponent<Biter>(ep.transform.position, 90)) {
+				foreach (Biter b in WorldUtil.getObjectsNearWithComponent<Biter>(ep.transform.position, 60)) {
 					attractCreatureToTarget(b, ep, false);
+					//SNUtil.writeToChat("Attracted biter "+b+" @ "+b.transform.position);
 				}
 			}
 		}
@@ -117,7 +119,7 @@ namespace ReikaKalseki.Ecocean {
 	    	GameObject go = pk.gameObject;
 	    	PrefabIdentifier pi = go.GetComponentInParent<PrefabIdentifier>();
 	    	if (pi) {
-	    		if (anchorPods.Contains(pi.ClassId) && !go.GetFullHierarchyPath().Contains("ACUDecoHolder"))
+	    		if (anchorPods.Contains(pi.ClassId))
 	    			go.EnsureComponent<ExplodingAnchorPod>();
 	    		else if (bloodVine.Contains(pi.ClassId))
 	    			go.EnsureComponent<PredatoryBloodvine>();
@@ -199,7 +201,9 @@ namespace ReikaKalseki.Ecocean {
 			
 			private Creature owner;
 			private SwimBehaviour swimmer;
+			private StayAtLeashPosition leash;
 			private AttackCyclops cyclopsAttacker;
+			private LastTarget targeter;
 			private MeleeAttack[] attacks;
 			private AggressiveWhenSeeTarget[] targeting;
 			
@@ -218,8 +222,12 @@ namespace ReikaKalseki.Ecocean {
 					owner = GetComponent<Creature>();
 				if (!swimmer)
 					swimmer = GetComponent<SwimBehaviour>();
+				if (!leash)
+					leash = GetComponent<StayAtLeashPosition>();
 				if (!cyclopsAttacker)
 					cyclopsAttacker = GetComponent<AttackCyclops>();
+				if (!targeter)
+					targeter = GetComponent<LastTarget>();
 				if (attacks == null)
 					attacks = GetComponents<MeleeAttack>();
 				if (targeting == null)
@@ -250,6 +258,10 @@ namespace ReikaKalseki.Ecocean {
 				
 				owner.Aggression.Add(isHorn ? 0.5F : 0.05F);
 				cyclopsAttacker.SetCurrentTarget(target.gameObject, false);
+				if (targeter)
+					targeter.SetTarget(target.gameObject);
+				//if (leash)
+				//	leash.
 		    	foreach (MeleeAttack a in attacks)
 		    		a.lastTarget.SetTarget(target.gameObject);
 		    	foreach (AggressiveWhenSeeTarget a in targeting)
