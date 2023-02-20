@@ -31,6 +31,14 @@ namespace ReikaKalseki.Ecocean {
 			ObjectUtil.removeComponent<Pickupable>(world);
 			ObjectUtil.removeComponent<ResourceTracker>(world);
 			ObjectUtil.removeComponent<ResourceTrackerUpdater>(world);
+			
+			Renderer r = world.GetComponentInChildren<Renderer>();
+			RenderUtil.swapTextures(EcoceanMod.modDLL, r, "Textures/Piezo/");
+			r.materials[0].SetFloat("_SpecInt", 50);
+			r.materials[0].SetFloat("_Shininess", 1);
+			r.materials[0].SetFloat("_Fresnel", 0.4F);
+			r.materials[0].SetColor("_Color", new Color(1, 1, 1, 1));
+			
 			return world;
 	    }
 		
@@ -45,11 +53,15 @@ namespace ReikaKalseki.Ecocean {
 		
 	public class PiezoCrystalTag : MonoBehaviour {
 		
+		private MeshRenderer render;
+		
 		private GameObject sparker;
 		
 		private ParticleSystem[] particles;
 		
-		private float charge;
+		private float nextDischargeTime;
+		
+		private float nextSparkAdjust = -1;
 		
 		private static readonly SoundManager.SoundData dischargeSound = SoundManager.registerSound(EcoceanMod.modDLL, "piezoblast", "Sounds/piezo.ogg", SoundManager.soundMode3D);
 		
@@ -57,7 +69,10 @@ namespace ReikaKalseki.Ecocean {
 			
 		}
 		
-		void Update() {			
+		void Update() {
+			if (!render) {
+				render = GetComponentInChildren<MeshRenderer>();
+			}
 			if (!sparker) {
 				sparker = ObjectUtil.createWorldObject("ff8e782e-e6f3-40a6-9837-d5b6dcce92bc");
 				sparker.transform.parent = transform;
@@ -73,12 +88,23 @@ namespace ReikaKalseki.Ecocean {
 				particles = sparker.GetComponentsInChildren<ParticleSystem>();
 			}
 			
+			float time = DayNightCycle.main.timePassedAsFloat;
+			
 			charge += Time.deltaTime*UnityEngine.Random.Range(0.033F, 0.1F);
-			sparker.SetActive(charge > 0.7F);
+			float f = (charge-0.7F)/0.3F;
+			if (time >= nextSparkAdjust) {
+				sparker.SetActive(f > 0 && UnityEngine.Random.Range(0F, 1F) < f*1.5F);
+				nextSparkAdjust = time+0.2F;
+			}
 			foreach (ParticleSystem p in particles) {
 				ParticleSystem.MainModule pm = p.main;
-				pm.startSize = (charge-0.7F)*15F/0.3F;
+				pm.startSize = Mathf.Max(0.1F, f*15F);
+				SNUtil.writeToChat(""+f*15F);
 			}
+			float f2 = Mathf.Max(0.25F, f*2*UnityEngine.Random.Range(0.9F, 1F));
+			if (UnityEngine.Random.Range(0F, 1F) < 0.2F)
+				f2 = Mathf.Min(f2, UnityEngine.Random.Range(0.25F, 0.5F));
+			RenderUtil.setEmissivity(render, f2, "GlowStrength");
 		
 			if (charge >= 1) {
 				charge = 0;
@@ -96,7 +122,7 @@ namespace ReikaKalseki.Ecocean {
 		}
 	    
 	    internal void spawnEMP() {
-			SoundManager.playSoundAt(dischargeSound, transform.position, false, -1, 1);
+			SoundManager.playSoundAt(dischargeSound, sparker.transform.position, false, -1, 1);
 	    	GameObject pfb = ObjectUtil.lookupPrefab(VanillaCreatures.CRABSQUID.prefab).GetComponent<EMPAttack>().ammoPrefab;
 	    	for (int i = 0; i < 180; i += 30) {
 				GameObject emp = UnityEngine.Object.Instantiate(pfb);
@@ -109,9 +135,9 @@ namespace ReikaKalseki.Ecocean {
 		    	r.materials[1].SetColor("_ColorStrength", new Color(1, 1, 100, 1));
 		    	EMPBlast e = emp.GetComponent<EMPBlast>();
 		    	ObjectUtil.removeComponent<VFXLerpColor>(emp);
-		    	e.blastRadius = AnimationCurve.Linear(0f, 0f, 1f, 50f);
-		    	e.blastHeight = AnimationCurve.Linear(0f, 0f, 1f, 50f);
-		    	e.lifeTime = 1F;
+		    	e.blastRadius = AnimationCurve.Linear(0f, 0f, 1f, 30f);
+		    	e.blastHeight = AnimationCurve.Linear(0f, 0f, 1f, 30f);
+		    	e.lifeTime = 0.33F;
 		    	e.disableElectronicsTime = 0;//UnityEngine.Random.Range(1F, 5F);
 		    	emp.name = "PiezoCrystal_EMPulse"+i;
 		    	emp.SetActive(true);
