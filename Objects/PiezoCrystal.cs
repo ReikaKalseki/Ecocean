@@ -35,7 +35,7 @@ namespace ReikaKalseki.Ecocean {
 			Renderer r = world.GetComponentInChildren<Renderer>();
 			RenderUtil.swapTextures(EcoceanMod.modDLL, r, "Textures/Piezo/");
 			r.materials[0].SetFloat("_SpecInt", 50);
-			r.materials[0].SetFloat("_Shininess", 1);
+			r.materials[0].SetFloat("_Shininess", 8);
 			r.materials[0].SetFloat("_Fresnel", 0.4F);
 			r.materials[0].SetColor("_Color", new Color(1, 1, 1, 1));
 			
@@ -59,6 +59,7 @@ namespace ReikaKalseki.Ecocean {
 		
 		private ParticleSystem[] particles;
 		
+		private float lastDischargeTime;
 		private float nextDischargeTime;
 		
 		private float nextSparkAdjust = -1;
@@ -89,6 +90,12 @@ namespace ReikaKalseki.Ecocean {
 			}
 			
 			float time = DayNightCycle.main.timePassedAsFloat;
+			if (lastDischargeTime <= 1) {
+				lastDischargeTime = time;
+				nextDischargeTime = time+UnityEngine.Random.Range(20F, 60F);
+				return;
+			}
+			float charge = (float)MathUtil.linterpolate(time, lastDischargeTime, nextDischargeTime, 0, 1, true);
 			
 			charge += Time.deltaTime*UnityEngine.Random.Range(0.033F, 0.1F);
 			float f = (charge-0.7F)/0.3F;
@@ -107,7 +114,7 @@ namespace ReikaKalseki.Ecocean {
 			RenderUtil.setEmissivity(render, f2, "GlowStrength");
 		
 			if (charge >= 1) {
-				charge = 0;
+				nextDischargeTime = time+UnityEngine.Random.Range(20F, 60F);
 				if (Vector3.Distance(Player.main.transform.position, transform.position) <= 200)
 					spawnEMP();
 			}
