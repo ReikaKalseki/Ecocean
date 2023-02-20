@@ -69,7 +69,9 @@
 			
 		</desc>
 		<pda>
-			Rather than a single organism, this entity is a large cluster of migrating phytoplankton. Interestingly, 
+			Rather than a single organism, this entity is a large cluster of migrating phytoplankton. Interestingly, it seems to possess the capability to detect minute movements in the surrounding water, and will emit light if sufficiently disturbed. This behavior not only can be used to detect the presence of such plankton blooms at a distance, but also as an early indication of more distant but large water movements, such as those created by swimming megafauna.
+			
+			The plankton itself is slightly toxic, but these chemical defenses might make them useful for crafting purposes.
 		</pda>
 		<header>
 			Plankton
@@ -97,6 +99,22 @@
 			
 		</pda>
 	</PlanktonScoop>
+	<piezoCrystal>
+		<name>
+			 Piezocrystal Deposit
+		</name>
+		<desc>
+			
+		</desc>
+		<pda>
+			These rare crystalline deposits have been named after their tendency to exhibit piezoelectric properties, converting the water pressure to electric charge. This charge eventually accumulates to such a level as to trigger a violent discharge into the surroundings.
+			
+			Assessment: Exercise strong caution; may damage electronics
+		</pda>
+		<header>
+			Piezo
+		</header>
+	</piezoCrystal>
 	<enum>
 		<name>
 			

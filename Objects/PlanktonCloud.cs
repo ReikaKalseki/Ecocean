@@ -71,6 +71,7 @@ namespace ReikaKalseki.Ecocean {
 		
 		public void register() {
 			Patch();
+			SNUtil.addPDAEntry(this, 3, "Lifeforms/Flora/Sea", locale.pda, locale.getField<string>("header"));/*
 			PDAManager.PDAPage pdaPage = PDAManager.createPage("ency_"+ClassID, FriendlyName, locale.pda, "Lifeforms/Flora/Sea");
 			pdaPage.setHeaderImage(TextureManager.getTexture(EcoceanMod.modDLL, "Textures/PDA/"+locale.getField<string>("header")));
 			pdaPage.register();
@@ -80,7 +81,7 @@ namespace ReikaKalseki.Ecocean {
 			e.locked = true;
 			e.scanTime = 3;
 			e.encyclopedia = pdaPage.id;
-			PDAHandler.AddCustomScannerEntry(e);
+			PDAHandler.AddCustomScannerEntry(e);*/
 			ItemRegistry.instance.addItem(this);
 			//GenUtil.registerSlotWorldgen(ClassID, PrefabFileName, TechType, EntitySlot.Type.Creature, LargeWorldEntity.CellLevel.Far, BiomeType.CragField_OpenDeep_CreatureOnly, 1, 1F);
 		}

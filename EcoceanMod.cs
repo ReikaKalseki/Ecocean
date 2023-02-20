@@ -37,6 +37,8 @@ namespace ReikaKalseki.Ecocean
     internal static PlanktonItem planktonItem;
     
     internal static SeamothPlanktonScoop planktonScoop;
+    
+    internal static PiezoCrystal piezo;
 		
 	internal static readonly Vector3 reaperlessTripleVent = new Vector3(-1150, -240, -258);
 	internal static readonly Vector3 northDuneBit = new Vector3(-1151, -340, 1444);
@@ -75,6 +77,11 @@ namespace ReikaKalseki.Ecocean
 	    planktonItem = new PlanktonItem(locale.getEntry("planktonItem"));
 	    planktonItem.register();
 	    
+	    WaterCurrent.register();
+	    
+	    piezo = new PiezoCrystal(locale.getEntry("piezoCrystal"));
+	    piezo.register();
+	    
 	    planktonScoop = new SeamothPlanktonScoop();
 	    planktonScoop.register();
 		
@@ -98,6 +105,8 @@ namespace ReikaKalseki.Ecocean
 		
 		GenUtil.registerWorldgen(new PositionedPrefab(VanillaCreatures.REAPER.prefab, reaperlessTripleVent.setY(-200)));
 		GenUtil.registerWorldgen(new PositionedPrefab(VanillaCreatures.REAPER.prefab, northDuneBit.setY(-320)));
+                 
+        new WorldgenDatabase().load();
 		
 		/*
 		GenUtil.ContainerPrefab pfb = GenUtil.getOrCreateDatabox(planktonScoop.TechType);

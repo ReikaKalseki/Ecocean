@@ -41,6 +41,8 @@ namespace ReikaKalseki.Ecocean {
 	    	DIHooks.onPrawnTickEvent += tickPrawn;
 	    	DIHooks.onCyclopsTickEvent += tickCyclops;
 	    	
+	    	DIHooks.onEMPHitEvent += onEMPHit;
+	    	
 	    	DIHooks.getTemperatureEvent += getWaterTemperature;
 	    	
 	    	DIHooks.onSeamothSonarUsedEvent += pingSeamothSonar;
@@ -77,6 +79,32 @@ namespace ReikaKalseki.Ecocean {
 	    			EcoceanMod.plankton.tickSpawner(ep, data, dT);
 	    	}
 		}
+	    
+	    public static void onEMPHit(EMPBlast e, GameObject go) {
+	    	if (e.gameObject.name.StartsWith("PiezoCrystal_EMPulse", StringComparison.InvariantCultureIgnoreCase)) {
+	    		//SNUtil.writeToChat("Match");
+	    		Player ep = go.gameObject.FindAncestor<Player>();
+	    		Vehicle v = go.gameObject.FindAncestor<Vehicle>();
+	    		SubRoot sub = go.gameObject.FindAncestor<SubRoot>();
+		    	float amt = UnityEngine.Random.Range(1F, 4F);
+		    	if (v) {
+		    		if (v is SeaMoth)
+		    			ObjectUtil.createSeamothSparkSphere((SeaMoth)v);
+		    		if (amt > 3)
+		    			v.energyInterface.DisableElectronicsForTime(amt-3);
+		    		v.ConsumeEnergy(amt*3);
+		    	}
+	    		else if (sub && sub.isCyclops) {
+		    		if (amt > 2)
+		    			sub.powerRelay.DisableElectronicsForTime((amt-2)*3);
+		    		float trash;
+		    		sub.powerRelay.ConsumeEnergy(amt*6, out trash);
+	    		}
+	    		else if (ep) {
+	    			ep.GetComponent<LiveMixin>().TakeDamage(UnityEngine.Random.Range(5F, 10F), ep.transform.position, DamageType.Electrical, e.gameObject);
+	    		}
+	    	}
+	    }
 		
 		public static void onTakeDamage(DIHooks.DamageToDeal dmg) {
 			//dmg.target.GetComponent<ExplodingAnchorPod>());

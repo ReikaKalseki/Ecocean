@@ -103,6 +103,7 @@ namespace ReikaKalseki.Ecocean {
 		
 		public void register() {
 			Patch();
+			//SNUtil.addPDAEntry(this, 3, "Advanced", locale.pda, locale.getField<string>("header"));/*
 			pdaPage = PDAManager.createPage("ency_"+ClassID, FriendlyName, locale.pda, "Advanced");
 			pdaPage.setHeaderImage(TextureManager.getTexture(EcoceanMod.modDLL, "Textures/PDA/"+locale.getField<string>("header")));
 			pdaPage.register();
@@ -112,7 +113,7 @@ namespace ReikaKalseki.Ecocean {
 			e.locked = true;
 			e.scanTime = 3;
 			e.encyclopedia = pdaPage.id;
-			PDAHandler.AddCustomScannerEntry(e);
+			PDAHandler.AddCustomScannerEntry(e);//*/
 			ItemRegistry.instance.addItem(this);
 		}
 		
