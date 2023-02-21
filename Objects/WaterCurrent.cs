@@ -21,6 +21,7 @@ namespace ReikaKalseki.Ecocean {
 			new WaterCurrentStrong().Patch();
 			new WaterCurrentHot().Patch();
 			new WaterCurrentHotStrong().Patch();
+			new WaterCurrentImpassable().Patch();
 		}
 		
 	}
@@ -35,7 +36,9 @@ namespace ReikaKalseki.Ecocean {
 			GameObject world = ObjectUtil.createWorldObject("42b38968-bd3a-4bfd-9d93-17078d161b29");
 			world.EnsureComponent<TechTag>().type = TechType;
 			world.EnsureComponent<PrefabIdentifier>().ClassId = ClassID;
+			world.EnsureComponent<LargeWorldEntity>().cellLevel = LargeWorldEntity.CellLevel.Medium;
 			ObjectUtil.removeChildObject(world, "xCurrenBubbles");
+			world.EnsureComponent<T>();
 			return world;
 	    }
 			
@@ -54,6 +57,10 @@ namespace ReikaKalseki.Ecocean {
 	}
 	
 	public class WaterCurrentHotStrong : WaterCurrentBase<HotStrongCurrentTag> {
+		
+	}
+	
+	public class WaterCurrentImpassable : WaterCurrentBase<ImpassableCurrentTag> {
 		
 	}
 	
@@ -76,6 +83,14 @@ namespace ReikaKalseki.Ecocean {
 	public class StrongCurrentTag : WaterCurrentTag {
 		
 		internal StrongCurrentTag() : base(false, 18) {
+			
+		}
+		
+	}
+	
+	public class ImpassableCurrentTag : WaterCurrentTag {
+		
+		internal ImpassableCurrentTag() : base(false, 25) {
 			
 		}
 		
@@ -107,8 +122,6 @@ namespace ReikaKalseki.Ecocean {
 			current.objectForce = currentStrength;
 			current.activeAtDay = true;
 			current.activeAtNight = true;
-			Vector3 vec = transform.localScale;
-			transform.localScale = new Vector3(vec.x, vec.y, 0.4F);
 			if (isHotWater) {
 				foreach (Rigidbody rb in current.rigidbodyList) {
 					if (rb.gameObject.FindAncestor<Player>()) {

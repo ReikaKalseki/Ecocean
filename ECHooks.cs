@@ -29,6 +29,7 @@ namespace ReikaKalseki.Ecocean {
 		private static readonly HashSet<string> bloodVine = new HashSet<string>();
 		
 		private static bool addingExtraGlowOil = false;
+		private static float lastPiezoEMPDamage = -1;
 	    
 	    static ECHooks() {
 	    	DIHooks.onSkyApplierSpawnEvent += onSkyApplierSpawn;
@@ -80,28 +81,29 @@ namespace ReikaKalseki.Ecocean {
 	    	}
 		}
 	    
-	    public static void onEMPHit(EMPBlast e, GameObject go) {
+	    public static void onEMPHit(EMPBlast e, GameObject go) { //might be called many times
 	    	if (e.gameObject.name.StartsWith("PiezoCrystal_EMPulse", StringComparison.InvariantCultureIgnoreCase)) {
 	    		//SNUtil.writeToChat("Match");
-	    		Player ep = go.gameObject.FindAncestor<Player>();
+	    		float time = DayNightCycle.main.timePassedAsFloat;
 	    		Vehicle v = go.gameObject.FindAncestor<Vehicle>();
 	    		SubRoot sub = go.gameObject.FindAncestor<SubRoot>();
 		    	float amt = UnityEngine.Random.Range(1F, 4F);
 		    	if (v) {
-		    		if (v is SeaMoth)
-		    			ObjectUtil.createSeamothSparkSphere((SeaMoth)v);
+		    		if (time >= lastPiezoEMPDamage+1F) {
+		    			go.GetComponent<LiveMixin>().TakeDamage(UnityEngine.Random.Range(10F, 20F), v.transform.position, DamageType.Electrical, e.gameObject);
+		    			lastPiezoEMPDamage = time;
+		    		}
+		    		v.ConsumeEnergy(amt*3); //must be first as will no-op if electronics is disabled
 		    		if (amt > 3)
 		    			v.energyInterface.DisableElectronicsForTime(amt-3);
-		    		v.ConsumeEnergy(amt*3);
+		    		if (v is SeaMoth)
+		    			ObjectUtil.createSeamothSparkSphere((SeaMoth)v);
 		    	}
 	    		else if (sub && sub.isCyclops) {
-		    		if (amt > 2)
-		    			sub.powerRelay.DisableElectronicsForTime((amt-2)*3);
 		    		float trash;
 		    		sub.powerRelay.ConsumeEnergy(amt*6, out trash);
-	    		}
-	    		else if (ep) {
-	    			ep.GetComponent<LiveMixin>().TakeDamage(UnityEngine.Random.Range(5F, 10F), ep.transform.position, DamageType.Electrical, e.gameObject);
+		    		if (amt > 2)
+		    			sub.powerRelay.DisableElectronicsForTime((amt-2)*3);
 	    		}
 	    	}
 	    }

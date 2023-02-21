@@ -20,31 +20,31 @@
     <scale>
       <x>1.6</x>
       <y>1.6</y>
-      <z>1</z>
+      <z>0.4</z>
     </scale>
   </customprefab>
   <customprefab>
     <prefab>WaterCurrent_Hot</prefab>
     <position>
       <x>1245.26257324219</x>
-      <y>-259.791778564453</y>
+      <y>-259.991778564453</y>
       <z>526.334899902344</z>
     </position>
     <rotation>
       <x>-89.6004180908203</x>
-      <y>240.001617431641</y>
+      <y>210.001617431641</y>
       <z>180</z>
     </rotation>
     <scale>
       <x>1.5</x>
-      <y>1.5</y>
-      <z>1</z>
+      <y>1.0</y>
+      <z>0.3</z>
     </scale>
   </customprefab>
   <customprefab>
     <prefab>WaterCurrent_Basic</prefab>
     <position>
-      <x>1245.80908203125</x>
+      <x>1245.30908203125</x>
       <y>-277.789398193359</y>
       <z>547.251403808594</z>
     </position>
@@ -60,9 +60,9 @@
       </quaternion>
     </rotation>
     <scale>
-      <x>1</x>
+      <x>0.8</x>
       <y>1</y>
-      <z>1</z>
+      <z>0.4</z>
     </scale>
   </customprefab>
   <customprefab>
@@ -86,11 +86,11 @@
     <scale>
       <x>1</x>
       <y>1</y>
-      <z>1</z>
+      <z>0.4</z>
     </scale>
   </customprefab>
   <customprefab>
-    <prefab>WaterCurrent_Strong</prefab>
+    <prefab>WaterCurrent_Impassable</prefab>
     <position>
       <x>1242.498791503906</x>
       <y>-287.7803863525391</y>
@@ -110,7 +110,7 @@
     <scale>
       <x>1.6</x>
       <y>1.6</y>
-      <z>1</z>
+      <z>0.4</z>
     </scale>
   </customprefab>
   <customprefab>
@@ -132,9 +132,9 @@
       </quaternion>
     </rotation>
     <scale>
-      <x>1.5</x>
-      <y>1.5</y>
-      <z>1</z>
+      <x>1.8</x>
+      <y>1.8</y>
+      <z>0.4</z>
     </scale>
   </customprefab>
   <customprefab>
@@ -156,9 +156,9 @@
       </quaternion>
     </rotation>
     <scale>
-      <x>1.5</x>
-      <y>1.5</y>
-      <z>1</z>
+      <x>1.8</x>
+      <y>1.8</y>
+      <z>0.4</z>
     </scale>
   </customprefab>
   <customprefab>
@@ -182,7 +182,7 @@
     <scale>
       <x>1.5</x>
       <y>1.5</y>
-      <z>1</z>
+      <z>0.4</z>
     </scale>
   </customprefab>
   <customprefab>
@@ -206,14 +206,14 @@
     <scale>
       <x>1.5</x>
       <y>1.5</y>
-      <z>1</z>
+      <z>0.4</z>
     </scale>
   </customprefab>
   <customprefab>
     <prefab>WaterCurrent_Hot</prefab>
     <position>
       <x>1296.62658691406</x>
-      <y>-277.966400146484</y>
+      <y>-277.566400146484</y>
       <z>535.750122070313</z>
     </position>
     <rotation>
@@ -229,32 +229,26 @@
     </rotation>
     <scale>
       <x>1.5</x>
-      <y>1.5</y>
-      <z>1</z>
+      <y>1.75</y>
+      <z>0.4</z>
     </scale>
   </customprefab>
   <customprefab>
     <prefab>WaterCurrent_Strong</prefab>
     <position>
       <x>1281.97485351563</x>
-      <y>-277.830505371094</y>
+      <y>-276.530505371094</y>
       <z>538.171936035156</z>
     </position>
     <rotation>
       <x>18.4000205993652</x>
       <y>345.599914550781</y>
-      <z>10.3999795913696</z>
-      <quaternion>
-        <x>-0.146754637360573</x>
-        <y>0.137588620185852</y>
-        <z>-0.108717143535614</z>
-        <w>-0.973505556583405</w>
-      </quaternion>
+      <z>345.3999795913696</z>
     </rotation>
     <scale>
       <x>1.5</x>
-      <y>1.5</y>
-      <z>1</z>
+      <y>2.2</y>
+      <z>0.4</z>
     </scale>
   </customprefab>
   <customprefab>
@@ -278,7 +272,7 @@
     <scale>
       <x>1</x>
       <y>1</y>
-      <z>1</z>
+      <z>0.2</z>
     </scale>
   </customprefab>
   <customprefab>
@@ -302,7 +296,7 @@
     <scale>
       <x>1.25</x>
       <y>1.25</y>
-      <z>1</z>
+      <z>0.4</z>
     </scale>
   </customprefab>
 </Root>

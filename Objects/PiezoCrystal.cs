@@ -34,7 +34,7 @@ namespace ReikaKalseki.Ecocean {
 			
 			Renderer r = world.GetComponentInChildren<Renderer>();
 			RenderUtil.swapTextures(EcoceanMod.modDLL, r, "Textures/Piezo/");
-			r.materials[0].SetFloat("_SpecInt", 50);
+			r.materials[0].SetFloat("_SpecInt", 300);
 			r.materials[0].SetFloat("_Shininess", 8);
 			r.materials[0].SetFloat("_Fresnel", 0.4F);
 			r.materials[0].SetColor("_Color", new Color(1, 1, 1, 1));
@@ -90,23 +90,24 @@ namespace ReikaKalseki.Ecocean {
 			}
 			
 			float time = DayNightCycle.main.timePassedAsFloat;
+			render.materials[0].SetFloat("_SpecInt", (float)MathUtil.linterpolate(DayNightCycle.main.GetLightScalar(), 0, 1, 300, 15));
 			if (lastDischargeTime <= 1) {
 				lastDischargeTime = time;
-				nextDischargeTime = time+UnityEngine.Random.Range(20F, 60F);
+				nextDischargeTime = time+UnityEngine.Random.Range(20F, 45F);
 				return;
 			}
 			float charge = (float)MathUtil.linterpolate(time, lastDischargeTime, nextDischargeTime, 0, 1, true);
 			
 			charge += Time.deltaTime*UnityEngine.Random.Range(0.033F, 0.1F);
-			float f = (charge-0.7F)/0.3F;
+			float f = (charge-0.5F)*2;
 			if (time >= nextSparkAdjust) {
-				sparker.SetActive(f > 0 && UnityEngine.Random.Range(0F, 1F) < f*1.5F);
+				sparker.SetActive(f > 0 && UnityEngine.Random.Range(0F, 1F) < f);
 				nextSparkAdjust = time+0.2F;
 			}
 			foreach (ParticleSystem p in particles) {
 				ParticleSystem.MainModule pm = p.main;
-				pm.startSize = Mathf.Max(0.1F, f*15F);
-				SNUtil.writeToChat(""+f*15F);
+				pm.startSize = Mathf.Max(0.1F, f*12F);
+				//SNUtil.writeToChat(""+f*15F);
 			}
 			float f2 = Mathf.Max(0.25F, f*2*UnityEngine.Random.Range(0.9F, 1F));
 			if (UnityEngine.Random.Range(0F, 1F) < 0.2F)
@@ -114,7 +115,8 @@ namespace ReikaKalseki.Ecocean {
 			RenderUtil.setEmissivity(render, f2, "GlowStrength");
 		
 			if (charge >= 1) {
-				nextDischargeTime = time+UnityEngine.Random.Range(20F, 60F);
+				lastDischargeTime = time;
+				nextDischargeTime = time+UnityEngine.Random.Range(20F, 45F);
 				if (Vector3.Distance(Player.main.transform.position, transform.position) <= 200)
 					spawnEMP();
 			}
@@ -142,12 +144,16 @@ namespace ReikaKalseki.Ecocean {
 		    	r.materials[1].SetColor("_ColorStrength", new Color(1, 1, 100, 1));
 		    	EMPBlast e = emp.GetComponent<EMPBlast>();
 		    	ObjectUtil.removeComponent<VFXLerpColor>(emp);
-		    	e.blastRadius = AnimationCurve.Linear(0f, 0f, 1f, 30f);
-		    	e.blastHeight = AnimationCurve.Linear(0f, 0f, 1f, 30f);
+		    	e.blastRadius = AnimationCurve.Linear(0f, 0f, 1f, 40f);
+		    	e.blastHeight = AnimationCurve.Linear(0f, 0f, 1f, 40f);
 		    	e.lifeTime = 0.33F;
 		    	e.disableElectronicsTime = 0;//UnityEngine.Random.Range(1F, 5F);
 		    	emp.name = "PiezoCrystal_EMPulse"+i;
 		    	emp.SetActive(true);
+	    	}
+	    	Player ep = Player.main;
+	    	if (Vector3.Distance(sparker.transform.position, ep.transform.position) <= 30) {
+	    		ep.GetComponent<LiveMixin>().TakeDamage(UnityEngine.Random.Range(5F, 10F), ep.transform.position, DamageType.Electrical, gameObject);
 	    	}
 	    }
 		
