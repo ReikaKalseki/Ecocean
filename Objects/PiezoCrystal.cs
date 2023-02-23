@@ -71,25 +71,46 @@ namespace ReikaKalseki.Ecocean {
 			Patch();
 			SNUtil.addPDAEntry(this, 8, "PlanetaryGeology", locale.pda, locale.getField<string>("header"));
 			ItemRegistry.instance.addItem(this);
-			//GenUtil.registerSlotWorldgen(ClassID, PrefabFileName, TechType, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.VeryFar, BiomeType.UnderwaterIslands_IslandSides, 1, 1F);
+			GenUtil.registerSlotWorldgen(ClassID, PrefabFileName, TechType, EntitySlot.Type.Creature, LargeWorldEntity.CellLevel.VeryFar, BiomeType.UnderwaterIslands_OpenDeep_CreatureOnly, 1, 0.1F);
+			GenUtil.registerWorldgen(new ScatteredPiezoGenerator(4, new Vector3(islandvent), new Vector3(60, 20, 60)));
+			GenUtil.registerWorldgen(new ScatteredPiezoGenerator(2, new Vector3(wreck), new Vector3(40, 10, 40)));
+			GenUtil.registerWorldgen(new ScatteredPiezoGenerator(1, new Vector3(aewreck), new Vector3(20, 10, 20)));
 		}
 			
 	}
 		
 	public class PiezoCrystalTag : MonoBehaviour {
 		
+		private static readonly float MAX_ROTATE_SPEED = 3F;
+		
 		private readonly List<PiezoSource> sources = new List<PiezoSource>();
 				
 		private float lastDischargeTime;
 		private float nextDischargeTime;
 		
+		private float lastTerrainCollisionCheckTime = -1;
+		
+		private Vector3 rotationSpeed;
+		
 		private static readonly SoundManager.SoundData dischargeSound = SoundManager.registerSound(EcoceanMod.modDLL, "piezoblast", "Sounds/piezo.ogg", SoundManager.soundMode3D);
 		
 		internal PiezoCrystalTag() {
-			
+			rotationSpeed = new Vector3(UnityEngine.Random.Range(-MAX_ROTATE_SPEED, MAX_ROTATE_SPEED), UnityEngine.Random.Range(-MAX_ROTATE_SPEED, MAX_ROTATE_SPEED), UnityEngine.Random.Range(-MAX_ROTATE_SPEED, MAX_ROTATE_SPEED));
 		}
 		
 		void Update() {
+			if (transform.position.y < -360) {
+				UnityEngine.Object.DestroyImmediate(gameObject);
+				return;
+			}
+			float time = DayNightCycle.main.timePassedAsFloat;
+			if (time >= lastTerrainCollisionCheckTime+2.5F) {
+				if (Physics.CheckSphere(transform.position, 16, Voxeland.GetTerrainLayerMask())) {
+					UnityEngine.Object.DestroyImmediate(gameObject);
+					return;
+				}
+				lastTerrainCollisionCheckTime = time;
+			}
 			if (sources.Count == 0) {
 				MeshRenderer[] rs = GetComponentsInChildren<MeshRenderer>();
 				foreach (MeshRenderer r in rs) {
@@ -97,7 +118,6 @@ namespace ReikaKalseki.Ecocean {
 				}
 			}
 			transform.localScale = Vector3.one*8;			
-			float time = DayNightCycle.main.timePassedAsFloat;
 			foreach (PiezoSource r in sources)
 				r.render.materials[0].SetFloat("_SpecInt", (float)MathUtil.linterpolate(DayNightCycle.main.GetLightScalar(), 0, 1, 300, 15));
 			if (lastDischargeTime <= 1) {
@@ -118,6 +138,11 @@ namespace ReikaKalseki.Ecocean {
 					r.resetIntensities();
 				}
 			}
+			transform.Rotate(rotationSpeed*Time.deltaTime, Space.Self);
+			rotationSpeed += new Vector3(UnityEngine.Random.Range(-0.5F, 0.5F), UnityEngine.Random.Range(-0.5F, 0.5F), UnityEngine.Random.Range(-0.5F, 0.5F));
+			rotationSpeed.x = Mathf.Clamp(rotationSpeed.x, -MAX_ROTATE_SPEED, MAX_ROTATE_SPEED);
+			rotationSpeed.y = Mathf.Clamp(rotationSpeed.y, -MAX_ROTATE_SPEED, MAX_ROTATE_SPEED);
+			rotationSpeed.z = Mathf.Clamp(rotationSpeed.z, -MAX_ROTATE_SPEED, MAX_ROTATE_SPEED);
 		}
 	    
 		internal void spawnEMP() {
@@ -190,13 +215,13 @@ namespace ReikaKalseki.Ecocean {
 				charge = Mathf.Clamp01(charge*intensityOffset);
 				float f = (charge-0.5F)*2;
 				if (time >= nextSparkAdjust) {
-					sparker.SetActive(f > 0 && UnityEngine.Random.Range(0F, 1F) < f);
-					nextSparkAdjust = time+0.2F;
+					bool a = f > 0 && UnityEngine.Random.Range(0F, 1F) < f*0.5F;
+					sparker.SetActive(a);
+					nextSparkAdjust = time+(a ? 0.1F : 0.25F);
 				}
 				foreach (ParticleSystem p in particles) {
 					ParticleSystem.MainModule pm = p.main;
-					pm.startSize = Mathf.Max(0.1F, f*12F);
-					//SNUtil.writeToChat(""+f*15F);
+					pm.startSize = Mathf.Max(1F, f*f*12F);
 				}
 				float f2 = Mathf.Max(0.25F, f*2*UnityEngine.Random.Range(0.9F, 1F));
 				if (UnityEngine.Random.Range(0F, 1F) < 0.2F)
