@@ -71,10 +71,10 @@ namespace ReikaKalseki.Ecocean {
 			Patch();
 			SNUtil.addPDAEntry(this, 8, "PlanetaryGeology", locale.pda, locale.getField<string>("header"));
 			ItemRegistry.instance.addItem(this);
-			GenUtil.registerSlotWorldgen(ClassID, PrefabFileName, TechType, EntitySlot.Type.Creature, LargeWorldEntity.CellLevel.VeryFar, BiomeType.UnderwaterIslands_OpenDeep_CreatureOnly, 1, 0.1F);
-			GenUtil.registerWorldgen(new ScatteredPiezoGenerator(4, new Vector3(islandvent), new Vector3(60, 20, 60)));
-			GenUtil.registerWorldgen(new ScatteredPiezoGenerator(2, new Vector3(wreck), new Vector3(40, 10, 40)));
-			GenUtil.registerWorldgen(new ScatteredPiezoGenerator(1, new Vector3(aewreck), new Vector3(20, 10, 20)));
+			GenUtil.registerSlotWorldgen(ClassID, PrefabFileName, TechType, EntitySlot.Type.Creature, LargeWorldEntity.CellLevel.VeryFar, BiomeType.UnderwaterIslands_OpenDeep_CreatureOnly, 1, 0.05F);
+			GenUtil.registerWorldgen(new ScatteredPiezoGenerator(4, new Vector3(-117, -205, 1002), new Vector3(60, 20, 60)));
+			GenUtil.registerWorldgen(new ScatteredPiezoGenerator(2, new Vector3(-122.5F, -162F, 876.5F), new Vector3(40, 10, 40)));
+			GenUtil.registerWorldgen(new ScatteredPiezoGenerator(1, new Vector3(-138.5F, -221F, 835.5F), new Vector3(20, 10, 20)));
 		}
 			
 	}
@@ -99,7 +99,7 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		void Update() {
-			if (transform.position.y < -360) {
+			if (transform.position.y < -360 || transform.position.z > 1188) {
 				UnityEngine.Object.DestroyImmediate(gameObject);
 				return;
 			}
@@ -108,7 +108,10 @@ namespace ReikaKalseki.Ecocean {
 				if (Physics.CheckSphere(transform.position, 16, Voxeland.GetTerrainLayerMask())) {
 					UnityEngine.Object.DestroyImmediate(gameObject);
 					return;
-				}
+				}/*
+				foreach (PiezoCrystalTag tag in WorldUtil.getObjectsNearWithComponent<PiezoCrystalTag>(transform.position, 30)) {
+					
+				}*/
 				lastTerrainCollisionCheckTime = time;
 			}
 			if (sources.Count == 0) {
@@ -146,7 +149,11 @@ namespace ReikaKalseki.Ecocean {
 		}
 	    
 		internal void spawnEMP() {
-			SoundManager.playSoundAt(dischargeSound, transform.position, false, -1, 1);
+		   	Player ep = Player.main;
+		   	float dist = Vector3.Distance(transform.position, ep.transform.position);
+		   	if (dist <= 60) {
+				SoundManager.playSoundAt(dischargeSound, transform.position, false, 60, 1);
+		   	}
 		   	GameObject pfb = ObjectUtil.lookupPrefab(VanillaCreatures.CRABSQUID.prefab).GetComponent<EMPAttack>().ammoPrefab;
 		   	for (int i = 0; i < 180; i += 30) {
 				GameObject emp = UnityEngine.Object.Instantiate(pfb);
@@ -166,8 +173,7 @@ namespace ReikaKalseki.Ecocean {
 		    	emp.name = "PiezoCrystal_EMPulse"+i;
 		    	emp.SetActive(true);
 		   	}
-		   	Player ep = Player.main;
-		   	if (Vector3.Distance(transform.position, ep.transform.position) <= 30) {
+		   	if (dist <= 30) {
 		   		ep.GetComponent<LiveMixin>().TakeDamage(UnityEngine.Random.Range(5F, 10F), ep.transform.position, DamageType.Electrical, gameObject);
 		   	}
 		}
