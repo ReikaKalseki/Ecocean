@@ -40,7 +40,7 @@ namespace ReikaKalseki.Ecocean
     
     internal static PiezoCrystal piezo;
     
-    internal static TreeBud mushTreeResource;
+    public static TreeBud mushTreeResource;
 		
 	internal static readonly Vector3 reaperlessTripleVent = new Vector3(-1150, -240, -258);
 	internal static readonly Vector3 northDuneBit = new Vector3(-1151, -340, 1444);
@@ -108,8 +108,8 @@ namespace ReikaKalseki.Ecocean
 		//LootDistributionHandler.EditLootDistributionData(VanillaResources.LITHIUM.prefab, BiomeType.MushroomForest_GiantTreeInteriorRecess, 0.1F, 1);
 		//LootDistributionHandler.EditLootDistributionData(VanillaResources.LITHIUM.prefab, BiomeType.MushroomForest_GiantTreeInteriorSpecial, 0.25F, 1);
 		
-		GenUtil.registerSlotWorldgen(mushTreeResource.ClassID, mushTreeResource.PrefabFileName, mushTreeResource.TechType, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Near, BiomeType.MushroomForest_GiantTreeInteriorRecess, 1, 1F);
-		GenUtil.registerSlotWorldgen(mushTreeResource.ClassID, mushTreeResource.PrefabFileName, mushTreeResource.TechType, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Near, BiomeType.MushroomForest_GiantTreeInteriorSpecial, 1, 2.5F);
+		//GenUtil.registerSlotWorldgen(mushTreeResource.ClassID, mushTreeResource.PrefabFileName, mushTreeResource.TechType, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Near, BiomeType.MushroomForest_GiantTreeInteriorRecess, 1, 3F);
+		//GenUtil.registerSlotWorldgen(mushTreeResource.ClassID, mushTreeResource.PrefabFileName, mushTreeResource.TechType, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Near, BiomeType.MushroomForest_GiantTreeInteriorSpecial, 1, 5F);
 		
 		BioReactorHandler.Main.SetBioReactorCharge(glowShroom.seed.TechType, BaseBioReactor.GetCharge(TechType.SnakeMushroomSpore)*3);
 		BioReactorHandler.Main.SetBioReactorCharge(glowOil.TechType, BaseBioReactor.GetCharge(TechType.BloodOil)*6);
