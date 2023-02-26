@@ -39,6 +39,8 @@ namespace ReikaKalseki.Ecocean
     internal static SeamothPlanktonScoop planktonScoop;
     
     internal static PiezoCrystal piezo;
+    
+    internal static TreeBud mushTreeResource;
 		
 	internal static readonly Vector3 reaperlessTripleVent = new Vector3(-1150, -240, -258);
 	internal static readonly Vector3 northDuneBit = new Vector3(-1151, -340, 1444);
@@ -82,6 +84,9 @@ namespace ReikaKalseki.Ecocean
 	    piezo = new PiezoCrystal(locale.getEntry("piezoCrystal"));
 	    piezo.register();
 	    
+	    mushTreeResource = new TreeBud(locale.getEntry("TreeBud"));
+	    mushTreeResource.Patch();
+	    
 	    planktonScoop = new SeamothPlanktonScoop();
 	    planktonScoop.register();
 		
@@ -99,6 +104,12 @@ namespace ReikaKalseki.Ecocean
 		SNUtil.log(" > "+lavaShroom);
 		GenUtil.registerSlotWorldgen(lavaShroom.ClassID, lavaShroom.PrefabFileName, lavaShroom.TechType, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Far, BiomeType.InactiveLavaZone_Chamber_Floor, 1, 0.08F);		
 		GenUtil.registerSlotWorldgen(lavaShroom.ClassID, lavaShroom.PrefabFileName, lavaShroom.TechType, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Far, BiomeType.InactiveLavaZone_Chamber_Floor_Far, 1, 0.08F);
+		
+		//LootDistributionHandler.EditLootDistributionData(VanillaResources.LITHIUM.prefab, BiomeType.MushroomForest_GiantTreeInteriorRecess, 0.1F, 1);
+		//LootDistributionHandler.EditLootDistributionData(VanillaResources.LITHIUM.prefab, BiomeType.MushroomForest_GiantTreeInteriorSpecial, 0.25F, 1);
+		
+		GenUtil.registerSlotWorldgen(mushTreeResource.ClassID, mushTreeResource.PrefabFileName, mushTreeResource.TechType, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Near, BiomeType.MushroomForest_GiantTreeInteriorRecess, 1, 1F);
+		GenUtil.registerSlotWorldgen(mushTreeResource.ClassID, mushTreeResource.PrefabFileName, mushTreeResource.TechType, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Near, BiomeType.MushroomForest_GiantTreeInteriorSpecial, 1, 2.5F);
 		
 		BioReactorHandler.Main.SetBioReactorCharge(glowShroom.seed.TechType, BaseBioReactor.GetCharge(TechType.SnakeMushroomSpore)*3);
 		BioReactorHandler.Main.SetBioReactorCharge(glowOil.TechType, BaseBioReactor.GetCharge(TechType.BloodOil)*6);

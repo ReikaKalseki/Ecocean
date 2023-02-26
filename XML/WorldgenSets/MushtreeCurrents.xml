@@ -98,9 +98,9 @@
   <customprefab>
     <prefab>WaterCurrent_Impassable</prefab>
     <position>
-      <x>-859.191711425781</x>
+      <x>-858.7</x>
       <y>-76.9519424438477</y>
-      <z>576.008483886719</z>
+      <z>576.2</z>
     </position>
     <rotation>
       <x>0</x>
