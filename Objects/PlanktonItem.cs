@@ -24,6 +24,24 @@ namespace ReikaKalseki.Ecocean {
 		public override Vector2int SizeInInventory {
 			get { return new Vector2int(2, 1); }
 		}
+
+		public override CraftTree.Type FabricatorType {
+			get {
+				return CraftTree.Type.None;
+			}
+		}
+
+		public override TechGroup GroupForPDA {
+			get {
+				return TechGroup.Uncategorized;
+			}
+		}
+
+		public override TechCategory CategoryForPDA {
+			get {
+				return TechCategory.Misc;
+			}
+		}
 /*
 		protected sealed override Atlas.Sprite GetItemSprite() {
 			return TextureManager.getSprite(EcoceanMod.modDLL, "Textures/Items/PlanktonItem");
