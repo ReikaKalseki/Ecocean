@@ -113,4 +113,36 @@
       <z>0.2</z>
     </scale>
   </customprefab>
+  <customprefab count="15">
+    <prefab>fauna_hoopfish</prefab>
+    <position>
+      <x>-879</x>
+      <y>-142</y>
+      <z>-589</z>
+    </position>
+  </customprefab>
+  <customprefab count="15">
+    <prefab>fauna_hoopfish</prefab>
+    <position>
+      <x>-878</x>
+      <y>-116</y>
+      <z>-585</z>
+    </position>
+  </customprefab>
+  <customprefab count="15">
+    <prefab>fauna_hoopfish</prefab>
+    <position>
+      <x>-872</x>
+      <y>-92</y>
+      <z>-586</z>
+    </position>
+  </customprefab>
+  <customprefab count="15">
+    <prefab>fauna_hoopfish</prefab>
+    <position>
+      <x>-870</x>
+      <y>-72</y>
+      <z>-589</z>
+    </position>
+  </customprefab>
 </Root>
