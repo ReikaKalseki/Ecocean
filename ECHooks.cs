@@ -18,14 +18,6 @@ namespace ReikaKalseki.Ecocean {
 	
 	public static class ECHooks {
 	    
-	    private static readonly HashSet<string> anchorPods = new HashSet<string>() {
-			VanillaFlora.ANCHOR_POD_SMALL1.getPrefabID(),
-			VanillaFlora.ANCHOR_POD_SMALL2.getPrefabID(),
-			VanillaFlora.ANCHOR_POD_MED1.getPrefabID(),
-			VanillaFlora.ANCHOR_POD_MED2.getPrefabID(),
-			VanillaFlora.ANCHOR_POD_LARGE.getPrefabID(),
-	    };
-	    
 		private static readonly HashSet<string> bloodVine = new HashSet<string>();
 		
 		private static bool addingExtraGlowOil = false;
@@ -147,9 +139,9 @@ namespace ReikaKalseki.Ecocean {
 	    
 	    public static void onSkyApplierSpawn(SkyApplier pk) {
 	    	GameObject go = pk.gameObject;
-	    	PrefabIdentifier pi = go.GetComponentInParent<PrefabIdentifier>();
+	    	PrefabIdentifier pi = go.FindAncestor<PrefabIdentifier>();
 	    	if (pi) {
-	    		if (anchorPods.Contains(pi.ClassId))
+	    		if (ObjectUtil.isAnchorPod(go))
 	    			go.EnsureComponent<ExplodingAnchorPod>();
 	    		else if (bloodVine.Contains(pi.ClassId))
 	    			go.EnsureComponent<PredatoryBloodvine>();

@@ -118,6 +118,9 @@ namespace ReikaKalseki.Ecocean
 		
 		GenUtil.registerWorldgen(new PositionedPrefab(VanillaCreatures.REAPER.prefab, reaperlessTripleVent.setY(-200)));
 		GenUtil.registerWorldgen(new PositionedPrefab(VanillaCreatures.REAPER.prefab, northDuneBit.setY(-320)));
+		
+		glowShroom.addNativeBiome(VanillaBiomes.DUNES);
+		lavaShroom.addNativeBiome(VanillaBiomes.ILZ);
                  
        	worldgen.load();
 		
