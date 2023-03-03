@@ -30,8 +30,14 @@ namespace ReikaKalseki.Ecocean {
 			world.EnsureComponent<TechTag>().type = TechType;
 			world.EnsureComponent<PrefabIdentifier>().ClassId = ClassID;
 			world.EnsureComponent<Pickupable>().SetTechTypeOverride(TechType);
+			ObjectUtil.fullyEnable(world);
 			return world;
 	    }
+		
+		protected override void ProcessPrefab(GameObject go) {
+			base.ProcessPrefab(go);
+			go.EnsureComponent<GlowOilTag>().enabled = true;
+		}
 
 		public override int getNumberCollectedAs() {
 			return EcoceanMod.config.getInt(ECConfig.ConfigEntries.GLOWCOUNT);

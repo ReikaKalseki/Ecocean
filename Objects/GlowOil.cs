@@ -98,6 +98,7 @@ namespace ReikaKalseki.Ecocean {
 			RenderUtil.makeTransparent(r.materials[1]);
 			r.materials[0].EnableKeyword("FX_KELP");
 			r.materials[0].SetColor("_Color", new Color(0, 0, 0, 1F));
+			ObjectUtil.fullyEnable(world);
 			return world;
 	    }
 		
@@ -195,6 +196,7 @@ namespace ReikaKalseki.Ecocean {
 		private bool isExploding = false;
 		
 		private readonly List<GlowSeed> seeds = new List<GlowSeed>();
+		private readonly List<LightCone> lightCones = new List<LightCone>();
 		
 		void Update() {
 			if (!mainRender) {
@@ -212,6 +214,23 @@ namespace ReikaKalseki.Ecocean {
 			int hash = prefab.Id.GetHashCode();
 			if (!transform)
 				return;
+			while (isNatural() && lightCones.Count < 9) {
+				GameObject main = ObjectUtil.createWorldObject("4e8d9640-dd23-46ca-99f2-6924fcf250a4");
+				GameObject go = ObjectUtil.getChildObject(main, "spotlight");
+				Light l = go.GetComponent<Light>();
+				l.intensity = 2;
+				l.spotAngle = 30;
+				l.range = 40;
+				l.color = Color.white;
+				float sc0 = UnityEngine.Random.Range(15F, 25F);
+				go.transform.localScale = new Vector3(1, 1, sc0);
+				go.transform.SetParent(transform);
+				go.transform.localPosition = Vector3.zero;
+				go.GetComponentInChildren<Renderer>().transform.localPosition = new Vector3(0, 0, -1.5F/sc0);
+				go.transform.localRotation = UnityEngine.Random.rotationUniform;
+				lightCones.Add(new LightCone{go = go, light = l});
+				UnityEngine.Object.DestroyImmediate(main);
+			}
 			while (seeds.Count < 4+((hash%5)+5)%5) {
 				GameObject go = ObjectUtil.createWorldObject("18229b4b-3ed3-4b35-ae30-43b1c31a6d8d");
 				RenderUtil.convertToModel(go);
@@ -324,9 +343,25 @@ namespace ReikaKalseki.Ecocean {
 			else {
 				RenderUtil.setEmissivity(mainRender.materials[0], glowIntensity*5F, "GlowStrength");
 			}
+			
 			if (light) {
 				light.intensity = glowIntensity*GlowOil.MAX_GLOW;
 				light.range = GlowOil.MAX_RADIUS*(0.5F+glowIntensity/2F);
+				if (isNatural()) {
+					light.intensity *= 1.5F;
+					light.range *= 2;
+				}
+			}
+			
+			foreach (LightCone g in lightCones) {
+				if (!g.go)
+					continue;
+				g.light.intensity = Mathf.Clamp01((glowIntensity-0.1F)*1.5F)*0.8F;
+				g.light.color = Color.Lerp(Color.white, light.color, 0.5F);
+				int id = g.go.GetHashCode();//g.go.GetInstanceID();
+				Vector3 rotVec = new Vector3(id & 512, (id >> 9) & 512, (id >> 18) & 512).normalized;
+				rotVec *= 0.5F+0.5F*Mathf.Sin(DayNightCycle.main.timePassedAsFloat*0.1F+0.137F*((id >> 27) & 32));
+				g.go.transform.RotateAround(transform.position, rotVec, 0.4F*glowIntensity);
 			}
 		}
 
@@ -343,6 +378,10 @@ namespace ReikaKalseki.Ecocean {
 				WorldUtil.spawnParticlesAt(transform.position, "0dbd3431-62cc-4dd2-82d5-7d60c71a9edf", 0.1F); //burst FX
 			isExploding = true;
 			UnityEngine.Object.Destroy(gameObject, 7.5F);
+		}
+		
+		public bool isNatural() {
+			return prefab && prefab.classId == EcoceanMod.naturalOil.ClassID;
 		}
 		
 		private void updateGlowStrength(float time, float dT) {
@@ -386,6 +425,13 @@ namespace ReikaKalseki.Ecocean {
 			internal Renderer render;
 			internal Vector3 motion = Vector3.zero;
 			internal Vector3 rotation = Vector3.zero;
+			
+		}
+		
+		class LightCone {
+			
+			internal GameObject go;
+			internal Light light;
 			
 		}
 		

@@ -197,4 +197,29 @@
     </scale>
     <tech>WaterCurrent_Hot</tech>
   </customprefab>
+  <customprefab>
+    <prefab>WaterCurrent_Hot</prefab>
+    <position>
+      <x>979.968383789063</x>
+      <y>-345.700622558594</y>
+      <z>1194.60083007813</z>
+    </position>
+    <rotation>
+      <x>0</x>
+      <y>307.999938964844</y>
+      <z>0</z>
+      <quaternion>
+        <x>0</x>
+        <y>0.438371539115906</y>
+        <z>0</z>
+        <w>-0.898793876171112</w>
+      </quaternion>
+    </rotation>
+    <scale>
+      <x>2.5</x>
+      <y>3.5</y>
+      <z>0.5</z>
+    </scale>
+    <tech>WaterCurrent_Hot</tech>
+  </customprefab>
 </Root>

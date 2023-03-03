@@ -192,6 +192,7 @@ namespace ReikaKalseki.Ecocean {
 			lastEmitTime = time;
 			nextEmitTime = time+getNextFireInterval();
 			GameObject go = createProjectile();
+			ObjectUtil.fullyEnable(go);
 			ObjectUtil.ignoreCollisions(go, gameObject);
 			go.transform.position = transform.position+transform.up*3.5F*transform.localScale.magnitude*(1+1.5F*Mathf.Clamp01((Vector3.Distance(transform.position, Player.main.transform.position)-60)/100F));
 			Rigidbody rb = go.GetComponent<Rigidbody>();

@@ -121,6 +121,8 @@ namespace ReikaKalseki.Ecocean
 		
 		glowShroom.addNativeBiome(VanillaBiomes.DUNES);
 		lavaShroom.addNativeBiome(VanillaBiomes.ILZ);
+		
+        ConsoleCommandsHandler.Main.RegisterConsoleCommand<Action<int>>("currentFlowVec", MountainCurrentSystem.instance.registerFlowVector);
                  
        	worldgen.load();
 		
