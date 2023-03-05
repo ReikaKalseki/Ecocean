@@ -226,7 +226,7 @@ namespace ReikaKalseki.Ecocean {
 				go.transform.localScale = new Vector3(1, 1, sc0);
 				go.transform.SetParent(transform);
 				go.transform.localPosition = Vector3.zero;
-				go.GetComponentInChildren<Renderer>().transform.localPosition = new Vector3(0, 0, -1.5F/sc0);
+				go.GetComponentInChildren<Renderer>().transform.localPosition = new Vector3(0, 0, -0.1F/*-1.5F/sc0*/);
 				go.transform.localRotation = UnityEngine.Random.rotationUniform;
 				lightCones.Add(new LightCone{go = go, light = l});
 				UnityEngine.Object.DestroyImmediate(main);

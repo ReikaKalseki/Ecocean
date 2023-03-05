@@ -141,7 +141,7 @@ namespace ReikaKalseki.Ecocean {
 	    	GameObject go = pk.gameObject;
 	    	PrefabIdentifier pi = go.FindAncestor<PrefabIdentifier>();
 	    	if (pi) {
-	    		if (ObjectUtil.isAnchorPod(go))
+	    		if (ObjectUtil.isAnchorPod(go) && !isSeaTreaderCave(go))
 	    			go.EnsureComponent<ExplodingAnchorPod>();
 	    		else if (bloodVine.Contains(pi.ClassId))
 	    			go.EnsureComponent<PredatoryBloodvine>();
@@ -149,6 +149,10 @@ namespace ReikaKalseki.Ecocean {
 	    			go.EnsureComponent<ReefbackJetSuctionManager>();
 	    	}
 	    }
+		
+		private static bool isSeaTreaderCave(GameObject go) {
+			return Vector3.Distance(go.transform.position, new Vector3(-1264, -281, -728)) <= 30;
+		}
 		
 		public static void tickObjectInGeyser(Geyser g, Collider c) {
 			if (g.erupting) {

@@ -24,13 +24,13 @@ namespace ReikaKalseki.Ecocean
 		private static readonly float REGEN_DURATION = 15;
 		
 		private bool isExploded;
-		private bool isGrown;
 		
 		private float lastExplodeTime;
 		private float lastRegenTime;
 		private float explodeIn = -1;
 		
 		private GameObject podGO;
+		private Material podTexture;
 		
 		private Vector3 effectivePodCenter;
 		
@@ -38,37 +38,30 @@ namespace ReikaKalseki.Ecocean
         	
 		void Start() {
 			podGO = ObjectUtil.getChildObject(gameObject, "stone_*");
+			podTexture = podGO.GetComponentInChildren<Renderer>().materials[0];
 			colliders = gameObject.GetComponentsInChildren<Collider>();
 			effectivePodCenter = transform.position+Vector3.up*17.5F;
 		}
 			
 		void Update() {
 			float time = DayNightCycle.main.timePassedAsFloat;
-			if (podGO.activeSelf) {
-				float f = Mathf.Clamp01((time-lastRegenTime)/REGEN_DURATION);
-				f = 1;
-				podGO.transform.localPosition = Vector3.up*(1-f)*15;
-				podGO.transform.localScale = Vector3.one*f;
-				isGrown = f >= 1;
-			}
 			if (isExploded) {
-				isGrown = false;
 				if (UnityEngine.Random.Range(0F, 1F) <= 0.01F && time-lastExplodeTime >= 4) {
 					isExploded = false;
 					Invoke("showPod", 2.5F);
 					//lastRegenTime = time;
 					spawnParticleShell("f39e56b9-9a11-4582-875f-c37f1ed37314"/*"a5b073a5-4bce-4bcf-8aaf-1e7f57851ba0"*/, 2, Vector3.down*2);
-					isGrown = true;
 				}
 			}
-			else if (!isExploded && isGrown && time-lastRegenTime >= 10) {
+			else if (!isExploded && time-lastRegenTime >= 10) {
 				if ((explodeIn > 0 && time >= explodeIn && isPlayerInRange(2)) || (UnityEngine.Random.Range(0F, 1F) <= 0.0000015F && canExplodeRandom()))
 					explode();
 			}
 		}
 		
 		void showPod() {
-			podGO.SetActive(true);
+			//podGO.SetActive(true);
+			podTexture.DisableKeyword("FX_BURST");
 			foreach (Collider c in colliders) {
 				c.enabled = true;
 				c.gameObject.SetActive(true);
@@ -99,7 +92,7 @@ namespace ReikaKalseki.Ecocean
 			SubRoot sub = collider.gameObject.FindAncestor<SubRoot>();
 			if (sub && sub.isCyclops)
 				thresh = 1F;
-	        if (!isExploded && isGrown && c.relativeVelocity.magnitude >= thresh && isPlayerInRange())
+	        if (!isExploded && c.relativeVelocity.magnitude >= thresh && isPlayerInRange())
 	        	explode();
 	    }
 		
@@ -131,12 +124,13 @@ namespace ReikaKalseki.Ecocean
 		
 		internal void explodePart2() {
 			float time = DayNightCycle.main.timePassedAsFloat;
-			if (isExploded || !isGrown || time-lastRegenTime < 10)
+			if (isExploded || time-lastRegenTime < 10)
 				return;
 			explodeIn = -1;
 			lastExplodeTime = time;
 			isExploded = true;
-			podGO.SetActive(false);
+			//podGO.SetActive(false);
+			podTexture.EnableKeyword("FX_BURST");
 			foreach (Collider c in colliders) {
 				c.enabled = false;
 				c.gameObject.SetActive(false);
@@ -167,7 +161,7 @@ namespace ReikaKalseki.Ecocean
 					continue;
 				float dd = Vector3.Distance(go.transform.position, effectivePodCenter);
 				ExplodingAnchorPod pod = go.GetComponent<ExplodingAnchorPod>();
-				if (pod && !pod.isExploded && pod.isGrown && UnityEngine.Random.Range(0F, 1F) <= 0.5F*Mathf.Max(0, 1-dd/30F)) {
+				if (pod && !pod.isExploded && UnityEngine.Random.Range(0F, 1F) <= 0.5F*Mathf.Max(0, 1-dd/30F)) {
 					pod.scheduleExplode(UnityEngine.Random.Range(0.2F, 0.67F));
 					continue;
 				}
