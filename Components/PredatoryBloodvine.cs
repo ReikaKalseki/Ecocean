@@ -24,6 +24,8 @@ namespace ReikaKalseki.Ecocean
 		private GameObject target;
 		
 		private float lastTime;
+		
+		private float topScale = 1;
         	
 		void Start() {
 			topGO = ObjectUtil.getChildObject(gameObject, "*_end");
@@ -37,20 +39,21 @@ namespace ReikaKalseki.Ecocean
 			
 		void Update() {
 			float time = DayNightCycle.main.timePassedAsFloat;
-			float sc = 1;
 			float dt = time-eatStart;
 			if (dt <= 2) {
 				if (dt <= 0.2F) {
-					sc = 1-(dt*2.5F);
+					topScale = 1-(dt*2.5F);
 				}
 				else {
-					sc = 0.5F+(dt-0.2F)/1.8F*0.5F;
+					topScale = 0.5F+(dt-0.2F)/1.8F*0.5F;
 				}
 			}
 			else {
 				target = null;
+				topScale = 1;
 			}
-			topGO.transform.localScale = new Vector3(sc, sc, 1F/sc); //axes on this are weird
+			if (!Mathf.Approximately(topScale, transform.localScale.x))
+				topGO.transform.localScale = new Vector3(topScale, topScale, 1F/topScale); //axes on this are weird
 			float dT = time-lastTime;
 			if (target && dT > 0) {
 				Vector3 dd = centerTarget-target.transform.position;

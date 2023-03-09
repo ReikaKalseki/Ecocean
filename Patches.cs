@@ -52,4 +52,26 @@ namespace ReikaKalseki.Ecocean {
 			return codes.AsEnumerable();
 		}
 	}
+	
+	[HarmonyPatch(typeof(Current))]
+	[HarmonyPatch("Update")]
+	public static class CurrentTick {
+		
+		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
+			List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
+			try {
+				int idx = InstructionHandlers.getInstruction(codes, 0, 0, OpCodes.Callvirt, "UnityEngine.Rigidbody", "AddForce", true, new Type[]{typeof(Vector3), typeof(ForceMode)});
+				codes[idx].operand = InstructionHandlers.convertMethodOperand("ReikaKalseki.Ecocean.ECHooks", "applyCurrentForce", false, typeof(Rigidbody), typeof(Vector3), typeof(ForceMode), typeof(Current));
+				codes.Insert(idx, new CodeInstruction(OpCodes.Ldarg_0));
+				FileLog.Log("Done patch "+MethodBase.GetCurrentMethod().DeclaringType);
+			}
+			catch (Exception e) {
+				FileLog.Log("Caught exception when running patch "+MethodBase.GetCurrentMethod().DeclaringType+"!");
+				FileLog.Log(e.Message);
+				FileLog.Log(e.StackTrace);
+				FileLog.Log(e.ToString());
+			}
+			return codes.AsEnumerable();
+		}
+	}
 }

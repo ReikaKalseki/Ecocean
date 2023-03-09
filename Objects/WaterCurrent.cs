@@ -90,7 +90,7 @@ namespace ReikaKalseki.Ecocean {
 	
 	public class ImpassableCurrentTag : WaterCurrentTag {
 		
-		internal ImpassableCurrentTag() : base(false, 25) {
+		internal ImpassableCurrentTag() : base(false, 27.5F) {
 			
 		}
 		
@@ -129,6 +129,24 @@ namespace ReikaKalseki.Ecocean {
 					}
 				}
 			}
+		}
+		
+		public float getCurrentStrength(Vector3 pos) {
+			float len = transform.localScale.z*21/2F+2.5F;
+			Vector3 pt1 = transform.position+transform.forward*len;
+			Vector3 pt2 = transform.position-transform.forward*len;
+			if (isInCylinder(pos, pt1, pt2))
+				return 1;
+			float dist = Mathf.Min(Vector3.Distance(pos, pt1), Vector3.Distance(pos, pt2));
+			float f = dist/(64F*transform.localScale.z);
+			if (currentStrength >= 20)
+				f *= 0.75F;
+			return f >= 1 ? 0 : Mathf.Sqrt(1-f);
+		}
+		
+		internal bool isInCylinder(Vector3 pos, Vector3 pt1, Vector3 pt2) {
+			Vector3 vec = pt2 - pt1;
+			return Vector3.Dot(pos - pt1, vec) >= 0 && Vector3.Dot(pos - pt2, vec) <= 0;
 		}
 		
 		void OnDestroy() {

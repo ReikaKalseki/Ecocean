@@ -150,7 +150,7 @@ namespace ReikaKalseki.Ecocean {
 	    	}
 	    }
 		
-		private static bool isSeaTreaderCave(GameObject go) {
+		private static bool isSeaTreaderCave(GameObject go) { //skip the c2c prop ones
 			return Vector3.Distance(go.transform.position, new Vector3(-1264, -281, -728)) <= 30;
 		}
 		
@@ -218,6 +218,13 @@ namespace ReikaKalseki.Ecocean {
 			ac.fire(obj, isHorn);
 			if (c is Reefback && isHorn)
 				SoundManager.playSoundAt(c.GetComponent<FMOD_CustomLoopingEmitter>().asset, c.transform.position, false, -1, 1);
+		}
+		
+		public static void applyCurrentForce(Rigidbody rb, Vector3 force, ForceMode mode, Current c) {
+			WaterCurrentTag wc = c.GetComponent<WaterCurrentTag>();
+			float str = wc ? wc.getCurrentStrength(rb.transform.position) : 1;
+			if (str > 0)
+				rb.AddForce(force*str, mode);
 		}
 		
 		class AttractToTarget : MonoBehaviour {
