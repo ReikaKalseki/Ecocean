@@ -66,7 +66,7 @@ namespace ReikaKalseki.Ecocean {
 			//ObjectUtil.removeComponent<EnzymeBall>(world);
 			//ObjectUtil.removeComponent<Plantable>(world);
 			Plantable p = world.GetComponent<Plantable>();
-			GameObject jellyseed = UnityEngine.Object.Instantiate(CraftData.GetPrefabForTechType(TechType.SnakeMushroomSpore));
+			GameObject jellyseed = ObjectUtil.lookupPrefab(TechType.SnakeMushroomSpore);
 			Plantable p2 = jellyseed.GetComponent<Plantable>();
 			p.plantTechType = p2.plantTechType;
 			p.growingPlant = p2.growingPlant;

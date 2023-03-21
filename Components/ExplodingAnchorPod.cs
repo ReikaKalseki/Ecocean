@@ -135,8 +135,7 @@ namespace ReikaKalseki.Ecocean
 				c.enabled = false;
 				c.gameObject.SetActive(false);
 			}
-			GameObject coral;
-			UWE.PrefabDatabase.TryGetPrefab("171c6a5b-879b-4785-be7a-6584b2c8c442", out coral);
+			GameObject coral = ObjectUtil.lookupPrefab("171c6a5b-879b-4785-be7a-6584b2c8c442");
 			IntermittentInstantiate ii = coral.GetComponent<IntermittentInstantiate>();
 			GameObject bubble = ii.prefab;
 			int n = UnityEngine.Random.Range(8, 12);

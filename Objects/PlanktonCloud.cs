@@ -314,8 +314,7 @@ namespace ReikaKalseki.Ecocean {
 					foreach (SeamothStorageContainer sc in sm.GetComponentsInChildren<SeamothStorageContainer>(true)) {
 						TechTag tt = sc.GetComponent<TechTag>();
 						if (tt && tt.type == EcoceanMod.planktonScoop.TechType) {
-							GameObject go = CraftData.GetPrefabForTechType(EcoceanMod.planktonItem.TechType);
-							go = UnityEngine.Object.Instantiate(go);
+							GameObject go = ObjectUtil.createWorldObject(EcoceanMod.planktonItem.TechType, true, false);
 							sc.container.AddItem(go.GetComponentInChildren<Pickupable>());
 							break;
 						}

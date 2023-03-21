@@ -53,7 +53,7 @@ namespace ReikaKalseki.Ecocean {
 			res.breakText = "Harvest fungal bud";
 			res.prefabList.Clear();
 			res.numChances = 0;
-			res.defaultPrefab = CraftData.GetPrefabForTechType(TechType.TreeMushroomPiece);
+			res.defaultPrefab = ObjectUtil.lookupPrefab(TechType.TreeMushroomPiece);
 			res.breakSound = SoundManager.getSound(CraftData.GetPickupSound(TechType.SeaTreaderPoop));
 			world.EnsureComponent<TreeBudTag>();
 			return world;
@@ -64,7 +64,7 @@ namespace ReikaKalseki.Ecocean {
 			void OnBreakResource() {
 				BreakableResource res = GetComponent<BreakableResource>();
 				foreach (TechType tt in drops) {
-					res.SpawnResourceFromPrefab(CraftData.GetPrefabForTechType(tt));
+					res.SpawnResourceFromPrefab(ObjectUtil.lookupPrefab(tt));
 				}
 				int n = UnityEngine.Random.Range(2, 6); //2-5
 				for (int i = 0; i < n; i++)

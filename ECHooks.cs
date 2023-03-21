@@ -193,10 +193,10 @@ namespace ReikaKalseki.Ecocean {
 			}
 			HashSet<Creature> set = WorldUtil.getObjectsNearWithComponent<Creature>(obj.transform.position, 400);
 			foreach (Creature c in set) {
-				if (!c.GetComponent<WaterParkCreature>()) {
-					float chance = Mathf.Clamp01(1F-Vector3.Distance(c.transform.position, obj.transform.position)/400F);
+				if (!c.GetComponent<WaterParkCreature>() && attractedToSound(c, isHorn)) {
+					float chance = 0.5F*Mathf.Clamp01(1F-Vector3.Distance(c.transform.position, obj.transform.position)/400F);
 					if (isHorn) {
-						chance *= 2;
+						chance *= 4;
 						chance = Mathf.Min(chance, 0.05F);
 						if (c is Reefback || c is GhostLeviathan || c is GhostLeviatanVoid || c is ReaperLeviathan || c is SeaDragon) {
 							chance *= 5;
@@ -211,6 +211,16 @@ namespace ReikaKalseki.Ecocean {
 						attractCreatureToTarget(c, obj, isHorn);
 				}
 			}
+		}
+		
+		internal static bool attractedToSound(Creature c, bool horn) {
+			if (c is GhostLeviathan || c is GhostLeviatanVoid || c is ReaperLeviathan || c is SeaDragon)
+				return true;
+			if (c is Reefback || c is BoneShark)
+				return horn;
+			if (c is CrabSnake || c is CrabSquid)
+				return !horn;
+			return false;
 		}
 		
 		internal static void attractCreatureToTarget(Creature c, MonoBehaviour obj, bool isHorn) {
@@ -290,9 +300,16 @@ namespace ReikaKalseki.Ecocean {
 					swimmer.SwimTo(target.transform.position, 10);
 				
 				owner.Aggression.Add(isHorn ? 0.5F : 0.05F);
-				cyclopsAttacker.SetCurrentTarget(target.gameObject, false);
+				if (cyclopsAttacker)
+					cyclopsAttacker.SetCurrentTarget(target.gameObject, false);
 				if (targeter)
 					targeter.SetTarget(target.gameObject);
+				if (owner is CrabSnake) {
+					CrabSnake cs = (CrabSnake)owner;
+					if (cs.IsInMushroom()) {
+						cs.ExitMushroom(target.transform.position);
+					}
+				}
 				//if (leash)
 				//	leash.
 		    	foreach (MeleeAttack a in attacks)
