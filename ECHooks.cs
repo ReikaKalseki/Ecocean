@@ -35,6 +35,7 @@ namespace ReikaKalseki.Ecocean {
 	    	DIHooks.onCyclopsTickEvent += tickCyclops;
 	    	
 	    	DIHooks.onEMPHitEvent += onEMPHit;
+	    	DIHooks.onEMPTouchEvent += onEMPTouch;
 	    	
 	    	DIHooks.getTemperatureEvent += getWaterTemperature;
 	    	
@@ -59,10 +60,13 @@ namespace ReikaKalseki.Ecocean {
 	    		GlowOil.handleLightTick(sub.transform);
 	    }
 	    
-	    public static void tickPlayer(Player ep) {	    	
-	    	GlowOil.checkPlayerLightTick(ep);
+	    public static void tickPlayer(Player ep) {	    
+			float time = DayNightCycle.main.timePassedAsFloat;	
+	    	GlowOil.checkPlayerLightTick(time, ep);
 	    	
 	    	float dT = Time.deltaTime;
+	    	CompassDistortionSystem.instance.tick(time, dT);
+	    	
 	    	float f = 0.3F-DayNightCycle.main.GetLightScalar()*0.15F;
 		    string biome = ep.GetBiomeString();
 		    	//SNUtil.writeToChat("Doing plankton spawn check - "+biome);
@@ -72,14 +76,21 @@ namespace ReikaKalseki.Ecocean {
 	    			EcoceanMod.plankton.tickSpawner(ep, data, dT);
 	    	}
 		}
+		
+		public static void onEMPTouch(EMPBlast e, Collider c) {
+	    	Player ep = c.gameObject.FindAncestor<Player>();
+	    	if (ep) {
+	    		CompassDistortionSystem.instance.onHitByEMP(e, isPiezo(e) ? 10 : 1); //piezo is only the 15s base since electrionicsDisableTime is zero for piezo
+	    	}
+		}
 	    
 	    public static void onEMPHit(EMPBlast e, GameObject go) { //might be called many times
-	    	if (e.gameObject.name.StartsWith("PiezoCrystal_EMPulse", StringComparison.InvariantCultureIgnoreCase)) {
+			if (isPiezo(e)) {
 	    		//SNUtil.writeToChat("Match");
 	    		float time = DayNightCycle.main.timePassedAsFloat;
-	    		Vehicle v = go.gameObject.FindAncestor<Vehicle>();
 	    		SubRoot sub = go.gameObject.FindAncestor<SubRoot>();
 		    	float amt = UnityEngine.Random.Range(1F, 4F);
+	    		Vehicle v = go.gameObject.FindAncestor<Vehicle>();
 		    	if (v) {
 		    		if (time >= lastPiezoEMPDamage+1F) {
 		    			go.GetComponent<LiveMixin>().TakeDamage(UnityEngine.Random.Range(10F, 20F), v.transform.position, DamageType.Electrical, e.gameObject);
@@ -100,12 +111,36 @@ namespace ReikaKalseki.Ecocean {
 	    	}
 	    }
 		
+		private static bool isPiezo(EMPBlast e) {
+			return e.gameObject.name.StartsWith("PiezoCrystal_EMPulse", StringComparison.InvariantCultureIgnoreCase);
+		}
+		
 		public static void onTakeDamage(DIHooks.DamageToDeal dmg) {
+			float f = 0;
+			switch(dmg.type) {
+				case DamageType.Normal:
+				case DamageType.Puncture:
+					f = 1;
+					break;
+				case DamageType.Collide:
+				case DamageType.Drill:
+					f = 0.67F;
+					break;
+				case DamageType.Heat:
+				case DamageType.Acid:
+				case DamageType.Explosive:
+				case DamageType.LaserCutter:
+				case DamageType.Fire:
+					f = 0.33F;
+					break;
+			}
+			if (f <= 0)
+				return;
 			//dmg.target.GetComponent<ExplodingAnchorPod>());
 			Player ep = dmg.target.gameObject.FindAncestor<Player>();
 			//SNUtil.writeToChat("Player '"+ep+"' took damage");
 			if (ep) {
-				foreach (Biter b in WorldUtil.getObjectsNearWithComponent<Biter>(ep.transform.position, 60)) {
+				foreach (Biter b in WorldUtil.getObjectsNearWithComponent<Biter>(ep.transform.position, 60*f)) {
 					attractCreatureToTarget(b, ep, false);
 					//SNUtil.writeToChat("Attracted biter "+b+" @ "+b.transform.position);
 				}
@@ -147,6 +182,8 @@ namespace ReikaKalseki.Ecocean {
 	    			go.EnsureComponent<PredatoryBloodvine>();
 	    		else if (pi.classId == "8d3d3c8b-9290-444a-9fea-8e5493ecd6fe") //reefback
 	    			go.EnsureComponent<ReefbackJetSuctionManager>();
+				else if (pi && pi.ClassId == VanillaCreatures.REAPER.prefab)
+					go.EnsureComponent<ECReaper>();
 	    	}
 	    }
 		
@@ -318,6 +355,15 @@ namespace ReikaKalseki.Ecocean {
 		    		a.lastTarget.SetTarget(target.gameObject);
 			}
 			
+		}
+		
+		public static void setHUDCompassDirection(uGUI_Compass compass, float dir) { /* 0-1 for 360 */
+			compass.direction = (dir+CompassDistortionSystem.instance.getTotalDisplacement(Player.main.transform.position)/360F)%1F;
+		}
+		
+		public static void setCyclopsCompassDirection(Transform obj, Quaternion dir) {
+			obj.rotation = dir;
+			obj.Rotate(0, CompassDistortionSystem.instance.getTotalDisplacement(obj.position), 0);
 		}
 	}
 }

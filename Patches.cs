@@ -74,4 +74,46 @@ namespace ReikaKalseki.Ecocean {
 			return codes.AsEnumerable();
 		}
 	}
+	
+	[HarmonyPatch(typeof(uGUI_DepthCompass))]
+	[HarmonyPatch("UpdateCompass")]
+	public static class OverrideHUDCompass {
+		
+		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
+			List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
+			try {
+				int idx = InstructionHandlers.getInstruction(codes, 0, 0, OpCodes.Callvirt, "uGUI_Compass", "set_direction", true, new Type[]{typeof(float)});
+				codes[idx].operand = InstructionHandlers.convertMethodOperand("ReikaKalseki.Ecocean.ECHooks", "setHUDCompassDirection", false, typeof(uGUI_Compass), typeof(float));
+				FileLog.Log("Done patch "+MethodBase.GetCurrentMethod().DeclaringType);
+			}
+			catch (Exception e) {
+				FileLog.Log("Caught exception when running patch "+MethodBase.GetCurrentMethod().DeclaringType+"!");
+				FileLog.Log(e.Message);
+				FileLog.Log(e.StackTrace);
+				FileLog.Log(e.ToString());
+			}
+			return codes.AsEnumerable();
+		}
+	}
+	
+	[HarmonyPatch(typeof(CyclopsCompassHUD))]
+	[HarmonyPatch("Update")]
+	public static class OverrideCyclopsCompass {
+		
+		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
+			List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
+			try {
+				int idx = InstructionHandlers.getInstruction(codes, 0, 0, OpCodes.Callvirt, "UnityEngine.Transform", "set_rotation", true, new Type[]{typeof(Quaternion)});
+				codes[idx].operand = InstructionHandlers.convertMethodOperand("ReikaKalseki.Ecocean.ECHooks", "setCyclopsCompassDirection", false, typeof(Transform), typeof(Quaternion));
+				FileLog.Log("Done patch "+MethodBase.GetCurrentMethod().DeclaringType);
+			}
+			catch (Exception e) {
+				FileLog.Log("Caught exception when running patch "+MethodBase.GetCurrentMethod().DeclaringType+"!");
+				FileLog.Log(e.Message);
+				FileLog.Log(e.StackTrace);
+				FileLog.Log(e.ToString());
+			}
+			return codes.AsEnumerable();
+		}
+	}
 }

@@ -143,8 +143,7 @@ namespace ReikaKalseki.Ecocean {
 			RenderUtil.swapTextures(EcoceanMod.modDLL, r, "Textures/Resources/GlowOil/"+texName, new Dictionary<int, string>{{0, "Shell"}, {1, "Inner"}});
 		}
 		
-		public static void checkPlayerLightTick(Player ep) {
-			float time = DayNightCycle.main.timePassedAsFloat;
+		public static void checkPlayerLightTick(float time, Player ep) {
 			if (time-lastPlayerLightCheck >= 0.25F) {
 				lastPlayerLightCheck = time;
 				PlayerTool pt = Inventory.main.GetHeldTool();
@@ -211,9 +210,9 @@ namespace ReikaKalseki.Ecocean {
 			if (!prefab) {
 				prefab = GetComponentInChildren<PrefabIdentifier>();
 			}
-			int hash = prefab.Id.GetHashCode();
-			if (!transform)
+			if (!transform || !prefab)
 				return;
+			int hash = prefab.Id.GetHashCode();
 			while (isNatural() && lightCones.Count < 9) {
 				GameObject main = ObjectUtil.createWorldObject("4e8d9640-dd23-46ca-99f2-6924fcf250a4");
 				GameObject go = ObjectUtil.getChildObject(main, "spotlight");
