@@ -32,7 +32,7 @@ namespace ReikaKalseki.Ecocean {
 		private CompassDistortionSystem() {
 			addRegionalDistortion(new PointRadiusDistortion(new Vector3(445, -50, 1200), 400, 360, 0.03F)); //QEP
 			addRegionalDistortion(new PointRadiusDistortion(new Vector3(-45, -1210, 115), 250, 360, 0.16F)); //ATP
-			addRegionalDistortion(new BiomeDistortion(VanillaBiomes.UNDERISLANDS, 360, 0.55F));
+			addRegionalDistortion(new BiomeDistortion(VanillaBiomes.UNDERISLANDS, 360, 0.35F));
 		}
 		
 		public void addRegionalDistortion(LocalDistortion ld) {
