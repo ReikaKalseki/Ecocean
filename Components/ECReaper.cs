@@ -144,8 +144,8 @@ namespace ReikaKalseki.Ecocean
 			private bool isInVehicleWithSonar() {
 				if (Player.main) {
 					Vehicle v = Player.main.GetVehicle();
-					//SNUtil.writeToChat(v.activeSlot+" > "+(v.activeSlot >= 0 ? ""+v.GetSlotItem(v.activeSlot).item : "null"));
-					if (v && /*InventoryUtil.vehicleHasUpgrade(v, TechType.SeamothSonarModule)*/v.activeSlot >= 0 && v.GetSlotItem(v.activeSlot) != null && v.GetSlotItem(v.activeSlot).item.GetTechType() == TechType.SeamothSonarModule)
+					//SNUtil.writeToChat(v.activeSlot+" > "+(v.activeSlot >= 0 ? ""+v.GetSlotItem(v.activeSlot).item : "null")); 
+					if (InventoryUtil.isVehicleUpgradeSelected(v, TechType.SeamothSonarModule))
 						return true;
 					SubRoot sub = Player.main.currentSub;
 					if (sub && sub.isCyclops && InventoryUtil.cyclopsHasUpgrade(sub, TechType.CyclopsSonarModule))
