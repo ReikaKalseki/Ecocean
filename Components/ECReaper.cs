@@ -32,6 +32,9 @@ namespace ReikaKalseki.Ecocean
 			private float forcedGlowFactor;
 			
 			private readonly List<Renderer> spheres = new List<Renderer>();
+			
+			private float minimumDistanceSq;
+			private float maximumDistanceSq;
         	
 			void Start() {
 				//base.InvokeRepeating("tick", 0f, 1);
@@ -68,7 +71,8 @@ namespace ReikaKalseki.Ecocean
 				}
 				//SNUtil.log("B");
 				float distq = (transform.position-MainCamera.camera.transform.position).sqrMagnitude;
-				float f = Mathf.Clamp01((distq-14400F)/(900F));
+				setSonarRanges();
+				float f = Mathf.Clamp01((distq-minimumDistanceSq)/(maximumDistanceSq-minimumDistanceSq));
 				float glow = 5*f*f*f;
 				//SNUtil.writeToChat(distq.ToString("000.0")+">"+f.ToString("0.000")+">"+glow.ToString("0000000.0")+"@"+forcedGlowFactor.ToString("0.000"));
 				//SNUtil.log("C");
@@ -101,6 +105,22 @@ namespace ReikaKalseki.Ecocean
 				else {
 					forcedGlowFactor = 0;
 				}
+			}
+			
+			private void setSonarRanges() {
+				float m = 80;
+				float x = 150;
+				float day = DayNightCycle.main.GetLightScalar();
+				if (VanillaBiomes.MOUNTAINS.isInBiome(transform.position)) {
+					m += 30+50*day;
+					x += 50+100*day;
+				}
+				else if (VanillaBiomes.DUNES.isInBiome(transform.position)) {
+					m += 20+20*day;
+					x += 50+50*day;
+				}
+				minimumDistanceSq = m*m;
+				maximumDistanceSq = x*x;
 			}
 			
 			private void createRadarSphere(GameObject go) {

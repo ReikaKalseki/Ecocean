@@ -48,6 +48,8 @@ namespace ReikaKalseki.Ecocean {
 			ObjectUtil.removeComponent<Plantable>(world);
 			ObjectUtil.removeComponent<Pickupable>(world);
 			ObjectUtil.removeComponent<PickPrefab>(world);
+			ObjectUtil.removeComponent<ResourceTracker>(world);
+			ObjectUtil.removeComponent<ResourceTrackerUpdater>(world);
 			world.EnsureComponent<LargeWorldEntity>().cellLevel = LargeWorldEntity.CellLevel.Far;
 			LavaBombTag g = world.EnsureComponent<LavaBombTag>();
 			Light l = ObjectUtil.addLight(world);

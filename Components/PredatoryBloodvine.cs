@@ -126,7 +126,8 @@ namespace ReikaKalseki.Ecocean
 		internal PredatoryBloodvine root;
 		
 	    void OnTriggerEnter(Collider other) {
-	        root.trigger(other.gameObject);
+			if (!other.isTrigger)
+	        	root.trigger(other.gameObject);
 	    }
 		
 		void Update() {
