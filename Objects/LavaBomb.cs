@@ -16,8 +16,8 @@ namespace ReikaKalseki.Ecocean {
 	
 	public class LavaBomb : Spawnable {
 		
-		internal static readonly float HEAT_RADIUS = 30;
-		internal static readonly float MAX_TEMPERATURE = 2000;
+		internal static readonly float HEAT_RADIUS = 60;
+		internal static readonly float MAX_TEMPERATURE = 1500;
 		
 		internal static List<LavaBombTag> activeLavaBombs = new List<LavaBombTag>();
 		
@@ -124,7 +124,7 @@ namespace ReikaKalseki.Ecocean {
 			
 			float time = DayNightCycle.main.timePassedAsFloat;
 			
-			temperature = Mathf.Max(600, temperature-Time.deltaTime*150);
+			temperature = Mathf.Max(600, temperature-Time.deltaTime*100);
 			
 			if (mainBody && mainBody.velocity.magnitude < 0.1F) {
 				explode(null);

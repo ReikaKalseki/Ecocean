@@ -55,7 +55,7 @@ namespace ReikaKalseki.Ecocean
 			if (!Mathf.Approximately(topScale, transform.localScale.x))
 				topGO.transform.localScale = new Vector3(topScale, topScale, 1F/topScale); //axes on this are weird
 			float dT = time-lastTime;
-			if (target && dT > 0) {
+			if (target && dT > 0 && !target.GetComponent<SubRoot>()) {
 				Vector3 dd = centerTarget-target.transform.position;
 				if (dd.sqrMagnitude <= 2.25F) {
 					target.transform.position = centerTarget;

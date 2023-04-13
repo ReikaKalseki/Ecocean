@@ -137,7 +137,8 @@ namespace ReikaKalseki.Ecocean
     
     [QModPostPatch]
     public static void PostLoad() {
-        
+    	if (InstructionHandlers.getTypeBySimpleName("ReikaKalseki.AqueousEngineering.BaseSonarPinger") != null)
+    		ReikaKalseki.AqueousEngineering.BaseSonarPinger.onBaseSonarPingedEvent += go => ECHooks.pingSonarFromObject(go.gameObject.GetComponentInChildren<CustomMachineLogic>(), 0.67F);
     }
 
   }

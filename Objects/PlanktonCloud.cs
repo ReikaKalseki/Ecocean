@@ -222,6 +222,10 @@ namespace ReikaKalseki.Ecocean {
 			float dscl = time-lastScoopTime;
 			
 			float dT = Time.deltaTime;
+			if (time-ECHooks.getLastSonarUse() <= 10) {
+				touchIntensity = 1;
+			}
+			
 			if (isDead) {
 				activation = Mathf.Clamp01(activation-2F*dT);
 				touchIntensity = Mathf.Clamp01(activation-2F*dT);

@@ -17,6 +17,8 @@ namespace ReikaKalseki.Ecocean {
 	
 	public class GlowOil : Spawnable {
 		
+		internal static readonly SoundManager.SoundData splatSound = SoundManager.registerSound(EcoceanMod.modDLL, "oilsplat", "Sounds/splat.ogg", SoundManager.soundMode3D, s => {SoundManager.setup3D(s, 40);}, SoundSystem.masterBus);
+		
 		internal static readonly float MAX_GLOW = 1.5F;
 		internal static readonly float MAX_RADIUS = 30;//18;
 		
@@ -367,8 +369,10 @@ namespace ReikaKalseki.Ecocean {
 	    void OnCollisionEnter(Collision c) {
 			//SNUtil.writeToChat("Collided with "+c.gameObject+" at speed "+c.relativeVelocity.magnitude);
 	        if (spawnTime > 0 && DayNightCycle.main.timePassedAsFloat-spawnTime >= 0.1 && c.relativeVelocity.magnitude >= 6) {
-				if (c.gameObject.FindAncestor<Vehicle>() || c.gameObject.FindAncestor<SubRoot>())
+				if (c.gameObject.FindAncestor<Vehicle>() || c.gameObject.FindAncestor<SubRoot>()) {
+					SoundManager.playSoundAt(GlowOil.splatSound, transform.position, false, 40);
 					explode();
+				}
 			}
 	    }
 		

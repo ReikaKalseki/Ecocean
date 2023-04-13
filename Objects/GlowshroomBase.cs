@@ -119,7 +119,6 @@ namespace ReikaKalseki.Ecocean {
     			UnityEngine.Object.Destroy(gameObject);
     		else if (isGrown) {
     			gameObject.SetActive(true);
-    			gameObject.transform.localScale = Vector3.one*UnityEngine.Random.Range(1.5F, 1.75F);
     		}
     		else {
 				gameObject.transform.localScale = Vector3.one*UnityEngine.Random.Range(0.75F, 1F)*getSize();

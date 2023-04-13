@@ -22,6 +22,8 @@ namespace ReikaKalseki.Ecocean {
 		
 		private static bool addingExtraGlowOil = false;
 		private static float lastPiezoEMPDamage = -1;
+		
+		private static float lastSonarUsed = -1;
 	    
 	    static ECHooks() {
 	    	DIHooks.onSkyApplierSpawnEvent += onSkyApplierSpawn;
@@ -115,6 +117,10 @@ namespace ReikaKalseki.Ecocean {
 			return e.gameObject.name.StartsWith("PiezoCrystal_EMPulse", StringComparison.InvariantCultureIgnoreCase);
 		}
 		
+		public static float getLastSonarUse() {
+			return lastSonarUsed;
+		}
+		
 		public static void onTakeDamage(DIHooks.DamageToDeal dmg) {
 			float f = 0;
 			switch(dmg.type) {
@@ -165,7 +171,8 @@ namespace ReikaKalseki.Ecocean {
 			LavaBomb.iterateLavaBombs(lb => {
 				float dist = Vector3.Distance(lb.transform.position, calc.position);
 				if (dist <= LavaBomb.HEAT_RADIUS) {
-					float f = 1F-(dist/LavaBomb.HEAT_RADIUS);
+					float f2 = dist/LavaBomb.HEAT_RADIUS;
+					float f = 1F-(f2*f2*4);
 					//SNUtil.writeToChat("Found lava bomb "+lb.transform.position+" at dist "+dist+" > "+f+" > "+(f*lb.getTemperature()));
 					calc.setValue(Mathf.Max(calc.getTemperature(), f*lb.getTemperature()));
 				}
@@ -178,12 +185,14 @@ namespace ReikaKalseki.Ecocean {
 	    	if (pi) {
 	    		if (ObjectUtil.isAnchorPod(go) && !isSeaTreaderCave(go))
 	    			go.EnsureComponent<ExplodingAnchorPod>();
-	    		else if (bloodVine.Contains(pi.ClassId))
+	    		else if (pi && bloodVine.Contains(pi.ClassId))
 	    			go.EnsureComponent<PredatoryBloodvine>();
-	    		else if (pi.classId == "8d3d3c8b-9290-444a-9fea-8e5493ecd6fe") //reefback
+	    		else if (pi && pi.ClassId == "8d3d3c8b-9290-444a-9fea-8e5493ecd6fe") //reefback
 	    			go.EnsureComponent<ReefbackJetSuctionManager>();
 				else if (pi && pi.ClassId == VanillaCreatures.REAPER.prefab)
 					go.EnsureComponent<ECReaper>();
+				else if (pi && VanillaFlora.getFromID(pi.ClassId) == VanillaFlora.CREEPVINE_FERTILE)
+					CreepvineCollisionDetector.addCreepvineSeedCollision(go);
 	    	}
 	    }
 		
@@ -211,27 +220,35 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		public static void honkCyclopsHorn(CyclopsHornButton b) {
-			attractToSoundPing(b.gameObject.FindAncestor<SubRoot>(), true);
+			attractToSoundPing(b.gameObject.FindAncestor<SubRoot>(), true, 1);
 		}
 	    
 	    public static void pingSeamothSonar(SeaMoth sm) {
-			attractToSoundPing(sm, false);
+			pingSonarFromObject(sm);
 	    }
 	    
-		public static void pingCyclopsSonar(SubRoot sm) {
-			attractToSoundPing(sm, false);
+		public static void pingCyclopsSonar(SubRoot sb) {
+			pingSonarFromObject(sb);
+	    }
+	    
+		public static void pingSonarFromObject(MonoBehaviour mb, float strength = 1) {
+			attractToSoundPing(mb, false, strength);
+			lastSonarUsed = DayNightCycle.main.timePassedAsFloat;
 	    }
 		
-		private static void attractToSoundPing(MonoBehaviour obj, bool isHorn) {
+		public static void attractToSoundPing(MonoBehaviour obj, bool isHorn, float strength) {
 			if (obj is SubRoot) {
 				CyclopsNoiseManager noise = obj.gameObject.GetComponentInChildren<CyclopsNoiseManager>();
 				noise.noiseScalar *= isHorn ? 6 : 2;
 				noise.Invoke("RecalculateNoiseValues", isHorn ? 15 : 10);
 			}
-			HashSet<Creature> set = WorldUtil.getObjectsNearWithComponent<Creature>(obj.transform.position, 400);
+			float range = 400*strength;
+			HashSet<Creature> set = WorldUtil.getObjectsNearWithComponent<Creature>(obj.transform.position, range);
 			foreach (Creature c in set) {
 				if (!c.GetComponent<WaterParkCreature>() && attractedToSound(c, isHorn)) {
-					float chance = 0.5F*Mathf.Clamp01(1F-Vector3.Distance(c.transform.position, obj.transform.position)/400F);
+					float chance = 0.5F*Mathf.Clamp01(1F-Vector3.Distance(c.transform.position, obj.transform.position)/range);
+					if (!Mathf.Approximately(strength, 1))
+						chance *= Mathf.Sqrt(strength);
 					if (isHorn) {
 						chance *= 4;
 						chance = Mathf.Min(chance, 0.05F);

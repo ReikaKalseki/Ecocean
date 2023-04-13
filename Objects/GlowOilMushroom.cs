@@ -16,7 +16,7 @@ namespace ReikaKalseki.Ecocean {
 	internal class GlowOilMushroom : GlowshroomBase<GlowShroomTag> {
 		
 		public GlowOilMushroom() : base("GLOWSHROOM") {
-			collectionMethod = HarvestType.None;
+			//collectionMethod = HarvestType.None;
 		}
 		
 		public override Color getLightColor() {
