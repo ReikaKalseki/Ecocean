@@ -54,6 +54,9 @@ namespace ReikaKalseki.Ecocean {
 			ResourceTracker rt = world.EnsureComponent<ResourceTracker>();
 			rt.techType = TechType;
 			rt.overrideTechType = TechType;
+			Rigidbody rb = world.GetComponent<Rigidbody>();
+			rt.rb = rb;
+			rt.StartUpdatePosition();
 			world.GetComponentInChildren<PickPrefab>().pickTech = TechType;
 			//world.GetComponent<Rigidbody>().isKinematic = true;
 			Pickupable pp = world.GetComponent<Pickupable>();
@@ -61,7 +64,6 @@ namespace ReikaKalseki.Ecocean {
 			WorldForces wf = world.GetComponent<WorldForces>();
 			wf.underwaterGravity = 0;
 			wf.underwaterDrag *= 1;
-			Rigidbody rb = world.GetComponent<Rigidbody>();
 			rb.angularDrag *= 3;
 			rb.maxAngularVelocity = 6;
 			rb.drag = wf.underwaterDrag;

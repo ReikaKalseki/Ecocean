@@ -216,6 +216,15 @@ namespace ReikaKalseki.Ecocean {
 					float num;
 					sub.powerRelay.AddEnergy(5*Time.deltaTime, out num);
 				}
+				if (!sub) {
+					Rigidbody rb = c.gameObject.FindAncestor<Rigidbody>();
+					if (rb) {
+						float f = 1F-(rb.transform.position.y-g.transform.position.y)/30;
+						if (v)
+							f *= 0.1F;
+						rb.AddForce(Vector3.up*f*80, ForceMode.Force);
+					}
+				}
 			}
 		}
 		

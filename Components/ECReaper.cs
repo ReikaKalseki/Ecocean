@@ -73,7 +73,7 @@ namespace ReikaKalseki.Ecocean
 				float distq = (transform.position-MainCamera.camera.transform.position).sqrMagnitude;
 				setSonarRanges();
 				float f = Mathf.Clamp01((distq-minimumDistanceSq)/(maximumDistanceSq-minimumDistanceSq));
-				float glow = 5*f*f*f;
+				float glow = 5*f*f*f*0.9F;
 				//SNUtil.writeToChat(distq.ToString("000.0")+">"+f.ToString("0.000")+">"+glow.ToString("0000000.0")+"@"+forcedGlowFactor.ToString("0.000"));
 				//SNUtil.log("C");
 				foreach (Renderer r in spheres) {
@@ -120,7 +120,7 @@ namespace ReikaKalseki.Ecocean
 					x += 50+50*day;
 				}
 				minimumDistanceSq = m*m;
-				maximumDistanceSq = x*x;
+				maximumDistanceSq = x*x*0.8F;
 			}
 			
 			private void createRadarSphere(GameObject go) {

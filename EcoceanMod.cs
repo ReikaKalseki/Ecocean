@@ -66,6 +66,8 @@ namespace ReikaKalseki.Ecocean
 			FileLog.Log(ex.ToString());
         }
         
+        ModVersionCheck.getFromGitVsInstall("Ecocean", modDLL, "Ecocean").register();
+        
         locale.load();
 	    
 	    glowOil = new GlowOil(locale.getEntry("GlowOil"));
