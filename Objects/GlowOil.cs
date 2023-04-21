@@ -220,6 +220,8 @@ namespace ReikaKalseki.Ecocean {
 			while (isNatural() && lightCones.Count < 9) {
 				GameObject main = ObjectUtil.createWorldObject("4e8d9640-dd23-46ca-99f2-6924fcf250a4");
 				GameObject go = ObjectUtil.getChildObject(main, "spotlight");
+				if (!go)
+					continue;
 				Light l = go.GetComponent<Light>();
 				l.intensity = 2;
 				l.spotAngle = 30;
@@ -236,6 +238,8 @@ namespace ReikaKalseki.Ecocean {
 			}
 			while (seeds.Count < 4+((hash%5)+5)%5) {
 				GameObject go = ObjectUtil.createWorldObject("18229b4b-3ed3-4b35-ae30-43b1c31a6d8d");
+				if (!go)
+					continue;
 				RenderUtil.convertToModel(go);
 				ObjectUtil.removeComponent<Collider>(go);
 				ObjectUtil.removeComponent<PrefabIdentifier>(go);
