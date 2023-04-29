@@ -122,33 +122,40 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		public static void onTakeDamage(DIHooks.DamageToDeal dmg) {
-			float f = 0;
-			switch(dmg.type) {
-				case DamageType.Normal:
-				case DamageType.Puncture:
-					f = 1;
-					break;
-				case DamageType.Collide:
-				case DamageType.Drill:
-					f = 0.67F;
-					break;
-				case DamageType.Heat:
-				case DamageType.Acid:
-				case DamageType.Explosive:
-				case DamageType.LaserCutter:
-				case DamageType.Fire:
-					f = 0.33F;
-					break;
-			}
-			if (f <= 0)
-				return;
-			//dmg.target.GetComponent<ExplodingAnchorPod>());
 			Player ep = dmg.target.gameObject.FindAncestor<Player>();
-			//SNUtil.writeToChat("Player '"+ep+"' took damage");
 			if (ep) {
-				foreach (Biter b in WorldUtil.getObjectsNearWithComponent<Biter>(ep.transform.position, 60*f)) {
-					attractCreatureToTarget(b, ep, false);
-					//SNUtil.writeToChat("Attracted biter "+b+" @ "+b.transform.position);
+				float f = 0;
+				switch(dmg.type) {
+					case DamageType.Normal:
+					case DamageType.Puncture:
+						f = 1;
+						break;
+					case DamageType.Collide:
+					case DamageType.Drill:
+						f = 0.67F;
+						break;
+					case DamageType.Heat:
+					case DamageType.Acid:
+					case DamageType.Explosive:
+					case DamageType.LaserCutter:
+					case DamageType.Fire:
+						f = 0.33F;
+						break;
+				}
+				if (f > 0) {
+					//dmg.target.GetComponent<ExplodingAnchorPod>());
+					//SNUtil.writeToChat("Player '"+ep+"' took damage");
+					foreach (Biter b in WorldUtil.getObjectsNearWithComponent<Biter>(ep.transform.position, 60*f)) {
+						attractCreatureToTarget(b, ep, false);
+						//SNUtil.writeToChat("Attracted biter "+b+" @ "+b.transform.position);
+					}
+				}
+			}
+			Creature c = dmg.target.gameObject.FindAncestor<Creature>();
+			if (c is SeaDragon || c is GhostLeviatanVoid || c is GhostLeviathan || c is ReaperLeviathan || c is Reefback) {
+				float f = EcoceanMod.config.getFloat(ECConfig.ConfigEntries.LEVIIMMUNE);
+				if (f > 0) {
+					dmg.setValue(Mathf.Max(0.001F, dmg.getAmount()*(1-f)));
 				}
 			}
 		}
@@ -191,6 +198,8 @@ namespace ReikaKalseki.Ecocean {
 	    			go.EnsureComponent<ReefbackJetSuctionManager>();
 				else if (pi && pi.ClassId == VanillaCreatures.REAPER.prefab)
 					go.EnsureComponent<ECReaper>();
+				else if (pi && pi.ClassId == VanillaCreatures.SEADRAGON.prefab)
+					go.EnsureComponent<ECDragon>();
 				else if (pi && VanillaFlora.getFromID(pi.ClassId) == VanillaFlora.CREEPVINE_FERTILE)
 					CreepvineCollisionDetector.addCreepvineSeedCollision(go);
 	    	}

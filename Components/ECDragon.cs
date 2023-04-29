@@ -18,30 +18,28 @@ using ECCLibrary;
 
 namespace ReikaKalseki.Ecocean
 {
-		internal class ECReaper : PassiveSonarEntity {
+		internal class ECDragon : PassiveSonarEntity {
 		
-			private FMOD_CustomLoopingEmitter roar1;
-			private FMOD_CustomLoopingEmitterWithCallback roar2;
+			private FMOD_CustomLoopingEmitter roar;
 			
 			protected void Update() {
 				base.Update();
-				if (!roar1) {
-					foreach (FMOD_CustomLoopingEmitter em in GetComponents<FMOD_CustomLoopingEmitter>()) {
-						if (em.asset != null && em.asset.path.Contains("idle")) {
-							roar1 = em;
-							break;
-						}
-					}
-					roar2 = GetComponent<FMOD_CustomLoopingEmitterWithCallback>();
+				if (!roar) {
+					roar = GetComponent<FMOD_CustomLoopingEmitterWithCallback>();
 				}
 			}
 			
+			protected override void setSonarRanges() {
+				minimumDistanceSq = 125*125;
+				maximumDistanceSq = 250*250;
+			}
+			
 			protected override Renderer getMainRenderer() {
-				return ObjectUtil.getChildObject(gameObject, "reaper_leviathan/Reaper_Leviathan_geo").GetComponentInChildren<Renderer>();
+				return ObjectUtil.getChildObject(gameObject, "Sea_Dragon_wholeBody_anim/Sea_Dragon_geo").GetComponentInChildren<Renderer>();
 			}
 			
 			protected override bool isAudible() {
-				return isRoaring(roar1) || isRoaring(roar2);
+				return isRoaring(roar);
 			}
 			
 		}

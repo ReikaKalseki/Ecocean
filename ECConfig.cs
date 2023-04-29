@@ -19,6 +19,7 @@ namespace ReikaKalseki.Ecocean
 			[ConfigEntry("Lava Bomb Damage Factor", typeof(float), 1, 0.1F, 10F, 1)]BOMBDMG,
 			[ConfigEntry("Plankton Collection Multiplier", typeof(float), 1, 0.1F, 10F, 1)]PLANKTONRATE,
 			[ConfigEntry("Magnetic Anomaly Frequency", typeof(float), 0.2F, 0F, 1F, 0)]GLOBALCOMPASS,
+			[ConfigEntry("Leviathan Damage Immunity", typeof(float), 0.5F, 0F, 1F, 0)]LEVIIMMUNE,
 		}
 	}
 }
