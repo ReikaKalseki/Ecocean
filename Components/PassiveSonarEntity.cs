@@ -54,7 +54,7 @@ namespace ReikaKalseki.Ecocean
 					}*/
 				}
 				if (spheres.Count == 0) {
-					GameObject go = GetComponentInChildren<TrailManager>().gameObject;
+					GameObject go = getSphereRootGO();
 					createRadarSphere(go);
 				}
 				//SNUtil.log("B");
@@ -95,6 +95,10 @@ namespace ReikaKalseki.Ecocean
 				}
 			}
 			
+			protected virtual GameObject getSphereRootGO() {
+				return GetComponentInChildren<TrailManager>().gameObject;
+			}
+			
 			protected abstract bool isAudible();
 			
 			protected bool isRoaring(FMOD_CustomEmitter emit) {/*
@@ -132,7 +136,7 @@ namespace ReikaKalseki.Ecocean
 			private void createRadarSphere(GameObject go) {
 				SNUtil.log("Creating radar sphere for "+go.GetFullHierarchyPath());
 				GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-				sphere.transform.localScale = new Vector3(15, 15, 15);
+				sphere.transform.localScale = getRadarSphereSize();
 				sphere.name = "RadarHalo";
 				sphere.transform.SetParent(go.transform);
 				sphere.transform.localPosition = Vector3.zero;
@@ -153,6 +157,10 @@ namespace ReikaKalseki.Ecocean
 						continue;
 					createRadarSphere(child.gameObject);
 				}
+			}
+			
+			protected virtual Vector3 getRadarSphereSize() {
+				return Vector3.one*15;
 			}
 			
 			private bool isInVehicleWithSonar() {

@@ -61,6 +61,24 @@
 			
 		</header>
 	</LavaBomb>
+	<VoidBubble>
+		<name>
+			 Void Bubble
+		</name>
+		<desc>
+			
+		</desc>
+		<pda>
+			Rising from the unseen depths outside the crater's boundary, these large gelatinous objects possess the unusual property of being buoyant when free-floating but denser than the surrounding water once they attach to something. In sufficient number, these could drag even the largest creatures - or submarines - well beyond survivable depths.
+			
+			The actual nature of these objects is poorly understood; they may be biological waste products, geologic phenomena, communities of single-celled organisms, or even the eggs of a much larger organism than any encountered so far on 4546B.
+			
+			Assessment: Avoid if possible, cut free to maintain vehicular control
+		</pda>
+		<header>
+			VoidBubble
+		</header>
+	</VoidBubble>
 	<TreeBud>
 		<name>
 			

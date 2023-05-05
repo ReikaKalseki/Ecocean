@@ -145,6 +145,20 @@ namespace ReikaKalseki.Ecocean {
 			}
 			
 		}
+	
+		public class ConditionalDistortion : LocalDistortion {
+			
+			internal readonly Func<Vector3, bool> condition;
+			
+			public ConditionalDistortion(Func<Vector3, bool> fc, float a, float f) : base(a, f, fc.GetHashCode()) {
+				condition = fc;
+			}
+			
+			internal override bool isInRange(Vector3 pos) {
+				return condition(pos);
+			}
+			
+		}
 	}
 	
 }

@@ -42,6 +42,9 @@ namespace ReikaKalseki.Ecocean
     
     internal static PiezoCrystal piezo;
     
+    internal static VoidBubble voidBubble;    
+    internal static VoidTongue tongue;
+    
     public static TreeBud mushTreeResource;
 		
 	internal static readonly Vector3 reaperlessTripleVent = new Vector3(-1150, -240, -258);
@@ -87,6 +90,11 @@ namespace ReikaKalseki.Ecocean
 	    
 	    piezo = new PiezoCrystal(locale.getEntry("piezoCrystal"));
 	    piezo.register();
+	    
+	    voidBubble = new VoidBubble(locale.getEntry("VoidBubble"));
+	    voidBubble.register();
+	    tongue = new VoidTongue();
+	    tongue.Patch();
 	    
 	    mushTreeResource = new TreeBud(locale.getEntry("TreeBud"));
 	    mushTreeResource.Patch();

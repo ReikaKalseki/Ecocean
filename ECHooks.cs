@@ -24,6 +24,8 @@ namespace ReikaKalseki.Ecocean {
 		private static float lastPiezoEMPDamage = -1;
 		
 		private static float lastSonarUsed = -1;
+		
+		internal static float nextVoidTongueGrab = -1;
 	    
 	    static ECHooks() {
 	    	DIHooks.onSkyApplierSpawnEvent += onSkyApplierSpawn;
@@ -77,6 +79,24 @@ namespace ReikaKalseki.Ecocean {
 	    		if (UnityEngine.Random.Range(0F, 1F) <= f*dT*data.spawnSuccessRate)
 	    			EcoceanMod.plankton.tickSpawner(ep, data, dT);
 	    	}
+		    EcoceanMod.voidBubble.tickSpawner(ep, time, dT);
+		    Vector3 pos = ep.transform.position;
+		    if (pos.y <= -UnityEngine.Random.Range(1000F, 1200F) && VanillaBiomes.VOID.isInBiome(pos)) {
+		    	//if (UnityEngine.Object.FindObjectsOfType<VoidTongueTag>().Length == 0)
+		    	//	SNUtil.writeToChat("Check void grab time = "+time.ToString("000.0")+"/"+nextVoidTongueGrab.ToString("000.0"));
+		    	if (time >= nextVoidTongueGrab) {
+		    		nextVoidTongueGrab = time+10;
+		    		GameObject go = ObjectUtil.createWorldObject(EcoceanMod.tongue.ClassID);
+		    		ObjectUtil.fullyEnable(go);
+		    		float depth = Mathf.Min(pos.y-UnityEngine.Random.Range(400F, 500F)*(ep.currentSub ? 2 : 1));
+		    		Vector3 put = MathUtil.getRandomVectorAround(pos, 60).setY(depth);
+		    		go.transform.position = put;
+		    		//go.transform.position = MathUtil.getRandomVectorAround(pos+Camera.main.transform.forward.normalized*400, 40).setY(-1600);
+		    		VoidTongueTag v = go.GetComponent<VoidTongueTag>();
+		    		v.enabled = true;
+		    		v.startGrab(Mathf.Max(-depth-(ep.currentSub ? 250 : 150), -pos.y+UnityEngine.Random.Range(200F, 400F)*(ep.currentSub ? 0.75F : 1)));
+		    	}
+		    }
 		}
 		
 		public static void onEMPTouch(EMPBlast e, Collider c) {
@@ -162,8 +182,15 @@ namespace ReikaKalseki.Ecocean {
 		
 		public static void onKnifed(GameObject go) {
 			ExplodingAnchorPod e = go.FindAncestor<ExplodingAnchorPod>();
-			if (e)
+			if (e) {
 				e.explode();
+				return;
+			}
+			VoidBubbleTag vb = go.FindAncestor<VoidBubbleTag>();
+			if (vb) {
+				vb.Disconnect();
+				return;
+			}
 		}
 		
 		public static void onPickup(Pickupable pp) {
@@ -194,8 +221,10 @@ namespace ReikaKalseki.Ecocean {
 	    			go.EnsureComponent<ExplodingAnchorPod>();
 	    		else if (pi && bloodVine.Contains(pi.ClassId))
 	    			go.EnsureComponent<PredatoryBloodvine>();
-	    		else if (pi && pi.ClassId == "8d3d3c8b-9290-444a-9fea-8e5493ecd6fe") //reefback
+	    		else if (pi && pi.ClassId == VanillaCreatures.REEFBACK.prefab) {
+					go.EnsureComponent<ECReefback>();
 	    			go.EnsureComponent<ReefbackJetSuctionManager>();
+	    		}
 				else if (pi && pi.ClassId == VanillaCreatures.REAPER.prefab)
 					go.EnsureComponent<ECReaper>();
 				else if (pi && pi.ClassId == VanillaCreatures.SEADRAGON.prefab)

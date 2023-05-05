@@ -20,7 +20,7 @@ namespace ReikaKalseki.Ecocean
 {
 		internal class ECDragon : PassiveSonarEntity {
 		
-			private FMOD_CustomLoopingEmitter roar;
+			private FMOD_CustomLoopingEmitterWithCallback roar;
 			
 			protected void Update() {
 				base.Update();
