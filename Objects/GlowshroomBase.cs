@@ -18,6 +18,9 @@ namespace ReikaKalseki.Ecocean {
 		public GlowshroomBase(string localeKey) : base(EcoceanMod.locale.getEntry(localeKey), VanillaFlora.JELLYSHROOM_LIVE, "7fcf1275-0687-491e-a086-d928dd3ba67a") {
 			glowIntensity = 1.5F;
 			finalCutBonus = 0;
+			OnFinishedPatching += () => {
+				SaveSystem.addSaveHandler(ClassID, new SaveSystem.ComponentFieldSaveHandler<GlowShroomTagBase>().addField("lastEmitTime"));
+			};
 		}
 		
 		public override Vector2int SizeInInventory {

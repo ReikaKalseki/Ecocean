@@ -205,6 +205,7 @@ namespace ReikaKalseki.Ecocean {
 				else if (stuckTo.transform.position.y < -willReleaseAtDepth || stuckTo.transform.position.y > -900) {
 					Disconnect();
 					isGrabbing = false;
+					currentSpeed = SPEED/2;
 					UnityEngine.Object.Destroy(this, 1.5F);
 				}
 			}

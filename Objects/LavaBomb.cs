@@ -25,6 +25,9 @@ namespace ReikaKalseki.Ecocean {
 	        
 	    internal LavaBomb(XMLLocale.LocaleEntry e) : base(e.key, e.name, e.desc) {
 			locale = e;
+			OnFinishedPatching += () => {
+				SaveSystem.addSaveHandler(ClassID, new SaveSystem.ComponentFieldSaveHandler<LavaBombTag>().addField("temperature").addField("spawnTime"));
+			};
 	    }
 		
 		public static void iterateLavaBombs(Action<LavaBombTag> a) {

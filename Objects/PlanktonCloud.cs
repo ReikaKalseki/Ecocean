@@ -34,6 +34,10 @@ namespace ReikaKalseki.Ecocean {
 			spawnData["mountains"] = new BiomeSpawnData(/*8*/30, 1F, 0F, 250);
 			spawnData["cragfield"] = new BiomeSpawnData(/*12*/18, 1, 0.5F, 100);
 			spawnData["void"] = new BiomeSpawnData(/*22*/45, 4, 1, 400);
+			
+			OnFinishedPatching += () => {
+				SaveSystem.addSaveHandler(ClassID, new SaveSystem.ComponentFieldSaveHandler<PlanktonCloudTag>().addField("touchIntensity"));
+			};
 	    }
 			
 	    public override GameObject GetGameObject() {
