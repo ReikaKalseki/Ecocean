@@ -19,9 +19,11 @@ using Util = UWE.Utils;
 namespace ReikaKalseki.Ecocean {
 	
 	public class VoidTongue : Spawnable {
+		
+		private readonly XMLLocale.LocaleEntry locale;
 	        
-	    internal VoidTongue() : base("voidtongue", "Organic Strand", "") {
-			
+	    internal VoidTongue(XMLLocale.LocaleEntry e) : base(e.key, e.name, e.desc) {
+			locale = e;
 	    }
 			
 	    public override GameObject GetGameObject() {
@@ -52,6 +54,12 @@ namespace ReikaKalseki.Ecocean {
 			ObjectUtil.fullyEnable(world);
 			return world;
 	    }
+		
+		public void register() {
+			Patch();
+			SNUtil.addPDAEntry(this, -1, "Lifeforms/Fauna/Leviathans", locale.pda, locale.getField<string>("header"));
+			ItemRegistry.instance.addItem(this);
+		}
 			
 	}
 		
@@ -297,12 +305,12 @@ namespace ReikaKalseki.Ecocean {
 			if (stuckTo)
 				return stuckTo.transform;
 			Player ep = Player.main;
-			if (ep.transform.position.y <= -1800)
-				return ep.transform;
 			foreach (GameObject go in VoidGhostLeviathansSpawner.main.spawnedCreatures) {
 				if (go && go.activeInHierarchy && go.GetComponent<LiveMixin>().IsAlive() && Vector3.Distance(ep.transform.position, go.transform.position) <= 120)
 					return go.transform;
 			}
+			if (ep.transform.position.y <= -1800)
+				return ep.transform;
 			foreach (SubRoot sub in UnityEngine.Object.FindObjectsOfType<SubRoot>()) {
 				if (sub && sub.gameObject.activeInHierarchy && sub.isCyclops && !sub.subDestroyed && VanillaBiomes.VOID.isInBiome(sub.transform.position))
 					return sub.transform;
@@ -370,6 +378,10 @@ namespace ReikaKalseki.Ecocean {
 			if (stuckTo || !isGrabbing)
 				return;
 			if (rb) {
+				Player p = rb.GetComponentInChildren<Player>();
+				bool pda = p;
+				if (p)
+					p.liveMixin.TakeDamage(15, p.transform.position, DamageType.Normal, gameObject);
 				//SNUtil.writeToChat("Stick to "+rb);
 				/*
 				Vector3 rel = transform.position-rb.transform.position;
@@ -380,6 +392,8 @@ namespace ReikaKalseki.Ecocean {
 				stuckTo = rb;
 				stuckCyclops = Util.GetComponentInHierarchy<SubRoot>(rb.gameObject);
 				stuckCreature = Util.GetComponentInHierarchy<Creature>(rb.gameObject);
+				Vehicle v = Util.GetComponentInHierarchy<Vehicle>(rb.gameObject);
+				//SNUtil.writeToChat("V: "+v);
 				SoundManager.playSoundAt(grabSound, rb.transform.position, false, -1, 2);
 				if (stuckCyclops) {
 					stuckCyclops.EndSubShielded();
@@ -390,6 +404,7 @@ namespace ReikaKalseki.Ecocean {
 					if (stuckCyclops == Player.main.currentSub) {
 						//relativePlayerCyclops = Player.main.transform.position-stuckCyclops.transform.position;
 						//Player.main.transform.SetParent(stuckCyclops.transform);
+						pda = true;
 					}
 					nextCyclopsReleaseTime = DayNightCycle.main.timePassedAsFloat+UnityEngine.Random.Range(1F, 1.5F);
 					//SNUtil.writeToChat("Time is "+DayNightCycle.main.timePassedAsFloat+" will release at "+nextCyclopsReleaseTime);
@@ -397,12 +412,17 @@ namespace ReikaKalseki.Ecocean {
 				else if (stuckCreature) {
 					willReleaseAtDepth = 9999;
 				}
-				else if (rb.GetComponentInChildren<Vehicle>()) {
+				else if (v) {
 					SoundManager.playSoundAt(SoundManager.buildSound("event:/sub/seamoth/impact_solid_hard"), rb.transform.position);
+					v.liveMixin.TakeDamage(30, v.transform.position, DamageType.Collide, gameObject);
+					pda = v == Player.main.GetVehicle();
 				}
+				ReikaKalseki.DIAlterra.SNUtil.log("", ReikaKalseki.DIAlterra.SNUtil.diDLL);
 				if (!stuckCyclops)
 					JointHelper.ConnectFixed(jointHelper, rb);
 				ObjectUtil.addCyclopsHologramWarning(rb, tip, Sprite.Create(TextureManager.getTexture(EcoceanMod.modDLL, "Textures/CyclopsVoidTongueIcon"), new Rect (0, 0, 100, 100), new Vector2(0, 0)));
+				if (pda)
+					PDAManager.getPage("ency_VoidTongue").unlock();
 			}
 		}
 		

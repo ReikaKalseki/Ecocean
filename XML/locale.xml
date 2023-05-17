@@ -79,6 +79,24 @@
 			VoidBubble
 		</header>
 	</VoidBubble>
+	<VoidTongue>
+		<name>
+			 Abyssal Terror
+		</name>
+		<desc>
+			
+		</desc>
+		<pda>
+			Lurking in the extreme depths around the crater's edge appears to be some organism far larger than even the largest living leviathans found in the shallower waters. The main body of the creature has never been seen, so most of its characteristics remain completely unknown. What little is known is that the creature appears to be largely sessile, using a long grasping appendage - leg, tongue, or otherwise - to snare objects in the waters far above it and drag them down towards it, presumably to feed.
+			
+			While the actual grasping process does inflict some minor damage, a far greater concern is that even if its grip is lost and the target escapes, vehicles can be pulled well below their crush depth, especially if they fail to avoid subsequent capture attempts.
+			
+			Assessment: Avoid large depths when in the void
+		</pda>
+		<header>
+			VoidTongue
+		</header>
+	</VoidTongue>
 	<TreeBud>
 		<name>
 			

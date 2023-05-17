@@ -23,8 +23,8 @@ namespace ReikaKalseki.Ecocean
     //public static readonly ModLogger logger = new ModLogger();
 	public static readonly Assembly modDLL = Assembly.GetExecutingAssembly();
     
-    public static readonly Config<ECConfig.ConfigEntries> config = new Config<ECConfig.ConfigEntries>();
-    internal static readonly XMLLocale locale = new XMLLocale("XML/locale.xml");
+    public static readonly Config<ECConfig.ConfigEntries> config = new Config<ECConfig.ConfigEntries>(modDLL);
+    internal static readonly XMLLocale locale = new XMLLocale(modDLL, "XML/locale.xml");
     
     public static readonly WorldgenDatabase worldgen = new WorldgenDatabase();
     
@@ -70,6 +70,7 @@ namespace ReikaKalseki.Ecocean
         }
         
         ModVersionCheck.getFromGitVsInstall("Ecocean", modDLL, "Ecocean").register();
+        SNUtil.checkModHash(modDLL);
         
         locale.load();
 	    
@@ -93,8 +94,8 @@ namespace ReikaKalseki.Ecocean
 	    
 	    voidBubble = new VoidBubble(locale.getEntry("VoidBubble"));
 	    voidBubble.register();
-	    tongue = new VoidTongue();
-	    tongue.Patch();
+	    tongue = new VoidTongue(locale.getEntry("VoidTongue"));
+	    tongue.register();
 	    
 	    mushTreeResource = new TreeBud(locale.getEntry("TreeBud"));
 	    mushTreeResource.Patch();
