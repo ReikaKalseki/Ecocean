@@ -51,19 +51,19 @@ namespace ReikaKalseki.Ecocean {
 			rootCollide.radius = 8;
 			rootCollide.isTrigger = true;
 			//ObjectUtil.removeComponent<BloomCreature>(world);
-			ObjectUtil.removeComponent<SwimRandom>(world);
-			ObjectUtil.removeComponent<SwimBehaviour>(world);
-			ObjectUtil.removeComponent<Locomotion>(world);
-			ObjectUtil.removeComponent<StayAtLeashPosition>(world);
-			ObjectUtil.removeComponent<CreatureUtils>(world);
-			//ObjectUtil.removeComponent<LiveMixin>(world);
-			ObjectUtil.removeComponent<BehaviourLOD>(world);
-			ObjectUtil.removeComponent<LastScarePosition>(world);
-			ObjectUtil.removeComponent<SplineFollowing>(world);
 			BloomCreature bc = world.GetComponent<BloomCreature>();
 			PlanktonCloudTag g = world.EnsureComponent<PlanktonCloudTag>();
 			//
 			UnityEngine.Object.DestroyImmediate(bc);
+			ObjectUtil.removeComponent<StayAtLeashPosition>(world);
+			ObjectUtil.removeComponent<SwimBehaviour>(world);
+			ObjectUtil.removeComponent<SplineFollowing>(world);
+			ObjectUtil.removeComponent<SwimRandom>(world);
+			ObjectUtil.removeComponent<Locomotion>(world);
+			ObjectUtil.removeComponent<CreatureUtils>(world);
+			//ObjectUtil.removeComponent<LiveMixin>(world);
+			ObjectUtil.removeComponent<BehaviourLOD>(world);
+			ObjectUtil.removeComponent<LastScarePosition>(world);
 			SphereCollider sc = world.EnsureComponent<SphereCollider>();
 			sc.isTrigger = true;
 			sc.center = Vector3.zero;

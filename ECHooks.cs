@@ -257,13 +257,59 @@ namespace ReikaKalseki.Ecocean {
 				if (!sub) {
 					Rigidbody rb = c.gameObject.FindAncestor<Rigidbody>();
 					if (rb) {
-						float f = 1F-(rb.transform.position.y-g.transform.position.y)/30;
+						float dh = rb.transform.position.y-g.transform.position.y;
+						float f = 1F-(dh)/30;
 						if (v)
-							f *= 0.1F;
-						rb.AddForce(Vector3.up*f*80, ForceMode.Force);
+							f *= 0.1F;/*
+						Vector3 vec = (rb.transform.position.setY(0)-g.transform.position.setY(0)).normalized;
+						float f2 = (dh/50F)+1;
+						vec *= f2*f2*f2*f2*0.025F;
+						vec.y = 1;*/
+						Vector3 vec = Vector3.up;
+						vec *= 80*f;
+						rb.AddForce(vec, ForceMode.Force);
+						if (!v && !rb.gameObject.FindAncestor<Player>()) {
+							GeyserDisplacement obj = rb.gameObject.EnsureComponent<GeyserDisplacement>();
+							obj.geyser = g;
+							obj.destroyIn = DayNightCycle.main.timePassedAsFloat+1.5F;
+						}
 					}
 				}
 			}
+		}
+		
+		class GeyserDisplacement : MonoBehaviour {
+			
+			internal Geyser geyser;
+			internal float destroyIn;
+			
+			private Rigidbody body;
+			
+			void Update() {
+				if (!body)
+					body = GetComponent<Rigidbody>();
+				if (DayNightCycle.main.timePassedAsFloat >= destroyIn) {
+					UnityEngine.Object.DestroyImmediate(this);
+					return;
+				}
+				if (geyser && geyser.erupting) {
+					float dh = transform.position.y-geyser.transform.position.y;
+					Vector3 vec = (transform.position.setY(0)-geyser.transform.position.setY(0));
+					if (vec.sqrMagnitude >= 1600) {
+						UnityEngine.Object.DestroyImmediate(this);
+					}
+					else {
+						//float f2 = (dh/40F)+1;
+						//vec *= f2*f2*f2*f2*Time.deltaTime;
+						vec *= Time.deltaTime;
+						body.AddForce(vec.normalized*20, ForceMode.Force);
+						Vector3 vel = body.velocity;
+						vel.y *= 0.99F;
+						body.velocity = vel;
+					}
+				}
+			}
+			
 		}
 		
 		public static void honkCyclopsHorn(CyclopsHornButton b) {

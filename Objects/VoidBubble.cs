@@ -89,7 +89,7 @@ namespace ReikaKalseki.Ecocean {
 			if (UnityEngine.Random.Range(0F, 1F) < 0.94F+f)
 				return;
 			Vector3 pos = MathUtil.getRandomVectorAround(ctr, 90).setY(ctr.y-140+UnityEngine.Random.Range(0F, 30F));
-			if (VanillaBiomes.VOID.isInBiome(pos)) {
+			if (VanillaBiomes.VOID.isInBiome(pos) && (pos.y >= -50 || VanillaBiomes.VOID.isInBiome(pos+Vector3.up*50))) {
 				GameObject go = ObjectUtil.createWorldObject(ClassID);
 				go.transform.position = pos;
 				//go.transform.localScale = new Vector3(UnityEngine.Random.Range(2F, 3F), UnityEngine.Random.Range(2F, 3F), UnityEngine.Random.Range(2F, 3F));
@@ -199,6 +199,9 @@ namespace ReikaKalseki.Ecocean {
 			
 			light.intensity = transform.localScale.magnitude*(stuckTo ? 0.67F : 1F);
 			light.range = stuckTo ? 16 : 24;
+			
+			if ((transform.position.y < -50 && !VanillaBiomes.VOID.isInBiome(transform.position+Vector3.up*50)) || UWE.Utils.RaycastIntoSharedBuffer(new Ray(transform.position, Vector3.up), 12, Voxeland.GetTerrainLayerMask()) > 0)
+				burst();
 		}
 		
 		public bool isStuckTo(Rigidbody rb) {
