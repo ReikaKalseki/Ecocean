@@ -122,12 +122,41 @@ namespace ReikaKalseki.Ecocean {
     			UnityEngine.Object.Destroy(gameObject);
     		else if (isGrown) {
     			gameObject.SetActive(true);
+				//gameObject.transform.localScale = Vector3.one*UnityEngine.Random.Range(0.125F, 0.15F)*getSize();
+				setModel();
     		}
     		else {
 				gameObject.transform.localScale = Vector3.one*UnityEngine.Random.Range(0.75F, 1F)*getSize();
     		}
     		init();
 		}
+		
+		private void setModel() {
+			GameObject pfb = ObjectUtil.lookupPrefab("3e199d12-2d75-4c58-a819-d78beeb24e2c");
+			Animator a = GetComponentInChildren<Animator>();
+			if (a) {
+				MeshRenderer r = pfb.GetComponentInChildren<MeshRenderer>();
+				GameObject mdl = UnityEngine.Object.Instantiate(r.gameObject);
+				mdl.transform.SetParent(transform);
+				mdl.transform.localPosition = a.transform.localPosition;
+				mdl.transform.localRotation = Quaternion.Euler(-90, a.transform.localEulerAngles.y, 0);
+				mdl.transform.localScale = a.transform.localScale;
+				RenderUtil.swapToModdedTextures(mdl.GetComponentInChildren<Renderer>(), getPrefab());
+				UnityEngine.Object.Destroy(a.gameObject);
+			}
+			GameObject coll = ObjectUtil.getChildObject(gameObject, "collision");
+			if (coll) {
+				GameObject cap = ObjectUtil.getChildObject(pfb, "Capsule");
+				GameObject coll2 = UnityEngine.Object.Instantiate(cap);
+				coll2.transform.SetParent(transform);
+				coll2.transform.localPosition = coll.transform.localPosition;
+				coll2.transform.localRotation = Quaternion.Euler(-90, coll.transform.localEulerAngles.y, 0);
+				coll2.transform.localScale = coll.transform.localScale;
+				UnityEngine.Object.Destroy(coll);
+			}
+		}
+		
+		protected abstract DIPrefab<VanillaFlora> getPrefab();
 		
 		void Update() {
 			if (renderers == null) {
@@ -171,16 +200,22 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		private void setBrightness(float f) {
-			foreach (Light l in lights) {
-				l.intensity = (isGrown ? 1 : 2)*f;
-			}
-			foreach (Renderer r in renderers) {
-				if (r.materials.Length > 1) { //outer stem and cap
-					RenderUtil.setEmissivity(r.materials[0], 0.75F+f*0.5F, "GlowStrength");
-					RenderUtil.setEmissivity(r.materials[1], 0.4F+f*3.6F, "GlowStrength");
+			if (lights != null) {
+				foreach (Light l in lights) {
+					l.intensity = (isGrown ? 1 : 2)*f;
 				}
-				else { //inner
-					RenderUtil.setEmissivity(r.materials[0], f, "GlowStrength");
+			}
+			if (renderers != null) {
+				foreach (Renderer r in renderers) {
+					if (!r)
+						continue;
+					if (r.materials.Length > 1) { //outer stem and cap
+						RenderUtil.setEmissivity(r.materials[0], 0.75F+f*0.5F, "GlowStrength");
+						RenderUtil.setEmissivity(r.materials[1], 0.4F+f*3.6F, "GlowStrength");
+					}
+					else { //inner
+						RenderUtil.setEmissivity(r.materials[0], f, "GlowStrength");
+					}
 				}
 			}
 			updateBrightness(f);

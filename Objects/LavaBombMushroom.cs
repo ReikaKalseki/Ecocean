@@ -86,5 +86,9 @@ namespace ReikaKalseki.Ecocean {
 			return UnityEngine.Random.Range(1F, 2.5F);
 		}
 		
+		protected override DIPrefab<VanillaFlora> getPrefab() {
+			return EcoceanMod.lavaShroom;
+		}
+		
 	}
 }

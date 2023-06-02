@@ -201,7 +201,7 @@ namespace ReikaKalseki.Ecocean {
 					//stuckTo.transform.localRotation = Quaternion.Lerp(stuckTo.transform.rotation, targetRotation, 0.02F);
 					stuckTo.transform.LookAt(transform, Vector3.up);
 					stuckTo.velocity = currentSpeed*transform.up.normalized;
-					stuckTo.transform.position = tip.transform.position;
+					stuckTo.MovePosition(tip.transform.position);
 				}
 				//if (stuckCyclops && stuckCyclops == Player.main.currentSub)
 					//Player.main.transform.position = stuckTo.transform.position+playerRel;
