@@ -150,6 +150,9 @@ namespace ReikaKalseki.Ecocean
     public static void PostLoad() {
     	if (InstructionHandlers.getTypeBySimpleName("ReikaKalseki.AqueousEngineering.BaseSonarPinger") != null)
     		ReikaKalseki.AqueousEngineering.BaseSonarPinger.onBaseSonarPingedEvent += go => ECHooks.pingSonarFromObject(go.gameObject.GetComponentInChildren<CustomMachineLogic>(), 0.67F);
+    	
+    	foreach (BiomeType b in Enum.GetValues(typeof(BiomeType)))
+    		LootDistributionHandler.Main.EditLootDistributionData("0e67804e-4a59-449d-929a-cd3fc2bef82c", b, 0, 0);
     }
 
   }
