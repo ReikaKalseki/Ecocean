@@ -93,8 +93,8 @@ namespace ReikaKalseki.Ecocean {
 			l.intensity = 0;
 			l.range = MAX_RADIUS;
 			Renderer r = world.GetComponentInChildren<Renderer>();
-			RenderUtil.setEmissivity(r.materials[0], 0, "GlowStrength");
-			RenderUtil.setEmissivity(r.materials[1], 0, "GlowStrength");
+			RenderUtil.setEmissivity(r.materials[0], 0);
+			RenderUtil.setEmissivity(r.materials[1], 0);
 			r.materials[0].SetFloat("_Shininess", 10);
 			r.materials[0].SetFloat("_SpecInt", 3);
 			r.materials[0].SetFloat("_Fresnel", 1);
@@ -254,8 +254,8 @@ namespace ReikaKalseki.Ecocean {
 				r.materials[0].SetFloat("_Fresnel", 0F);
 				r.materials[0].EnableKeyword("UWE_WAVING");
 				r.materials[1].EnableKeyword("UWE_WAVING");
-				RenderUtil.setEmissivity(r.materials[0], 0, "GlowStrength");
-				RenderUtil.setEmissivity(r.materials[1], 0, "GlowStrength");
+				RenderUtil.setEmissivity(r.materials[0], 0);
+				RenderUtil.setEmissivity(r.materials[1], 0);
 				GlowOil.setupRenderer(r, "Seed");
 				Vector3 rot = UnityEngine.Random.rotationUniform.eulerAngles.normalized*UnityEngine.Random.Range(0.75F, 1.25F);
 				seeds.Add(new GlowSeed{go = go, render = r, motion = MathUtil.getRandomVectorAround(Vector3.zero, 0.07F), rotation = rot});
@@ -338,7 +338,7 @@ namespace ReikaKalseki.Ecocean {
 						g.go.transform.position = g.go.transform.position.setY(-0.5F);
 					g.go.transform.Rotate(g.rotation, Space.Self);
 				}
-				RenderUtil.setEmissivity(g.render.materials[1], 0.05F+glowIntensity*8.95F, "GlowStrength");
+				RenderUtil.setEmissivity(g.render.materials[1], 0.05F+glowIntensity*8.95F);
 			}
 			if (isExploding) {
 				mainRender.gameObject.SetActive(false);
@@ -348,7 +348,7 @@ namespace ReikaKalseki.Ecocean {
 				mainHitbox.enabled = false;
 			}
 			else {
-				RenderUtil.setEmissivity(mainRender.materials[0], glowIntensity*5F, "GlowStrength");
+				RenderUtil.setEmissivity(mainRender.materials[0], glowIntensity*5F);
 			}
 			
 			if (light) {

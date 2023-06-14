@@ -73,7 +73,7 @@ namespace ReikaKalseki.Ecocean
 						r.materials[0].EnableKeyword("FX_BUILDING");
 					else
 						r.materials[0].DisableKeyword("FX_BUILDING");
-					RenderUtil.setEmissivity(r.materials[0], f2, "GlowStrength");
+					RenderUtil.setEmissivity(r.materials[0], f2);
 					r.materials[0].SetFloat("_Built", Mathf.Lerp(0.18F, 0.3F, f2/5F));
 					//sphereRenderer.materials[i].SetInt("_Cutoff", 0);
 				}

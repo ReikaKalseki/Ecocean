@@ -210,11 +210,11 @@ namespace ReikaKalseki.Ecocean {
 					if (!r)
 						continue;
 					if (r.materials.Length > 1) { //outer stem and cap
-						RenderUtil.setEmissivity(r.materials[0], 0.75F+f*0.5F, "GlowStrength");
-						RenderUtil.setEmissivity(r.materials[1], 0.4F+f*3.6F, "GlowStrength");
+						RenderUtil.setEmissivity(r.materials[0], 0.75F+f*0.5F);
+						RenderUtil.setEmissivity(r.materials[1], 0.4F+f*3.6F);
 					}
 					else { //inner
-						RenderUtil.setEmissivity(r.materials[0], f, "GlowStrength");
+						RenderUtil.setEmissivity(r.materials[0], f);
 					}
 				}
 			}

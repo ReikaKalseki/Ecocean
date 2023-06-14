@@ -232,7 +232,7 @@ namespace ReikaKalseki.Ecocean {
 				float f2 = Mathf.Max(0.25F, f*2*UnityEngine.Random.Range(0.9F, 1F));
 				if (UnityEngine.Random.Range(0F, 1F) < 0.2F)
 					f2 = Mathf.Min(f2, UnityEngine.Random.Range(0.25F, 0.5F));
-				RenderUtil.setEmissivity(render, f2, "GlowStrength");
+				RenderUtil.setEmissivity(render, f2);
 			}
 			
 		}

@@ -48,7 +48,7 @@ namespace ReikaKalseki.Ecocean {
 			r.material.SetVector("_Speed", new Vector4(0.1F, 0.05F, 0.0F, 0.0F));
 			r.material.SetVector("_ObjectUp", new Vector4(0F, 0F, 1F, 0F));
 			r.material.SetFloat("_WaveUpMin", 0F);
-			RenderUtil.setEmissivity(r, 1, "GlowStrength");
+			RenderUtil.setEmissivity(r, 1);
 			BreakableResource res = world.GetComponent<BreakableResource>();
 			res.breakText = "Harvest fungal bud";
 			res.prefabList.Clear();

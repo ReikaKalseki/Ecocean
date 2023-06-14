@@ -41,7 +41,7 @@ namespace ReikaKalseki.Ecocean {
 		
 		protected override void tick() {
 			if (isGrown)		
-    			gameObject.transform.localScale = Vector3.one*0.3F;
+				gameObject.transform.localScale = new Vector3(1.5F, 1.8F, 1.5F);
 		}
 		
 		protected override float getMinimumAllowableDepth() {
@@ -70,7 +70,7 @@ namespace ReikaKalseki.Ecocean {
 			//if (isGrown)
 			//	f = 0;
 			foreach (Renderer r in renderers) {
-				RenderUtil.setEmissivity(r.materials[0], 0.5F+f*1.5F, "GlowStrength");
+				RenderUtil.setEmissivity(r.materials[0], 0.5F+f*1.5F);
 				Color c = Color.Lerp(Color.white, new Color(0.8F, 0, 0, 1), 1-f);
 				//if (isGrown)
 				//	c = Color.black;
