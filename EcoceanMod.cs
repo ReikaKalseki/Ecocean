@@ -28,19 +28,19 @@ namespace ReikaKalseki.Ecocean
     
     public static readonly WorldgenDatabase worldgen = new WorldgenDatabase();
     
-    internal static GlowOilMushroom glowShroom;
-    internal static GlowOil glowOil;
+    public static GlowOilMushroom glowShroom;
+    public static GlowOil glowOil;
     internal static GlowOilNatural naturalOil;
     
-    internal static LavaBombMushroom lavaShroom;
-    internal static LavaBomb lavaBomb;
+    public static LavaBombMushroom lavaShroom;
+    public static LavaBomb lavaBomb;
     
-    internal static PlanktonCloud plankton;
-    internal static PlanktonItem planktonItem;
+    public static PlanktonCloud plankton;
+    public static PlanktonItem planktonItem;
     
-    internal static SeamothPlanktonScoop planktonScoop;
+    public static SeamothPlanktonScoop planktonScoop;
     
-    internal static PiezoCrystal piezo;
+    public static PiezoCrystal piezo;
     
     internal static VoidBubble voidBubble;    
     internal static VoidTongue tongue;

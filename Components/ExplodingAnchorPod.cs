@@ -147,6 +147,9 @@ namespace ReikaKalseki.Ecocean
 				go.transform.localScale = Vector3.one*f;
 				Bubble b = go.GetComponent<Bubble>();
 				b.oxygenSeconds *= f;
+				WorldForces wf = go.GetComponent<WorldForces>();
+				wf.underwaterGravity *= 0.5F;
+				go.GetComponent<Rigidbody>().drag *= 2F;
 			}
 			SoundManager.playSoundAt(explosionSound, effectivePodCenter, false, 64);
 			HashSet<GameObject> set = WorldUtil.getObjectsNear(transform.position, 35);

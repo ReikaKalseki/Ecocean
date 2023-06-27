@@ -13,7 +13,7 @@ using ReikaKalseki.DIAlterra;
 
 namespace ReikaKalseki.Ecocean {
 	
-	internal class LavaBombMushroom : GlowshroomBase<LavaShroomTag> { //hollow's lantern
+	public class LavaBombMushroom : GlowshroomBase<LavaShroomTag> { //hollow's lantern
 		
 		public LavaBombMushroom() : base("LAVASHROOM") {
 			
@@ -33,7 +33,7 @@ namespace ReikaKalseki.Ecocean {
 		
 	}
 	
-	internal class LavaShroomTag : GlowShroomTagBase {
+	public class LavaShroomTag : GlowShroomTagBase {
 		
 		protected override void init() {
 			

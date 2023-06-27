@@ -13,7 +13,7 @@ using ReikaKalseki.DIAlterra;
 
 namespace ReikaKalseki.Ecocean {
 	
-	internal abstract class GlowshroomBase<T> : BasicCustomPlant, MultiTexturePrefab<VanillaFlora> where T : GlowShroomTagBase {
+	public abstract class GlowshroomBase<T> : BasicCustomPlant, MultiTexturePrefab<VanillaFlora> where T : GlowShroomTagBase {
 		
 		public GlowshroomBase(string localeKey) : base(EcoceanMod.locale.getEntry(localeKey), VanillaFlora.JELLYSHROOM_LIVE, "7fcf1275-0687-491e-a086-d928dd3ba67a") {
 			glowIntensity = 1.5F;
@@ -94,7 +94,7 @@ namespace ReikaKalseki.Ecocean {
 		
 	}
 	
-	internal abstract class GlowShroomTagBase : MonoBehaviour {
+	public abstract class GlowShroomTagBase : MonoBehaviour {
 		
 		private static readonly SoundManager.SoundData fireSound = SoundManager.registerSound(EcoceanMod.modDLL, "glowshroomfire", "Sounds/glowshroom-fire.ogg", SoundManager.soundMode3D, s => {SoundManager.setup3D(s, 40);}, SoundSystem.masterBus);
 		

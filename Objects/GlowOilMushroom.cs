@@ -13,7 +13,7 @@ using ReikaKalseki.DIAlterra;
 
 namespace ReikaKalseki.Ecocean {
 	
-	internal class GlowOilMushroom : GlowshroomBase<GlowShroomTag> {
+	public class GlowOilMushroom : GlowshroomBase<GlowShroomTag> {
 		
 		public GlowOilMushroom() : base("GLOWSHROOM") {
 			collectionMethod = HarvestType.None;
@@ -33,7 +33,7 @@ namespace ReikaKalseki.Ecocean {
 		
 	}
 	
-	internal class GlowShroomTag : GlowShroomTagBase {
+	public class GlowShroomTag : GlowShroomTagBase {
 		
 		protected override void init() {
 			
