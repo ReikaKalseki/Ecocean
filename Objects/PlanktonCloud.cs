@@ -324,6 +324,8 @@ namespace ReikaKalseki.Ecocean {
 						if (tt && tt.type == EcoceanMod.planktonScoop.TechType) {
 							GameObject go = ObjectUtil.createWorldObject(EcoceanMod.planktonItem.TechType, true, false);
 							sc.container.AddItem(go.GetComponentInChildren<Pickupable>());
+							if (sc.container.IsFull())
+								SNUtil.writeToChat("Plankton scoop is full");
 							break;
 						}
 					}
