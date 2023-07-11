@@ -184,6 +184,16 @@ namespace ReikaKalseki.Ecocean
 						rb.AddForce(vec.normalized*140/vec.magnitude, ForceMode.VelocityChange);
 					}
 				}
+				Creature c = go.GetComponent<Creature>();
+				if (c && (c is GhostLeviathan || c is GhostLeviatanVoid || c is ReaperLeviathan || c is SeaDragon)) {
+					c.Aggression.Add(-1F);
+				 	foreach (LastTarget lt in go.GetComponentsInChildren<LastTarget>())
+						lt.SetTarget(null);
+				 	foreach (AggressiveWhenSeeTarget lt in go.GetComponentsInChildren<AggressiveWhenSeeTarget>())
+						lt.lastTarget.SetTarget(null);
+				 	foreach (AttackLastTarget lt in go.GetComponentsInChildren<AttackLastTarget>())
+				 		lt.StopAttack();
+				}
 			}
 		}
 		
