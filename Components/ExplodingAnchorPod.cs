@@ -13,7 +13,7 @@ using SMLHelper.V2.Utility;
 
 namespace ReikaKalseki.Ecocean
 {
-	internal class ExplodingAnchorPod : MonoBehaviour {
+	public class ExplodingAnchorPod : MonoBehaviour {
 		
 		private static readonly SoundManager.SoundData explosionSound = SoundManager.registerSound(EcoceanMod.modDLL, "reefpodexplode", "Sounds/reefpod.ogg", SoundManager.soundMode3D);
 		
@@ -35,6 +35,8 @@ namespace ReikaKalseki.Ecocean
 		private Vector3 effectivePodCenter;
 		
 		private Collider[] colliders;
+		
+		public static event Action<ExplodingAnchorPodDamage> onExplodingAnchorPodDamageEvent;
         	
 		void Start() {
 			podGO = ObjectUtil.getChildObject(gameObject, "stone_*");
@@ -88,7 +90,7 @@ namespace ReikaKalseki.Ecocean
 			float thresh = 4;
 			Creature cc = collider.gameObject.FindAncestor<Creature>();
 			if (cc)
-				thresh = cc is ReaperLeviathan || cc is GhostLeviathan || cc is GhostLeviatanVoid ? 6 : 10;
+				thresh = cc is ReaperLeviathan || cc is GhostLeviathan/* || cc is GhostLeviatanVoid*/ ? 6 : 10;
 			SubRoot sub = collider.gameObject.FindAncestor<SubRoot>();
 			if (sub && sub.isCyclops)
 				thresh = 1F;
@@ -174,9 +176,16 @@ namespace ReikaKalseki.Ecocean
 						continue;
 					float f = (dd-10)/35F;
 					amt *= Mathf.Clamp01(1.5F-f*f);
-					float depth2 = (-(go.transform.position.y))-400;
-					amt *= 1+depth2/400F;
+					if (isInGrandReef()) {
+						float depth2 = (-(go.transform.position.y))-400;
+						amt *= 1+depth2/400F;
+					}
 					amt *= EcoceanMod.config.getFloat(ECConfig.ConfigEntries.ANCHORDMG);
+					if (onExplodingAnchorPodDamageEvent != null) {
+						ExplodingAnchorPodDamage e = new ExplodingAnchorPodDamage(this, lv, amt);
+						onExplodingAnchorPodDamageEvent.Invoke(e);
+						amt = e.damageAmount;
+					}
 					lv.TakeDamage(amt, go.transform.position, DamageType.Explosive, gameObject);
 					Rigidbody rb = go.GetComponent<Rigidbody>();
 					if (rb) {
@@ -197,6 +206,10 @@ namespace ReikaKalseki.Ecocean
 			}
 		}
 		
+		private bool isInGrandReef() {
+			return VanillaBiomes.DEEPGRAND.isInBiome(transform.position) || VanillaBiomes.GRANDREEF.isInBiome(transform.position);
+		}
+		
 		private float getDamageToDeal(GameObject go) {
 			BaseCell b = go.GetComponent<BaseCell>();
 			if (b)
@@ -213,6 +226,23 @@ namespace ReikaKalseki.Ecocean
 			else if (v && v is Exosuit)
 				return 30;
 			return 15;
+		}
+		
+	}
+	
+	public class ExplodingAnchorPodDamage {
+		
+		public readonly ExplodingAnchorPod pod;
+		public readonly LiveMixin toDamage;
+		public readonly float originalDamageAmount;
+		
+		public float damageAmount;
+		
+		internal ExplodingAnchorPodDamage(ExplodingAnchorPod e, LiveMixin lv, float amt) {
+			pod = e;
+			toDamage = lv;
+			originalDamageAmount = amt;
+			damageAmount = originalDamageAmount;
 		}
 		
 	}
