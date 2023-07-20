@@ -29,7 +29,10 @@ namespace ReikaKalseki.Ecocean {
 	public abstract class WaterCurrentBase<T> : Spawnable where T : WaterCurrentTag {
 	        
 		internal WaterCurrentBase() : base("WaterCurrent_"+typeof(T).Name.Replace("CurrentTag", ""), "Water Current", "") {
-			
+			OnFinishedPatching += () => {
+				XMLLocale.LocaleEntry locale = EcoceanMod.locale.getEntry("WaterCurrent");
+				SNUtil.addPDAEntry(this, 5, "PlanetaryGeology", locale.pda, locale.getField<string>("header"));
+			};
 	    }
 			
 	    public override GameObject GetGameObject() {
@@ -38,6 +41,7 @@ namespace ReikaKalseki.Ecocean {
 			world.EnsureComponent<PrefabIdentifier>().ClassId = ClassID;
 			world.EnsureComponent<LargeWorldEntity>().cellLevel = LargeWorldEntity.CellLevel.Medium;
 			ObjectUtil.removeChildObject(world, "xCurrenBubbles");
+			world.layer = LayerID.Useable;
 			world.EnsureComponent<T>();
 			return world;
 	    }
@@ -115,10 +119,13 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		private Current current;
+		private Renderer render;
 		
 		void Update() {
 			if (!current)
 				current = GetComponent<Current>();
+			if (!render)
+				render = GetComponentInChildren<Renderer>();
 			current.objectForce = currentStrength;
 			current.activeAtDay = true;
 			current.activeAtNight = true;
@@ -128,6 +135,14 @@ namespace ReikaKalseki.Ecocean {
 						rb.gameObject.FindAncestor<LiveMixin>().TakeDamage(4*Time.deltaTime, rb.transform.position, DamageType.Heat, gameObject);
 					}
 				}
+				Color c = new Color(1.25F, 1, 1);
+				render.materials[0].SetColor("_Color", c);
+				render.materials[0].color = c;
+			}
+			else if (currentStrength >= 20) {
+				Color c = new Color(1F, 1, 1.25F);
+				render.materials[0].SetColor("_Color", c);
+				render.materials[0].color = c;
 			}
 		}
 		

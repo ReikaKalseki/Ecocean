@@ -63,7 +63,7 @@ namespace ReikaKalseki.Ecocean {
 			go.GetComponent<GlowOilTag>().onFired();
 		}
 		
-		protected override DIPrefab<VanillaFlora> getPrefab() {
+		protected override DIPrefab<FloraPrefabFetch> getPrefab() {
 			return EcoceanMod.glowShroom;
 		}
 		

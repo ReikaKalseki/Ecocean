@@ -69,7 +69,7 @@
 			
 		</desc>
 		<pda>
-			Rising from the unseen depths outside the crater's boundary, these large gelatinous objects possess the unusual property of being buoyant when free-floating but denser than the surrounding water once they attach to something. In sufficient number, these could drag even the largest creatures - or submarines - well beyond survivable depths.
+			Rising from the unseen depths outside the crater's boundary, these large gelatinous objects possess an unusual property: While they are buoyant when free-floating, their collision with another object triggers a chemical reaction, causing them to become denser than the surrounding water and begin to sink. In sufficient number, these could drag even the largest creatures - or submarines - well beyond survivable depths.
 			
 			The actual nature of these objects is poorly understood; they may be biological waste products, geologic phenomena, communities of single-celled organisms, or even the eggs of a much larger organism than any encountered so far on 4546B.
 			
@@ -97,6 +97,20 @@
 			VoidTongue
 		</header>
 	</VoidTongue>
+	<WaterCurrent>
+		<name>
+			 Water Current
+		</name>
+		<desc>
+			
+		</desc>
+		<pda>
+			Due to the local topography or geology, certain cave passages 
+		</pda>
+		<header>
+			WaterCurrent
+		</header>
+	</WaterCurrent>
 	<TreeBud>
 		<name>
 			

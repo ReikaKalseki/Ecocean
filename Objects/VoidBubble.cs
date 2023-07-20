@@ -19,6 +19,7 @@ namespace ReikaKalseki.Ecocean {
 		private readonly XMLLocale.LocaleEntry locale;
 		
 		internal static readonly Color COLOR = new Color(0.25F, 0F, 1F, 1);
+		internal static readonly Color COLOR_ATTACHED = new Color(0.75F, 0.5F, 1F, 1);
 		
 		internal static readonly Simplex3DGenerator densityNoise = (Simplex3DGenerator)new Simplex3DGenerator(483181).setFrequency(0.005);
 		
@@ -108,6 +109,7 @@ namespace ReikaKalseki.Ecocean {
 		private Light light;
 		
 		private GameObject inner;
+		private Renderer innerRender;
 		
 		private float velocity = UnityEngine.Random.Range(7.5F, 12F);
 		
@@ -119,6 +121,7 @@ namespace ReikaKalseki.Ecocean {
 		private FixedJoint joint;
 		
 		private float attachCooldown = 0;
+		private float attachFade = 0;
 		
 		private float age;
 		
@@ -143,16 +146,16 @@ namespace ReikaKalseki.Ecocean {
 					inner.name = "InnerShine";
 					inner.transform.SetParent(transform);
 					inner.transform.localPosition = Vector3.zero;
-					Renderer r = inner.GetComponentInChildren<Renderer>();
-					r.material.SetFloat("_SpecInt", 24);
-					r.material.SetFloat("_Shininess", 4.5F);
-					r.material.SetFloat("_Fresnel", 0);
-					r.material.SetColor("_Color", new Color(1, 1, 1, 1));
-					r.material.SetColor("_SpecColor", Color.Lerp(VoidBubble.COLOR, Color.white, 0.5F));
-					r.material.SetVector("_Scale", new Vector4(0.04F, 0.04F, 0.04F, 0.04F));
-					r.material.SetVector("_Frequency", new Vector4(8.0F, 8.0F, 8.0F, 8.0F));
-					r.material.SetVector("_Speed", new Vector4(0.05F, 0.05F, 0.05F, 0.05F));
-					r.material.SetVector("_ObjectUp", new Vector4(0F, 0F, 1F, 0F));
+					innerRender = inner.GetComponentInChildren<Renderer>();
+					innerRender.material.SetFloat("_SpecInt", 24);
+					innerRender.material.SetFloat("_Shininess", 4.5F);
+					innerRender.material.SetFloat("_Fresnel", 0);
+					innerRender.material.SetColor("_Color", new Color(1, 1, 1, 1));
+					innerRender.material.SetColor("_SpecColor", Color.Lerp(VoidBubble.COLOR, Color.white, 0.5F));
+					innerRender.material.SetVector("_Scale", new Vector4(0.04F, 0.04F, 0.04F, 0.04F));
+					innerRender.material.SetVector("_Frequency", new Vector4(8.0F, 8.0F, 8.0F, 8.0F));
+					innerRender.material.SetVector("_Speed", new Vector4(0.05F, 0.05F, 0.05F, 0.05F));
+					innerRender.material.SetVector("_ObjectUp", new Vector4(0F, 0F, 1F, 0F));
 				}
 			}
 			
@@ -177,7 +180,13 @@ namespace ReikaKalseki.Ecocean {
 				float force = stuckTo.GetComponent<SubRoot>() ? 20 : 30;
 				stuckTo.AddForce(Vector3.down*dT*force, ForceMode.Acceleration);
 				//SNUtil.writeToChat("parented to "+transform.parent+" of "+stuckTo);
+				attachFade = Mathf.Min(1, attachFade+1.5F*dT);
 			}
+			else {
+				attachFade = Mathf.Max(0, attachFade-0.5F*dT);
+			}
+			
+			Color color = Color.Lerp(VoidBubble.COLOR, VoidBubble.COLOR_ATTACHED, attachFade);
 				
 			age += dT;
 			if (attachCooldown > 0)
@@ -188,17 +197,22 @@ namespace ReikaKalseki.Ecocean {
 			float f = depth > 20 ? 1 : depth/20F;
 			if (stuckTo)
 				f *= 0.8F;
+			f *= Mathf.Lerp(1, 0.5F, attachFade);
 			transform.localScale = new Vector3(evalSizeNoise(xSize, vec), evalSizeNoise(ySize, vec), evalSizeNoise(zSize, vec))*f;
 			inner.transform.localPosition = Vector3.zero;
-			inner.transform.localScale = transform.localScale*0.25F;
+			inner.transform.localScale = transform.localScale*Mathf.Lerp(0.25F, 0.67F, attachFade);
+			innerRender.material.SetColor("_SpecColor", Color.Lerp(color, Color.white, 0.5F));
+			innerRender.material.SetFloat("_SpecInt", Mathf.Lerp(24, 6, attachFade));
 			
 			if (age > 1) {
 				if (depth <= 0)
 					burst();
 			}
 			
+			mainRender.material.SetColor("_SpecColor", color);
 			light.intensity = transform.localScale.magnitude*(stuckTo ? 0.67F : 1F);
 			light.range = stuckTo ? 16 : 24;
+			light.color = color;
 			
 			if ((transform.position.y < -50 && !VanillaBiomes.VOID.isInBiome(transform.position+Vector3.up*50)) || UWE.Utils.RaycastIntoSharedBuffer(new Ray(transform.position, Vector3.up), 12, Voxeland.GetTerrainLayerMask()) > 0)
 				burst();

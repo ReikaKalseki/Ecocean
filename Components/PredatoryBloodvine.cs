@@ -15,13 +15,18 @@ namespace ReikaKalseki.Ecocean
 {
 	internal class PredatoryBloodvine : MonoBehaviour {
 		
+		private static readonly float DURATION = 10F;
+		private static readonly float SNAP_TIME = 0.2F;
+		private static readonly float RELEASE_TIME = 2-SNAP_TIME;
+		private static readonly float RELEASE_START = DURATION-RELEASE_TIME;
+		
 		private GameObject topGO;
 		private SphereCollider triggerBox;
 		private Vector3 centerTarget;
 		
 		private float eatStart = -1;
 		
-		private GameObject target;
+		private LiveMixin target;
 		
 		private float lastTime;
 		
@@ -31,7 +36,7 @@ namespace ReikaKalseki.Ecocean
 			topGO = ObjectUtil.getChildObject(gameObject, "*_end");
 			triggerBox = topGO.AddComponent<SphereCollider>();
 			triggerBox.center = new Vector3(0, 0, 6);//topGO.transform.position;
-			triggerBox.radius = 2.0F;
+			triggerBox.radius = 5.2F;
 			triggerBox.isTrigger = true;
 			centerTarget = topGO.transform.position+Vector3.up*7.5F;
 			topGO.EnsureComponent<PredatoryBloodvineTop>().root = this;
@@ -40,12 +45,15 @@ namespace ReikaKalseki.Ecocean
 		void Update() {
 			float time = DayNightCycle.main.timePassedAsFloat;
 			float dt = time-eatStart;
-			if (dt <= 2) {
-				if (dt <= 0.2F) {
-					topScale = 1-(dt*2.5F);
+			if (dt <= DURATION) {
+				if (dt <= SNAP_TIME) {
+					topScale = 1-(dt*0.5F/SNAP_TIME);
+				}
+				else if (dt > DURATION-RELEASE_TIME) {
+					topScale = 0.5F+(dt-RELEASE_START)/RELEASE_TIME*0.5F;
 				}
 				else {
-					topScale = 0.5F+(dt-0.2F)/1.8F*0.5F;
+					topScale = 0.5F;
 				}
 			}
 			else {
@@ -55,19 +63,22 @@ namespace ReikaKalseki.Ecocean
 			if (!Mathf.Approximately(topScale, transform.localScale.x))
 				topGO.transform.localScale = new Vector3(topScale, topScale, 1F/topScale); //axes on this are weird
 			float dT = time-lastTime;
-			if (target && dT > 0 && !target.GetComponent<SubRoot>()) {
-				Vector3 dd = centerTarget-target.transform.position;
-				if (dd.sqrMagnitude <= 2.25F) {
-					target.transform.position = centerTarget;
-				}
-				else {
-					Rigidbody rb = target.GetComponent<Rigidbody>();
-					if (rb) {
-						float f = dT*50F*Mathf.Clamp01(dd.sqrMagnitude*dd.sqrMagnitude/2);
-						if (target.GetComponent<Vehicle>())
-							f *= 4;
-						//SNUtil.writeToChat("Bloodvine at "+transform.position+" pulling "+target+" dist="+dd.magnitude+" > force = "+f);
-						rb.AddForce(dd.normalized*f, ForceMode.VelocityChange);
+			if (target && dT > 0) {
+				target.TakeDamage(dT*1.2F, target.transform.position, DamageType.Puncture, gameObject);
+				if (!target.GetComponent<SubRoot>()) {
+					Vector3 dd = centerTarget-target.transform.position;
+					if (dd.sqrMagnitude <= 2.25F) {
+						target.transform.position = centerTarget;
+					}
+					else {
+						Rigidbody rb = target.GetComponent<Rigidbody>();
+						if (rb) {
+							float f = dT*50F*Mathf.Clamp01(dd.sqrMagnitude*dd.sqrMagnitude/2);
+							if (target.GetComponent<Vehicle>())
+								f *= 4;
+							//SNUtil.writeToChat("Bloodvine at "+transform.position+" pulling "+target+" dist="+dd.magnitude+" > force = "+f);
+							rb.AddForce(dd.normalized*f, ForceMode.VelocityChange);
+						}
 					}
 				}
 			}
@@ -97,7 +108,7 @@ namespace ReikaKalseki.Ecocean
 				return;
 			//if (go.GetComponent<SubRoot>())
 			//	return;
-			float amt = 10;
+			float amt = 5;
 			Vehicle v = go.GetComponent<Vehicle>();
 			if (v) {
 				if (v.docked)
@@ -106,7 +117,7 @@ namespace ReikaKalseki.Ecocean
 					amt *= 2;
 			}
 			amt *= EcoceanMod.config.getFloat(ECConfig.ConfigEntries.BLOODDMG);
-			target = go;
+			target = live;
 			eatStart = time;
 			live.TakeDamage(amt, go.transform.position, DamageType.Puncture, gameObject);
 			SoundManager.playSoundAt(SoundManager.buildSound("event:/creature/reaper/attack_player_claw"), centerTarget, false, 40);

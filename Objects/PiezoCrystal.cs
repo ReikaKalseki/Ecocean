@@ -55,6 +55,22 @@ namespace ReikaKalseki.Ecocean {
 			world.EnsureComponent<PrefabIdentifier>().ClassId = ClassID;
 			world.EnsureComponent<LargeWorldEntity>().cellLevel = LargeWorldEntity.CellLevel.VeryFar;
 			world.EnsureComponent<PiezoCrystalTag>();
+			Drillable dr = world.EnsureComponent<Drillable>();
+			dr.kChanceToSpawnResources = 0;
+			dr.lootPinataObjects = new List<GameObject>();
+			dr.maxResourcesToSpawn = 0;
+			dr.minResourcesToSpawn = 0;
+			dr.renderers = world.GetComponentsInChildren<MeshRenderer>();
+			dr.onDrilled += (d) => {
+				d.GetComponent<PiezoCrystalTag>().onDrilled();
+			};/*
+			ObjectUtil.removeComponent<Rigidbody>(world);
+			Rigidbody rb = world.EnsureComponent<Rigidbody>();
+			rb.isKinematic = false;
+			rb.mass = 1200;
+			rb.drag = 0.8F;*/
+			world.EnsureComponent<AlwaysPropulsible>();
+			world.EnsureComponent<ReactsOnDrilled>();
 			
 			foreach (Renderer r in world.GetComponentsInChildren<Renderer>()) {
 				RenderUtil.swapTextures(EcoceanMod.modDLL, r, "Textures/Piezo/");
@@ -84,6 +100,8 @@ namespace ReikaKalseki.Ecocean {
 		private static readonly float MAX_ROTATE_SPEED = 3F;
 		
 		private readonly List<PiezoSource> sources = new List<PiezoSource>();
+		
+		private Drillable drill;
 				
 		private float lastDischargeTime;
 		private float nextDischargeTime;
@@ -92,7 +110,10 @@ namespace ReikaKalseki.Ecocean {
 		
 		private Vector3 rotationSpeed;
 		
+		private bool exploded;
+		
 		private static readonly SoundManager.SoundData dischargeSound = SoundManager.registerSound(EcoceanMod.modDLL, "piezoblast", "Sounds/piezo.ogg", SoundManager.soundMode3D);
+		private static readonly SoundManager.SoundData explodeSound = SoundManager.registerSound(EcoceanMod.modDLL, "piezobreak", "Sounds/piezobreak.ogg", SoundManager.soundMode3D);
 		
 		internal PiezoCrystalTag() {
 			rotationSpeed = new Vector3(UnityEngine.Random.Range(-MAX_ROTATE_SPEED, MAX_ROTATE_SPEED), UnityEngine.Random.Range(-MAX_ROTATE_SPEED, MAX_ROTATE_SPEED), UnityEngine.Random.Range(-MAX_ROTATE_SPEED, MAX_ROTATE_SPEED));
@@ -103,6 +124,8 @@ namespace ReikaKalseki.Ecocean {
 				UnityEngine.Object.DestroyImmediate(gameObject);
 				return;
 			}
+			if (!drill)
+				drill = GetComponent<Drillable>();
 			float time = DayNightCycle.main.timePassedAsFloat;
 			if (time >= lastTerrainCollisionCheckTime+2.5F) {
 				if (Physics.CheckSphere(transform.position, 16, Voxeland.GetTerrainLayerMask())) {
@@ -146,6 +169,8 @@ namespace ReikaKalseki.Ecocean {
 			rotationSpeed.x = Mathf.Clamp(rotationSpeed.x, -MAX_ROTATE_SPEED, MAX_ROTATE_SPEED);
 			rotationSpeed.y = Mathf.Clamp(rotationSpeed.y, -MAX_ROTATE_SPEED, MAX_ROTATE_SPEED);
 			rotationSpeed.z = Mathf.Clamp(rotationSpeed.z, -MAX_ROTATE_SPEED, MAX_ROTATE_SPEED);
+			if (drill.drillingExo && !exploded)
+				onDrilled();
 		}
 	    
 		internal void spawnEMP() {
@@ -176,6 +201,32 @@ namespace ReikaKalseki.Ecocean {
 		   	if (dist <= 30) {
 		   		ep.GetComponent<LiveMixin>().TakeDamage(UnityEngine.Random.Range(5F, 10F), ep.transform.position, DamageType.Electrical, gameObject);
 		   	}
+		}
+			
+		internal void onDrilled() {
+			exploded = true;
+			spawnEMP();
+			Utils.PlayOneShotPS(ObjectUtil.lookupPrefab(VanillaCreatures.CRASHFISH.prefab).GetComponent<Crash>().detonateParticlePrefab, transform.position, transform.rotation);
+			SoundManager.playSoundAt(explodeSound, transform.position, false, 60, 1);
+			HashSet<GameObject> set = WorldUtil.getObjectsNear(transform.position, 25);
+			set.Add(Player.main.gameObject);
+			HashSet<int> used = new HashSet<int>();
+			foreach (GameObject go in set) {
+				if (used.Contains(go.GetInstanceID()))
+					continue;
+				used.Add(go.GetInstanceID());
+				LiveMixin lv = go.GetComponent<LiveMixin>();
+				if (lv && lv.IsAlive()) {
+					float dist = Vector3.Distance(go.transform.position, transform.position);
+					float f = 1;
+					if (!go.FindAncestor<Player>() && !go.FindAncestor<Vehicle>())
+						f = 1F-(Mathf.Max(0, dist-10F)/20F);
+					//SNUtil.writeToChat("Damaging "+lv+" @ "+dist+" by "+f);
+					lv.TakeDamage(lv.maxHealth*0.8F*f, go.transform.position, DamageType.Explosive, gameObject);
+					lv.TakeDamage(lv.maxHealth*0.5F*f, go.transform.position, DamageType.Electrical, gameObject);
+				}
+			}
+			UnityEngine.Object.Destroy(gameObject, 0.5F);
 		}
 		
 		void OnDestroy() {
