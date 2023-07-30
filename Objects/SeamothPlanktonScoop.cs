@@ -18,7 +18,7 @@ namespace ReikaKalseki.Ecocean {
 	public class SeamothPlanktonScoop : SeamothModule {
 		
 	    internal SeamothPlanktonScoop() : base(EcoceanMod.locale.getEntry("PlanktonScoop"), "d290b5da-7370-4fb8-81bc-656c6bde78f8") {
-			if (QModManager.API.QModServices.Main.ModPresent("SeaToSea"))
+			if (QModManager.API.QModServices.Main.ModPresent("SeaToSea")) //does not work
 				preventNaturalUnlock();
 	    }
 

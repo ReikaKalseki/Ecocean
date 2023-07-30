@@ -46,6 +46,8 @@ namespace ReikaKalseki.Ecocean {
 	    	DIHooks.onSeamothSonarUsedEvent += pingSeamothSonar;
 	    	DIHooks.onCyclopsSonarUsedEvent += pingCyclopsSonar;
 	    	
+	    	DIHooks.drillableDrillTickEvent += onDrillableTick;
+	    	
 	    	bloodVine.AddRange(VanillaFlora.BLOOD_KELP.getPrefabs(true, true));
 	    }
 	    
@@ -475,11 +477,11 @@ namespace ReikaKalseki.Ecocean {
 			obj.rotation = dir;
 			obj.Rotate(0, CompassDistortionSystem.instance.getTotalDisplacement(obj.position), 0);
 		}
-		/*
-		public static void tickDrilling(Drillable d, Exosuit s) {
+		
+		public static void onDrillableTick(Drillable d, Vector3 vec, Exosuit s) {
 			PiezoCrystalTag pt = d.GetComponent<PiezoCrystalTag>();
 			if (pt)
 				pt.onDrilled();
-		}*/
+		}
 	}
 }

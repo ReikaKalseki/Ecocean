@@ -23,7 +23,7 @@ namespace ReikaKalseki.Ecocean {
 		internal static readonly float VOID_RANGE_SCALE = 2;
 		internal static readonly float LEVI_RANGE_SCALE = 3;
 		
-		internal static readonly Simplex3DGenerator densityNoise = (Simplex3DGenerator)new Simplex3DGenerator(3340487).setFrequency(0.1);
+		internal static readonly Simplex3DGenerator densityNoise = (Simplex3DGenerator)new Simplex3DGenerator(3340487).setFrequency(0.05);
 		
 		private readonly Dictionary<string, BiomeSpawnData> spawnData = new Dictionary<string, BiomeSpawnData>();
 	        

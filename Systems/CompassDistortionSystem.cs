@@ -70,6 +70,8 @@ namespace ReikaKalseki.Ecocean {
 			float time = DayNightCycle.main.timePassedAsFloat;
 			float noise = (float)globalDistortionCutoff.getValue(new Vector3(time, 0, 0));
 			float depth = -pos.y;
+			if (BiomeBase.getBiome(pos).isCaveBiome())
+				depth = 0;
 			float globalThresh = 1F+Mathf.Max(0, depth-400)/600F-2*Mathf.Clamp01(EcoceanMod.config.getFloat(ECConfig.ConfigEntries.GLOBALCOMPASS)); //config is 0-1 for "how often"
 			//SNUtil.writeToChat("Global noise level = "+noise.ToString("0.0000")+"/"+globalThresh.ToString("0.0000"));
 			if (noise >= globalThresh) {

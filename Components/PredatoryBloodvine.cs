@@ -13,7 +13,7 @@ using SMLHelper.V2.Utility;
 
 namespace ReikaKalseki.Ecocean
 {
-	internal class PredatoryBloodvine : MonoBehaviour {
+	public class PredatoryBloodvine : MonoBehaviour {
 		
 		private static readonly float DURATION = 10F;
 		private static readonly float SNAP_TIME = 0.2F;
@@ -38,7 +38,7 @@ namespace ReikaKalseki.Ecocean
 			triggerBox.center = new Vector3(0, 0, 6);//topGO.transform.position;
 			triggerBox.radius = 5.2F;
 			triggerBox.isTrigger = true;
-			centerTarget = topGO.transform.position+Vector3.up*7.5F;
+			centerTarget = topGO.transform.position+Vector3.up*7.75F;
 			topGO.EnsureComponent<PredatoryBloodvineTop>().root = this;
 		}
 			
@@ -46,11 +46,14 @@ namespace ReikaKalseki.Ecocean
 			float time = DayNightCycle.main.timePassedAsFloat;
 			float dt = time-eatStart;
 			if (dt <= DURATION) {
+				//SNUtil.writeToChat("dt: "+dt.ToString("00.000"));
 				if (dt <= SNAP_TIME) {
 					topScale = 1-(dt*0.5F/SNAP_TIME);
+					//SNUtil.writeToChat("snap "+dt.ToString("00.000")+" "+topScale.ToString("00.000"));
 				}
 				else if (dt > DURATION-RELEASE_TIME) {
 					topScale = 0.5F+(dt-RELEASE_START)/RELEASE_TIME*0.5F;
+					//SNUtil.writeToChat("release "+dt.ToString("00.000")+" "+topScale.ToString("00.000"));
 				}
 				else {
 					topScale = 0.5F;
@@ -66,9 +69,12 @@ namespace ReikaKalseki.Ecocean
 			if (target && dT > 0) {
 				target.TakeDamage(dT*1.2F, target.transform.position, DamageType.Puncture, gameObject);
 				if (!target.GetComponent<SubRoot>()) {
-					Vector3 dd = centerTarget-target.transform.position;
+					Vector3 tgt = centerTarget;
+					if (target.GetComponent<Vehicle>())
+						tgt += Vector3.up;
+					Vector3 dd = tgt-target.transform.position;
 					if (dd.sqrMagnitude <= 2.25F) {
-						target.transform.position = centerTarget;
+						target.transform.position = tgt;
 					}
 					else {
 						Rigidbody rb = target.GetComponent<Rigidbody>();
@@ -83,6 +89,14 @@ namespace ReikaKalseki.Ecocean
 				}
 			}
 			lastTime = time;
+		}
+		
+		public void release() {
+			if (!target)
+				return;
+			target = null;
+			eatStart = DayNightCycle.main.timePassedAsFloat-DURATION+RELEASE_TIME;
+			//SNUtil.writeToChat(eatStart.ToString("00.000"));
 		}
 		
 		internal bool canAttack(GameObject go, out LiveMixin live) {
@@ -101,7 +115,7 @@ namespace ReikaKalseki.Ecocean
 		
 		internal void trigger(GameObject go) {
 			float time = DayNightCycle.main.timePassedAsFloat;
-			if (time-eatStart <= 4)
+			if (time-eatStart <= DURATION+2)
 				return;
 			LiveMixin live;
 			if (!canAttack(go, out live))
@@ -119,6 +133,8 @@ namespace ReikaKalseki.Ecocean
 			amt *= EcoceanMod.config.getFloat(ECConfig.ConfigEntries.BLOODDMG);
 			target = live;
 			eatStart = time;
+			//SNUtil.writeToChat(eatStart.ToString("00.000"));
+			target.gameObject.SendMessage("OnBloodKelpGrab", this, SendMessageOptions.DontRequireReceiver);
 			live.TakeDamage(amt, go.transform.position, DamageType.Puncture, gameObject);
 			SoundManager.playSoundAt(SoundManager.buildSound("event:/creature/reaper/attack_player_claw"), centerTarget, false, 40);
 		}
