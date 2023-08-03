@@ -20,6 +20,8 @@ namespace ReikaKalseki.Ecocean
 		private static readonly float RELEASE_TIME = 2-SNAP_TIME;
 		private static readonly float RELEASE_START = DURATION-RELEASE_TIME;
 		
+		private FruitPlant fruiter;
+		
 		private GameObject topGO;
 		private SphereCollider triggerBox;
 		private Vector3 centerTarget;
@@ -40,6 +42,7 @@ namespace ReikaKalseki.Ecocean
 			triggerBox.isTrigger = true;
 			centerTarget = topGO.transform.position+Vector3.up*7.75F;
 			topGO.EnsureComponent<PredatoryBloodvineTop>().root = this;
+			fruiter = GetComponent<FruitPlant>();
 		}
 			
 		void Update() {
@@ -68,6 +71,8 @@ namespace ReikaKalseki.Ecocean
 			float dT = time-lastTime;
 			if (target && dT > 0) {
 				target.TakeDamage(dT*1.2F, target.transform.position, DamageType.Puncture, gameObject);
+				if (fruiter)
+					fruiter.timeNextFruit -= dT*6;
 				if (!target.GetComponent<SubRoot>()) {
 					Vector3 tgt = centerTarget;
 					if (target.GetComponent<Vehicle>())

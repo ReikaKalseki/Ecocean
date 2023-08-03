@@ -82,8 +82,6 @@ namespace ReikaKalseki.Ecocean {
 			p.modelLocalPosition = p2.modelLocalPosition;
 			p.modelScale = p2.modelScale;
 			p.pickupable = pp;
-			//jellyseed.GetComponent<Plantable>().CopyFields<Plantable>(p, BindingFlags.Public | BindingFlags.NonPublic);
-			//ObjectUtil.dumpObjectData(p);
 			BasicCustomPlant.setPlantSeed(TechType, EcoceanMod.glowShroom);
 			GlowOilTag g = world.EnsureComponent<GlowOilTag>();
 			world.EnsureComponent<LargeWorldEntity>().cellLevel = LargeWorldEntity.CellLevel.VeryFar;
