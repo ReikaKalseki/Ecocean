@@ -17,11 +17,16 @@ namespace ReikaKalseki.Ecocean {
 	public static class WaterCurrent {
 		
 		public static void register() {
-			new WaterCurrentBasic().Patch();
+			WaterCurrentBasic basic = new WaterCurrentBasic();
+			basic.Patch();
 			new WaterCurrentStrong().Patch();
 			new WaterCurrentHot().Patch();
 			new WaterCurrentHotStrong().Patch();
 			new WaterCurrentImpassable().Patch();
+			
+			XMLLocale.LocaleEntry e = EcoceanMod.locale.getEntry("WaterCurrent");
+        	EcoceanMod.waterCurrentCommon = TechTypeHandler.AddTechType(EcoceanMod.modDLL, e.key, e.name, e.desc);
+			SNUtil.addPDAEntry(basic, 5, "PlanetaryGeology", e.pda, e.getField<string>("header"), d => d.key = EcoceanMod.waterCurrentCommon);
 		}
 		
 	}
@@ -29,21 +34,22 @@ namespace ReikaKalseki.Ecocean {
 	public abstract class WaterCurrentBase<T> : Spawnable where T : WaterCurrentTag {
 	        
 		internal WaterCurrentBase() : base("WaterCurrent_"+typeof(T).Name.Replace("CurrentTag", ""), "Water Current", "") {
-			OnFinishedPatching += () => {
-				XMLLocale.LocaleEntry locale = EcoceanMod.locale.getEntry("WaterCurrent");
-				SNUtil.addPDAEntry(this, 5, "PlanetaryGeology", locale.pda, locale.getField<string>("header"));
-			};
+
 	    }
 			
 	    public override GameObject GetGameObject() {
 			GameObject world = ObjectUtil.createWorldObject("42b38968-bd3a-4bfd-9d93-17078d161b29");
-			world.EnsureComponent<TechTag>().type = TechType;
+			world.EnsureComponent<TechTag>().type = EcoceanMod.waterCurrentCommon;
 			world.EnsureComponent<PrefabIdentifier>().ClassId = ClassID;
 			world.EnsureComponent<LargeWorldEntity>().cellLevel = LargeWorldEntity.CellLevel.Medium;
 			ObjectUtil.removeChildObject(world, "xCurrenBubbles");
 			world.layer = LayerID.Useable;
 			world.EnsureComponent<T>();
 			return world;
+	    }
+			
+	    protected override void ProcessPrefab(GameObject world) {
+			world.EnsureComponent<TechTag>().type = EcoceanMod.waterCurrentCommon;
 	    }
 			
 	}

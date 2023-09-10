@@ -46,6 +46,8 @@ namespace ReikaKalseki.Ecocean
     internal static VoidTongue tongue;
     
     public static TreeBud mushTreeResource;
+    
+    internal static TechType waterCurrentCommon;
 		
 	internal static readonly Vector3 reaperlessTripleVent = new Vector3(-1150, -240, -258);
 	internal static readonly Vector3 northDuneBit = new Vector3(-1151, -340, 1444);
