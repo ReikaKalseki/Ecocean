@@ -24,6 +24,7 @@ namespace ReikaKalseki.Ecocean {
 		private static float lastPiezoEMPDamage = -1;
 		
 		private static float lastSonarUsed = -1;
+		private static float lastHornUsed = -1;
 		
 		internal static float nextVoidTongueGrab = -1;
 	    
@@ -143,6 +144,10 @@ namespace ReikaKalseki.Ecocean {
 			return lastSonarUsed;
 		}
 		
+		public static float getLastHornUse() {
+			return lastHornUsed;
+		}
+		
 		public static void onTakeDamage(DIHooks.DamageToDeal dmg) {
 			Player ep = dmg.target.gameObject.FindAncestor<Player>();
 			if (ep) {
@@ -172,6 +177,10 @@ namespace ReikaKalseki.Ecocean {
 						//SNUtil.writeToChat("Attracted biter "+b+" @ "+b.transform.position);
 					}
 				}
+			}
+			if (dmg.type == DamageType.Electrical && dmg.dealer && dmg.dealer.GetComponentInParent<ElectricalDefense>()) {
+				dmg.setValue(Mathf.Min(EcoceanMod.config.getFloat(ECConfig.ConfigEntries.DEFENSECLAMP), dmg.getAmount()));
+	    		//SNUtil.writeToChat(dmg.target+" > "+dmg.getAmount()+" from "+dmg.originalAmount);
 			}
 			Creature c = dmg.target.gameObject.FindAncestor<Creature>();
 			if (c is SeaDragon || c is GhostLeviatanVoid || c is GhostLeviathan || c is ReaperLeviathan || c is Reefback) {
@@ -316,6 +325,7 @@ namespace ReikaKalseki.Ecocean {
 		
 		public static void honkCyclopsHorn(CyclopsHornButton b) {
 			attractToSoundPing(b.gameObject.FindAncestor<SubRoot>(), true, 1);
+			lastHornUsed = DayNightCycle.main.timePassedAsFloat;
 		}
 	    
 	    public static void pingSeamothSonar(SeaMoth sm) {
@@ -482,6 +492,10 @@ namespace ReikaKalseki.Ecocean {
 			PiezoCrystalTag pt = d.GetComponent<PiezoCrystalTag>();
 			if (pt)
 				pt.onDrilled();
-		}
+		}/*
+		
+		public static void tickVortexTorpedo(SeamothTorpedoWhirlpool go) {
+			
+		}*/
 	}
 }

@@ -47,6 +47,8 @@ namespace ReikaKalseki.Ecocean
     
     public static TreeBud mushTreeResource;
     
+    public static MushroomStack mushroomStack;
+    
     internal static TechType waterCurrentCommon;
 		
 	internal static readonly Vector3 reaperlessTripleVent = new Vector3(-1150, -240, -258);
@@ -93,6 +95,9 @@ namespace ReikaKalseki.Ecocean
 	    
 	    piezo = new PiezoCrystal(locale.getEntry("piezoCrystal"));
 	    piezo.register();
+	    
+	    mushroomStack = new MushroomStack(locale.getEntry("mushroomStack"));
+	    mushroomStack.Patch();
 	    
 	    voidBubble = new VoidBubble(locale.getEntry("VoidBubble"));
 	    voidBubble.register();

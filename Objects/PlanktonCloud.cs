@@ -176,6 +176,7 @@ namespace ReikaKalseki.Ecocean {
 		
 		//private float lastContactTime;
 		private float lastScoopTime;
+		private float lastVortexCheckTime;
 		
 		private float minParticleSize = 2;
 		private float maxParticleSize = 5;
@@ -226,8 +227,15 @@ namespace ReikaKalseki.Ecocean {
 			float dscl = time-lastScoopTime;
 			
 			float dT = Time.deltaTime;
-			if (time-ECHooks.getLastSonarUse() <= 10) {
+			if (time-ECHooks.getLastSonarUse() <= 10 || time-ECHooks.getLastHornUse() <= 10) {
 				touchIntensity = 1;
+			}
+			if (time-lastVortexCheckTime >= 1) {
+				lastVortexCheckTime = time;
+				SeamothTorpedoWhirlpool sm = WorldUtil.getClosest<SeamothTorpedoWhirlpool>(gameObject);
+				if (sm && sm.sequence.active && Vector3.Distance(sm.transform.position, transform.position) <= 30) {
+					touchIntensity = 1;
+				}
 			}
 			
 			if (isDead) {

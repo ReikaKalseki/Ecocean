@@ -162,7 +162,7 @@
 	</PlanktonScoop>
 	<piezoCrystal>
 		<name>
-			 Piezocrystal Deposit
+			Piezocrystal Deposit
 		</name>
 		<desc>
 			
@@ -176,6 +176,20 @@
 			Piezo
 		</header>
 	</piezoCrystal>
+	<mushroomStack>
+		<name>
+			
+		</name>
+		<desc>
+			
+		</desc>
+		<pda>
+			
+		</pda>
+		<header>
+			MushroomStack
+		</header>
+	</mushroomStack>
 	<enum>
 		<name>
 			

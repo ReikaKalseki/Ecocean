@@ -1,0 +1,211 @@
+﻿using System;
+using System.IO;
+using System.Reflection;
+using System.Collections.Generic;
+
+using UnityEngine;
+
+using SMLHelper.V2.Handlers;
+using SMLHelper.V2.Assets;
+using SMLHelper.V2.Utility;
+
+using ReikaKalseki.DIAlterra;
+
+namespace ReikaKalseki.Ecocean {
+	
+	public class MushroomStack : BasicCustomPlant {
+		
+		private static readonly string STEM_NAME = "column_stem_";
+		private static readonly string CHILD_NAME = "column_plant_";
+		
+		public MushroomStack(XMLLocale.LocaleEntry e) : base(e, new FloraPrefabFetch("99cdec62-302b-4999-ba49-f50c73575a4d"), "adad4264-23ee-4303-8369-9f6471d91c28", "Samples") {
+			glowIntensity = 2F;
+			finalCutBonus = 0;
+			OnFinishedPatching += () => {addPDAEntry(e.pda, 15F, e.getField<string>("header"));};
+		}
+		
+		public override Vector2int SizeInInventory {
+			get {return new Vector2int(1, 1);}
+		}
+		
+		public override void prepareGameObject(GameObject go, Renderer[] r0) {
+			base.prepareGameObject(go, r0);
+			foreach (Renderer r in r0) {
+				UnityEngine.Object.DestroyImmediate(r.gameObject);
+			}
+			go.EnsureComponent<LargeWorldEntity>().cellLevel = LargeWorldEntity.CellLevel.Medium;
+			MushroomStackTag g = go.EnsureComponent<MushroomStackTag>();
+			int arms = UnityEngine.Random.Range(3, 6);
+			for (int i = 0; i < arms; i++) {
+				GameObject stem = getOrCreateStem(go, i);
+				Vector3 pos = Vector3.zero;
+				float lastTilt = 0;
+				int steps = UnityEngine.Random.Range(11, 18);
+				for (int i0 = 0; i0 <= steps; i0++) {
+					float tilt;
+					GameObject child = getOrCreateSubplant("99cdec62-302b-4999-ba49-f50c73575a4d", stem, i0, pos, lastTilt, out tilt);
+					lastTilt = tilt;
+					pos = pos+child.transform.up.normalized*0.25F;
+					prepareSubplant(child);
+				}
+				float ang = i*360F/arms+UnityEngine.Random.Range(-15F, 15F);
+				float rad = Mathf.Deg2Rad*(-ang+90);
+				stem.transform.localPosition = new Vector3(Mathf.Cos(rad)*0.4F, 0, Mathf.Sin(rad)*0.4F);
+				stem.transform.localRotation = Quaternion.Euler(0, ang, 0);
+			}
+			go.layer = LayerID.Useable;
+			foreach (Collider c in go.GetComponentsInChildren<Collider>(true)) {
+				c.isTrigger = true;
+			}
+		}
+		
+		private GameObject getOrCreateStem(GameObject go, int i) {
+			string nm = STEM_NAME+i;
+			GameObject child = ObjectUtil.getChildObject(go, nm);
+			if (!child) {
+				child = new GameObject(nm);
+				child.transform.parent = go.transform;
+				child.transform.localPosition = Vector3.zero;
+				child.transform.localScale = Vector3.one;
+			}
+			return child;
+		}
+		
+		private GameObject getOrCreateSubplant(string pfb, GameObject go, int i0, Vector3 pos, float lastTilt, out float tilt) {
+			string nm = CHILD_NAME+i0;
+			GameObject child = ObjectUtil.getChildObject(go, nm);
+			if (!child) {
+				child = ObjectUtil.createWorldObject(pfb);	
+				child.name = nm;
+				child.transform.parent = go.transform;
+				child.transform.localPosition = pos;
+				float maxTilt = 30F;
+				if (pos.y < 0.5F)
+					maxTilt = Mathf.Min(maxTilt, pos.y*60);
+				if (lastTilt > 60)
+					maxTilt = Mathf.Max(0, 90-lastTilt);
+				tilt = (i0 == 0 ? UnityEngine.Random.Range(5F, 20F) : UnityEngine.Random.Range(-20F, maxTilt))+lastTilt;
+				child.transform.localEulerAngles = new Vector3(tilt, UnityEngine.Random.Range(-10F, 10F), 0);
+				//SNUtil.writeToChat(i0+":"+tilt);
+				child.transform.localScale = Vector3.one;
+				foreach (Renderer r in child.GetComponentsInChildren<Renderer>())
+					r.transform.localRotation = Quaternion.Euler(-90, 0, 0);
+			}
+			else {
+				tilt = lastTilt;
+			}
+			return child;
+		}
+		
+		private void prepareSubplant(GameObject child) {
+			child.EnsureComponent<LargeWorldEntity>().cellLevel = LargeWorldEntity.CellLevel.Medium;
+			child.EnsureComponent<TechTag>().type = TechType;
+			
+			foreach (Renderer r in child.GetComponentsInChildren<Renderer>(true)) {
+				r.materials[0].SetColor("_GlowColor", Color.white);
+				RenderUtil.makeTransparent(r);
+				RenderUtil.setEmissivity(r, 2);
+				RenderUtil.setGlossiness(r, 4, 0, 0.6F);
+				RenderUtil.swapToModdedTextures(r, this);
+			}
+		}
+		
+		public override float getScaleInGrowbed(bool indoors) {
+			return indoors ? 0.25F : 0.5F;
+		}
+		
+	}
+	
+	class MushroomStackTag : MonoBehaviour {
+		
+		private readonly List<PlantSegment> segments = new List<PlantSegment>();
+		private GrownPlant grown;
+		private float creationTime = 999999;
+		private float lastContinuityCheckTime = -1;
+		
+		class PlantSegment {
+			
+			internal readonly Renderer renderer;
+			internal readonly LiveMixin live;
+			internal readonly GameObject obj;
+			internal readonly int index;
+			
+			internal PlantSegment(Renderer r) {
+				renderer = r;
+				live = r.gameObject.FindAncestor<LiveMixin>();
+				obj = r.transform.parent.gameObject;
+				string n = obj.name;
+				if (!string.IsNullOrEmpty(n) && n.Contains("leaf_aux")) {
+					index = int.Parse(n.Substring(n.Length-1));
+				}
+				else {
+					index = -1;
+				}
+			}
+			
+		}
+		
+		void Start() {
+			EcoceanMod.mushroomStack.prepareGameObject(gameObject, null);
+			creationTime = DayNightCycle.main.timePassedAsFloat;
+			grown = gameObject.GetComponent<GrownPlant>();
+			if (grown) {
+    			gameObject.SetActive(true);
+    		}
+    		else {
+    			gameObject.transform.localScale = new Vector3(1, 1, 1);
+				gameObject.transform.rotation = Quaternion.identity;
+    		}
+		}
+		
+		void Update() {
+			bool isNew = DayNightCycle.main.timePassedAsFloat-creationTime <= 0.1F;
+			if (segments.Count == 0 || isNew) {
+				segments.Clear();
+				foreach (Renderer r in gameObject.GetComponentsInChildren<Renderer>()) {
+					segments.Add(new PlantSegment(r));
+				}
+			}
+			float time = DayNightCycle.main.timePassedAsFloat;
+			bool kill = false;
+			if (time-lastContinuityCheckTime >= 1) {
+				lastContinuityCheckTime = time;
+				List<int> presenceSet = new List<int>();
+				foreach (PlantSegment s in segments) {
+					if (!s.renderer) {
+						kill = true;
+						continue;
+					}
+					//float f = (float)Math.Abs(2*VentKelp.noiseField.getValue(r.gameObject.transform.position+Vector3.up*DayNightCycle.main.timePassedAsFloat*7.5F))-0.75F;
+					if (!s.live || s.live.health <= 0) {
+						kill = true;
+					}
+					if (s.index >= 0) {
+						presenceSet.Add(s.index);
+					}
+				}
+				presenceSet.Sort();
+				int last = -1;
+				foreach (int val in presenceSet) {
+					if (val-last > 1) {
+						kill = true;
+					}
+					last = val;
+				}
+			}
+			if (kill && !isNew) {/*
+				Planter p = gameObject.GetComponentInParent<Planter>();
+				GrownPlant g = gameObject.GetComponentInParent<GrownPlant>();
+				if (p && g) {
+					p.RemoveItem(p.GetSlotID(g.seed));
+					p.storageContainer.container.DestroyItem(SeaToSeaMod.kelp.seed.TechType);
+					//p.RemoveItem(g.seed);
+				}
+				UnityEngine.Object.DestroyImmediate(gameObject);*/
+				gameObject.GetComponentInParent<LiveMixin>().TakeDamage(99999F);
+				SNUtil.log("Killing incomplete/killed mushroom stack @ "+transform.position);
+			}
+		}
+		
+	}
+}

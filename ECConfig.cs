@@ -20,6 +20,7 @@ namespace ReikaKalseki.Ecocean
 			[ConfigEntry("Plankton Collection Multiplier", typeof(float), 1, 0.1F, 10F, 1)]PLANKTONRATE,
 			[ConfigEntry("Magnetic Anomaly Frequency", typeof(float), 0.2F, 0F, 1F, 0)]GLOBALCOMPASS,
 			[ConfigEntry("Leviathan Damage Immunity", typeof(float), 0.5F, 0F, 1F, 0)]LEVIIMMUNE, //To what degree to make leviathans immune to damage, fractionally (so 1 = 100% immune)
+			[ConfigEntry("Electrical Defense Damage Cap", typeof(float), 20F, 1F, 1000F, 60F)]DEFENSECLAMP, //The maximum damage dealt by the seamoth electrical defense.
 		}
 	}
 }
