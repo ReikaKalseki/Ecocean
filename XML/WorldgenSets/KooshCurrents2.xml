@@ -23,7 +23,7 @@
       <z>0.25</z>
     </scale>
     <xmlID>c19a153e-1a66-4483-9cef-406985248dfc</xmlID>
-    <tech>WaterCurrent_HotStrong</tech>
+    <tech>WaterCurrent</tech>
   </customprefab>
   <customprefab>
     <prefab>WaterCurrent_HotStrong</prefab>
@@ -49,6 +49,6 @@
       <z>0.33</z>
     </scale>
     <xmlID>e6ffb7a1-4b98-437b-bf69-be308235a2c6</xmlID>
-    <tech>WaterCurrent_HotStrong</tech>
+    <tech>WaterCurrent</tech>
   </customprefab>
 </Root>

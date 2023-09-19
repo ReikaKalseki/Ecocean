@@ -18,7 +18,7 @@ namespace ReikaKalseki.Ecocean {
 		private static readonly string STEM_NAME = "column_stem_";
 		private static readonly string CHILD_NAME = "column_plant_";
 		
-		public MushroomStack(XMLLocale.LocaleEntry e) : base(e, new FloraPrefabFetch("99cdec62-302b-4999-ba49-f50c73575a4d"), "adad4264-23ee-4303-8369-9f6471d91c28", "Samples") {
+		public MushroomStack(XMLLocale.LocaleEntry e) : base(e, new FloraPrefabFetch("99cdec62-302b-4999-ba49-f50c73575a4d"), "10d3c291-f343-4d7c-a68a-ecc64229d086", "Samples") {
 			glowIntensity = 2F;
 			finalCutBonus = 0;
 			OnFinishedPatching += () => {addPDAEntry(e.pda, 15F, e.getField<string>("header"));};
@@ -29,21 +29,24 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		public override void prepareGameObject(GameObject go, Renderer[] r0) {
+			//SNUtil.writeToChat("Prepared mushroomstack "+go.GetFullHierarchyPath());
 			base.prepareGameObject(go, r0);
 			foreach (Renderer r in r0) {
 				UnityEngine.Object.DestroyImmediate(r.gameObject);
 			}
+			bool grown = go.GetFullHierarchyPath().ToLowerInvariant().Contains("planter");
+			prepareObject(go);
 			go.EnsureComponent<LargeWorldEntity>().cellLevel = LargeWorldEntity.CellLevel.Medium;
 			MushroomStackTag g = go.EnsureComponent<MushroomStackTag>();
-			int arms = UnityEngine.Random.Range(3, 6);
+			int arms = UnityEngine.Random.Range(3, grown ? 5 : 6);
 			for (int i = 0; i < arms; i++) {
 				GameObject stem = getOrCreateStem(go, i);
 				Vector3 pos = Vector3.zero;
 				float lastTilt = 0;
-				int steps = UnityEngine.Random.Range(11, 18);
+				int steps = UnityEngine.Random.Range(11, grown ? 15 : 18);
 				for (int i0 = 0; i0 <= steps; i0++) {
 					float tilt;
-					GameObject child = getOrCreateSubplant("99cdec62-302b-4999-ba49-f50c73575a4d", stem, i0, pos, lastTilt, out tilt);
+					GameObject child = getOrCreateSubplant("99cdec62-302b-4999-ba49-f50c73575a4d", grown, stem, i0, pos, lastTilt, out tilt);
 					lastTilt = tilt;
 					pos = pos+child.transform.up.normalized*0.25F;
 					prepareSubplant(child);
@@ -56,7 +59,19 @@ namespace ReikaKalseki.Ecocean {
 			go.layer = LayerID.Useable;
 			foreach (Collider c in go.GetComponentsInChildren<Collider>(true)) {
 				c.isTrigger = true;
+				c.gameObject.layer = LayerID.Useable;
 			}
+		}
+		
+		private void prepareObject(GameObject go) {
+			ObjectUtil.removeComponent<Pickupable>(go);
+			ObjectUtil.removeComponent<PlantBehaviour>(go);
+			ObjectUtil.removeComponent<DamageOnPickup>(go);
+			ObjectUtil.removeComponent<Plantable>(go);
+			ObjectUtil.removeComponent<FMOD_StudioEventEmitter>(go);
+			LiveMixin lv = go.GetComponent<LiveMixin>();
+			lv.data.maxHealth = 90;
+			lv.health = lv.maxHealth;
 		}
 		
 		private GameObject getOrCreateStem(GameObject go, int i) {
@@ -67,27 +82,36 @@ namespace ReikaKalseki.Ecocean {
 				child.transform.parent = go.transform;
 				child.transform.localPosition = Vector3.zero;
 				child.transform.localScale = Vector3.one;
+				child.layer = LayerID.Useable;
 			}
 			return child;
 		}
 		
-		private GameObject getOrCreateSubplant(string pfb, GameObject go, int i0, Vector3 pos, float lastTilt, out float tilt) {
+		private GameObject getOrCreateSubplant(string pfb, bool grown, GameObject go, int i0, Vector3 pos, float lastTilt, out float tilt) {
 			string nm = CHILD_NAME+i0;
 			GameObject child = ObjectUtil.getChildObject(go, nm);
 			if (!child) {
 				child = ObjectUtil.createWorldObject(pfb);	
+				prepareObject(child);
 				child.name = nm;
 				child.transform.parent = go.transform;
 				child.transform.localPosition = pos;
-				float maxTilt = 30F;
+				float maxTilt = grown ? 20F : 30F;
 				if (pos.y < 0.5F)
 					maxTilt = Mathf.Min(maxTilt, pos.y*60);
-				if (lastTilt > 60)
-					maxTilt = Mathf.Max(0, 90-lastTilt);
+				if (grown) {
+					if (lastTilt >= 30)
+						maxTilt = -5;
+				}
+				else {
+					if (lastTilt > 60)
+						maxTilt = Mathf.Max(0, 90-lastTilt);
+				}
 				tilt = (i0 == 0 ? UnityEngine.Random.Range(5F, 20F) : UnityEngine.Random.Range(-20F, maxTilt))+lastTilt;
 				child.transform.localEulerAngles = new Vector3(tilt, UnityEngine.Random.Range(-10F, 10F), 0);
 				//SNUtil.writeToChat(i0+":"+tilt);
 				child.transform.localScale = Vector3.one;
+				child.layer = LayerID.Useable;
 				foreach (Renderer r in child.GetComponentsInChildren<Renderer>())
 					r.transform.localRotation = Quaternion.Euler(-90, 0, 0);
 			}
@@ -104,7 +128,7 @@ namespace ReikaKalseki.Ecocean {
 			foreach (Renderer r in child.GetComponentsInChildren<Renderer>(true)) {
 				r.materials[0].SetColor("_GlowColor", Color.white);
 				RenderUtil.makeTransparent(r);
-				RenderUtil.setEmissivity(r, 2);
+				RenderUtil.setEmissivity(r, 1);
 				RenderUtil.setGlossiness(r, 4, 0, 0.6F);
 				RenderUtil.swapToModdedTextures(r, this);
 			}
@@ -112,6 +136,22 @@ namespace ReikaKalseki.Ecocean {
 		
 		public override float getScaleInGrowbed(bool indoors) {
 			return indoors ? 0.25F : 0.5F;
+		}
+		
+		public override bool isResource() {
+			return false;
+		}
+		
+		public override Plantable.PlantSize getSize() {
+			return Plantable.PlantSize.Large;
+		}
+		
+		public override bool canGrowAboveWater() {
+			return true;
+		}
+		
+		public override bool canGrowUnderWater() {
+			return true;
 		}
 		
 	}
@@ -164,6 +204,8 @@ namespace ReikaKalseki.Ecocean {
 				segments.Clear();
 				foreach (Renderer r in gameObject.GetComponentsInChildren<Renderer>()) {
 					segments.Add(new PlantSegment(r));
+					if (transform.position.y < 0)
+						RenderUtil.swapTextures(EcoceanMod.modDLL, r, "Textures/Plants/MushroomStackPink");
 				}
 			}
 			float time = DayNightCycle.main.timePassedAsFloat;
@@ -192,6 +234,9 @@ namespace ReikaKalseki.Ecocean {
 					}
 					last = val;
 				}
+			}
+			foreach (PlantSegment s in segments) {
+				RenderUtil.setEmissivity(s.renderer, 1+0.4F*Mathf.Sin(s.renderer.gameObject.GetInstanceID()*-11.7851F+time*0.733F));
 			}
 			if (kill && !isNew) {/*
 				Planter p = gameObject.GetComponentInParent<Planter>();

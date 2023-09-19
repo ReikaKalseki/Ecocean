@@ -22,7 +22,7 @@
       <y>4</y>
       <z>0.67</z>
     </scale>
-    <tech>WaterCurrent_Basic</tech>
+    <tech>WaterCurrent</tech>
   </customprefab>
   <customprefab>
     <prefab>WaterCurrent_Basic</prefab>
@@ -48,7 +48,7 @@
       <z>0.5</z>
     </scale>
     <xmlID>f767c8ae-11cc-47d9-9e44-67b0358e6ead</xmlID>
-    <tech>WaterCurrent_Basic</tech>
+    <tech>WaterCurrent</tech>
   </customprefab>
   <customprefab>
     <prefab>WaterCurrent_Impassable</prefab>
@@ -97,7 +97,7 @@
       <y>1.8</y>
       <z>0.25</z>
     </scale>
-    <tech>WaterCurrent_Strong</tech>
+    <tech>WaterCurrent</tech>
   </customprefab>
   <customprefab>
     <prefab>WaterCurrent_Basic</prefab>
@@ -146,7 +146,7 @@
       <y>5</y>
       <z>3</z>
     </scale>
-    <tech>WaterCurrent_Strong</tech>
+    <tech>WaterCurrent</tech>
   </customprefab>
   <customprefab>
     <prefab>WaterCurrent_Basic</prefab>
@@ -195,7 +195,7 @@
       <y>2.1</y>
       <z>0.33</z>
     </scale>
-    <tech>WaterCurrent_Hot</tech>
+    <tech>WaterCurrent</tech>
   </customprefab>
   <customprefab>
     <prefab>WaterCurrent_Hot</prefab>
@@ -220,6 +220,6 @@
       <y>3.5</y>
       <z>0.5</z>
     </scale>
-    <tech>WaterCurrent_Hot</tech>
+    <tech>WaterCurrent</tech>
   </customprefab>
 </Root>

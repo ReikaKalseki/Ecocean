@@ -22,7 +22,7 @@
       <y>4</y>
       <z>0.25</z>
     </scale>
-    <tech>WaterCurrent_Strong</tech>
+    <tech>WaterCurrent</tech>
   </customprefab>
   <customprefab>
     <prefab>WaterCurrent_Strong</prefab>
@@ -47,6 +47,6 @@
       <y>2</y>
       <z>0.5</z>
     </scale>
-    <tech>WaterCurrent_Impassable</tech>
+    <tech>WaterCurrent</tech>
   </customprefab>
 </Root>

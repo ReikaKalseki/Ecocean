@@ -178,13 +178,19 @@
 	</piezoCrystal>
 	<mushroomStack>
 		<name>
-			
+			Nozzlevine
 		</name>
 		<desc>
-			
+			A midsize tubular plant consisting of a linked chain of conical units.
 		</desc>
 		<pda>
+			One of the rarer flora species on 4546B, nozzlevine excels at siphoning material from the soil, which might explain why it can maintain such a vibrant color and luminosity even in regions where the sunlight and/or soil content is poor and little else can thrive.
 			
+			Each plant is composed of one or more chainlike stems, which are in turn comprised of a series of linked subparts. Each junction is slightly non-axial, resulting in the overall chain following a curved trajectory.
+			
+			Given that these flora seem to expend all their energy and nutrients on growth and luminosity, there remains little material within them that could be put to functional use.
+			
+			Assessment: Decorative
 		</pda>
 		<header>
 			MushroomStack
