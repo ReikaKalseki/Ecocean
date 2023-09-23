@@ -45,10 +45,12 @@ namespace ReikaKalseki.Ecocean {
 			ObjectUtil.removeChildObject(world, "xCurrenBubbles");
 			world.layer = LayerID.Useable;
 			world.EnsureComponent<T>();
+			world.name = ClassID+"[Clone]";
 			return world;
 	    }
 			
 	    protected override void ProcessPrefab(GameObject world) {
+			base.ProcessPrefab(world);
 			world.EnsureComponent<TechTag>().type = EcoceanMod.waterCurrentCommon;
 	    }
 			
@@ -119,6 +121,8 @@ namespace ReikaKalseki.Ecocean {
 		internal readonly bool isHotWater;
 		internal readonly float currentStrength;
 		
+		private float age;
+		
 		internal WaterCurrentTag(bool temp, float str) {
 			isHotWater = temp;
 			currentStrength = str;
@@ -132,6 +136,14 @@ namespace ReikaKalseki.Ecocean {
 				current = GetComponent<Current>();
 			if (!render)
 				render = GetComponentInChildren<Renderer>();
+			
+			age += Time.deltaTime;
+			
+			if (age > 1 && age < 2 && Vector3.Distance(transform.position, Vector3.zero) <= 10) {
+				UnityEngine.Object.Destroy(gameObject);
+				return;
+			}
+			
 			current.objectForce = currentStrength;
 			current.activeAtDay = true;
 			current.activeAtNight = true;
