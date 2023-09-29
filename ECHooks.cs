@@ -53,8 +53,11 @@ namespace ReikaKalseki.Ecocean {
 	    }
 	    
 	    public static void tickSeamoth(SeaMoth sm) {
-	    	if (sm.toggleLights.lightsActive)
+			if (sm.toggleLights.lightsActive) {
 	    		GlowOil.handleLightTick(sm.transform);
+	    		if (UnityEngine.Random.Range(0F, 1F) <= 0.02F)
+	    			attractToLight(sm);
+			}
 	    }
 	    
 	    public static void tickPrawn(Exosuit e) {
@@ -63,8 +66,11 @@ namespace ReikaKalseki.Ecocean {
 	    }
 	    
 	    public static void tickCyclops(SubRoot sub) {
-	    	if (sub.subLightsOn) //lights always on
+			if (sub.subLightsOn) {
 	    		GlowOil.handleLightTick(sub.transform);
+	    		if (UnityEngine.Random.Range(0F, 1F) <= 0.04F)
+	    			attractToLight(sub);
+			}
 	    }
 	    
 	    public static void tickPlayer(Player ep) {	    
@@ -242,6 +248,12 @@ namespace ReikaKalseki.Ecocean {
 					go.EnsureComponent<ECDragon>();
 				else if (pi && VanillaFlora.getFromID(pi.ClassId) == VanillaFlora.CREEPVINE_FERTILE)
 					CreepvineCollisionDetector.addCreepvineSeedCollision(go);
+				else if (pi && (pi.ClassId == VanillaResources.NICKEL.prefab || pi.ClassId == VanillaResources.LARGE_NICKEL.prefab)) {
+					foreach (Renderer r in pi.GetComponentsInChildren<Renderer>()) {
+						RenderUtil.swapTextures(EcoceanMod.modDLL, r, "Textures/Nickel");
+						RenderUtil.setGlossiness(r, 4, 2, 0.4F);
+					}
+				}
 	    	}
 	    }
 		
@@ -380,6 +392,26 @@ namespace ReikaKalseki.Ecocean {
 			if (c is CrabSnake || c is CrabSquid)
 				return !horn;
 			return false;
+		}
+		
+		internal static bool attractedToLight(Creature c, MonoBehaviour obj) {
+			if (c is SeaDragon)
+				return true;
+			if (c is BoneShark)
+				return !(obj is SubRoot);
+			return false;
+		}
+		
+		public static void attractToLight(MonoBehaviour obj) {
+			float range = obj is SubRoot ? 150 : 80;
+			HashSet<Creature> set = WorldUtil.getObjectsNearWithComponent<Creature>(obj.transform.position, range);
+			foreach (Creature c in set) {
+				if (attractedToLight(c, obj) && !c.GetComponent<WaterParkCreature>() && (obj is SubRoot || ObjectUtil.isLookingAt(obj.transform, c.transform.position, 45))) {
+					float chance = Mathf.Clamp01(1F-Vector3.Distance(c.transform.position, obj.transform.position)/range);
+					if (UnityEngine.Random.Range(0F, 1F) <= chance)
+						attractCreatureToTarget(c, obj, false);
+				}
+			}
 		}
 		
 		internal static void attractCreatureToTarget(Creature c, MonoBehaviour obj, bool isHorn) {
