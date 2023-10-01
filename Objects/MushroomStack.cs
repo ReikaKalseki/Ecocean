@@ -204,8 +204,11 @@ namespace ReikaKalseki.Ecocean {
 				segments.Clear();
 				foreach (Renderer r in gameObject.GetComponentsInChildren<Renderer>()) {
 					segments.Add(new PlantSegment(r));
-					if (transform.position.y < 0)
-						RenderUtil.swapTextures(EcoceanMod.modDLL, r, "Textures/Plants/MushroomStackPink");
+					if (transform.position.y < 0) {
+						Planter p = gameObject.FindAncestor<Planter>();
+						if (!(p && p.environment == Planter.PlantEnvironment.Air))
+							RenderUtil.swapTextures(EcoceanMod.modDLL, r, "Textures/Plants/MushroomStackPink");
+					}
 				}
 			}
 			float time = DayNightCycle.main.timePassedAsFloat;
