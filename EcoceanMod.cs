@@ -42,8 +42,8 @@ namespace ReikaKalseki.Ecocean
     
     public static PiezoCrystal piezo;
     
-    internal static VoidBubble voidBubble;    
-    internal static VoidTongue tongue;
+    public static VoidBubble voidBubble;    
+    public static VoidTongue tongue;
     
     public static TreeBud mushTreeResource;
     
@@ -131,8 +131,9 @@ namespace ReikaKalseki.Ecocean
 		//GenUtil.registerSlotWorldgen(mushTreeResource.ClassID, mushTreeResource.PrefabFileName, mushTreeResource.TechType, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Near, BiomeType.MushroomForest_GiantTreeInteriorRecess, 1, 3F);
 		//GenUtil.registerSlotWorldgen(mushTreeResource.ClassID, mushTreeResource.PrefabFileName, mushTreeResource.TechType, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Near, BiomeType.MushroomForest_GiantTreeInteriorSpecial, 1, 5F);
 		
-		BioReactorHandler.Main.SetBioReactorCharge(glowShroom.seed.TechType, BaseBioReactor.GetCharge(TechType.SnakeMushroomSpore)*3);
+		BioReactorHandler.Main.SetBioReactorCharge(lavaShroom.seed.TechType, BaseBioReactor.GetCharge(TechType.SnakeMushroomSpore)*3);
 		BioReactorHandler.Main.SetBioReactorCharge(glowOil.TechType, BaseBioReactor.GetCharge(TechType.BloodOil)*6);
+		BioReactorHandler.Main.SetBioReactorCharge(mushroomStack.seed.TechType, BaseBioReactor.GetCharge(TechType.GarryFish)*0.6F);
 		
 		GenUtil.registerWorldgen(new PositionedPrefab(VanillaCreatures.REAPER.prefab, reaperlessTripleVent.setY(-200)));
 		GenUtil.registerWorldgen(new PositionedPrefab(VanillaCreatures.REAPER.prefab, northDuneBit.setY(-320)));

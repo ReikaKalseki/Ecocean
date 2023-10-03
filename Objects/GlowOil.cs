@@ -419,7 +419,7 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		void OnDestroy() {
-			
+			GetComponent<ResourceTracker>().Unregister();
 		}
 		
 		void OnDisable() {
