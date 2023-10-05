@@ -31,8 +31,11 @@ namespace ReikaKalseki.Ecocean {
 		public override void prepareGameObject(GameObject go, Renderer[] r0) {
 			//SNUtil.writeToChat("Prepared mushroomstack "+go.GetFullHierarchyPath());
 			base.prepareGameObject(go, r0);
-			foreach (Renderer r in r0) {
-				UnityEngine.Object.DestroyImmediate(r.gameObject);
+			if (r0 != null) {
+				foreach (Renderer r in r0) {
+					if (r)
+						UnityEngine.Object.DestroyImmediate(r.gameObject);
+				}
 			}
 			bool grown = go.GetFullHierarchyPath().ToLowerInvariant().Contains("planter");
 			prepareObject(go);
@@ -41,6 +44,8 @@ namespace ReikaKalseki.Ecocean {
 			int arms = UnityEngine.Random.Range(3, grown ? 5 : 6);
 			for (int i = 0; i < arms; i++) {
 				GameObject stem = getOrCreateStem(go, i);
+				if (!stem)
+					continue;
 				Vector3 pos = Vector3.zero;
 				float lastTilt = 0;
 				int steps = UnityEngine.Random.Range(11, grown ? 15 : 18);
@@ -215,31 +220,19 @@ namespace ReikaKalseki.Ecocean {
 			bool kill = false;
 			if (time-lastContinuityCheckTime >= 1) {
 				lastContinuityCheckTime = time;
-				List<int> presenceSet = new List<int>();
 				foreach (PlantSegment s in segments) {
 					if (!s.renderer) {
 						kill = true;
 						continue;
 					}
 					//float f = (float)Math.Abs(2*VentKelp.noiseField.getValue(r.gameObject.transform.position+Vector3.up*DayNightCycle.main.timePassedAsFloat*7.5F))-0.75F;
-					if (!s.live || s.live.health <= 0) {
+					if (!s.live || s.live.health <= 0)
 						kill = true;
-					}
-					if (s.index >= 0) {
-						presenceSet.Add(s.index);
-					}
-				}
-				presenceSet.Sort();
-				int last = -1;
-				foreach (int val in presenceSet) {
-					if (val-last > 1) {
-						kill = true;
-					}
-					last = val;
 				}
 			}
 			foreach (PlantSegment s in segments) {
-				RenderUtil.setEmissivity(s.renderer, 1+0.4F*Mathf.Sin(s.renderer.gameObject.GetInstanceID()*-11.7851F+time*0.733F));
+				if (s.renderer)
+					RenderUtil.setEmissivity(s.renderer, 1+0.4F*Mathf.Sin(s.renderer.gameObject.GetInstanceID()*-11.7851F+time*0.733F));
 			}
 			if (kill && !isNew) {/*
 				Planter p = gameObject.GetComponentInParent<Planter>();

@@ -7,6 +7,7 @@ using UnityEngine.Serialization;
 using UnityEngine.Scripting;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using System.Linq;
 using ReikaKalseki.DIAlterra;
 using SMLHelper.V2.Handlers;
 using SMLHelper.V2.Utility;
@@ -30,7 +31,7 @@ namespace ReikaKalseki.Ecocean
 		private float explodeIn = -1;
 		
 		private GameObject podGO;
-		private Material podTexture;
+		private Renderer[] podRenders;
 		
 		private Vector3 effectivePodCenter;
 		
@@ -40,9 +41,9 @@ namespace ReikaKalseki.Ecocean
         	
 		void Start() {
 			podGO = ObjectUtil.getChildObject(gameObject, "stone_*");
-			podTexture = podGO.GetComponentInChildren<Renderer>().materials[0];
+			podRenders = podGO.GetComponentsInChildren<Renderer>();
 			colliders = gameObject.GetComponentsInChildren<Collider>();
-			effectivePodCenter = transform.position+Vector3.up*17.5F;
+			effectivePodCenter = podRenders.First(r => !ObjectUtil.isLODRenderer(r)).bounds.center;//transform.position+Vector3.up*17.5F;
 		}
 			
 		void Update() {
@@ -63,7 +64,10 @@ namespace ReikaKalseki.Ecocean
 		
 		void showPod() {
 			//podGO.SetActive(true);
-			podTexture.DisableKeyword("FX_BURST");
+			foreach (Renderer r in podRenders) {
+				foreach (Material m in r.materials)
+					m.DisableKeyword("FX_BURST");
+			}
 			foreach (Collider c in colliders) {
 				c.enabled = true;
 				c.gameObject.SetActive(true);
@@ -132,7 +136,10 @@ namespace ReikaKalseki.Ecocean
 			lastExplodeTime = time;
 			isExploded = true;
 			//podGO.SetActive(false);
-			podTexture.EnableKeyword("FX_BURST");
+			foreach (Renderer r in podRenders) {
+				foreach (Material m in r.materials)
+					m.EnableKeyword("FX_BURST");
+			}
 			foreach (Collider c in colliders) {
 				c.enabled = false;
 				c.gameObject.SetActive(false);
@@ -154,7 +161,7 @@ namespace ReikaKalseki.Ecocean
 				go.GetComponent<Rigidbody>().drag *= 2F;
 			}
 			SoundManager.playSoundAt(explosionSound, effectivePodCenter, false, 64);
-			HashSet<GameObject> set = WorldUtil.getObjectsNear(transform.position, 35);
+			HashSet<GameObject> set = WorldUtil.getObjectsNear(effectivePodCenter, 35);
 			HashSet<int> used = new HashSet<int>();
 			foreach (GameObject go in set) {
 				if (used.Contains(go.GetInstanceID()))
@@ -186,6 +193,7 @@ namespace ReikaKalseki.Ecocean
 						onExplodingAnchorPodDamageEvent.Invoke(e);
 						amt = e.damageAmount;
 					}
+					//SNUtil.writeToChat("Damaging "+lv+" from anchor pod explosion @ "+effectivePodCenter+" x"+amt);
 					lv.TakeDamage(amt, go.transform.position, DamageType.Explosive, gameObject);
 					Rigidbody rb = go.GetComponent<Rigidbody>();
 					if (rb) {
