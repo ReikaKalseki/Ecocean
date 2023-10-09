@@ -35,7 +35,6 @@ namespace ReikaKalseki.Ecocean {
 	    	DIHooks.onItemPickedUpEvent += onPickup;
 			
 	    	DIHooks.onPlayerTickEvent += tickPlayer;
-	    	DIHooks.onSeamothTickEvent += tickSeamoth;
 	    	DIHooks.onPrawnTickEvent += tickPrawn;
 	    	DIHooks.onCyclopsTickEvent += tickCyclops;
 	    	
@@ -52,11 +51,43 @@ namespace ReikaKalseki.Ecocean {
 	    	bloodVine.AddRange(VanillaFlora.BLOOD_KELP.getPrefabs(true, true));
 	    }
 	    
-	    public static void tickSeamoth(SeaMoth sm) {
-			if (sm.toggleLights.lightsActive) {
-	    		GlowOil.handleLightTick(sm.transform);
-	    		if (UnityEngine.Random.Range(0F, 1F) <= 0.02F)
-	    			attractToLight(sm);
+		class ECMoth : MonoBehaviour {
+			
+			private SeaMoth seamoth;
+			
+			private bool lightsOn;
+			
+			private readonly LinkedList<float> lightToggles = new LinkedList<float>();
+			
+			void Update() {
+				if (!seamoth)
+					seamoth = GetComponent<SeaMoth>();
+				float time = DayNightCycle.main.timePassedAsFloat;
+				while (lightToggles.First != null && time-lightToggles.First.Value > 3) {
+					lightToggles.RemoveFirst();
+				}
+				if (seamoth.toggleLights.lightsActive != lightsOn) {
+					lightToggles.AddLast(time);
+					lightsOn = seamoth.toggleLights.lightsActive;
+				}
+				int flashCount = lightToggles.Count;
+				//SNUtil.writeToChat(flashCount+" > "+((flashCount-5)/200F).ToString("0.0000"));
+				if (flashCount > 5 && UnityEngine.Random.Range(0F, 1F) < (flashCount-5)/250F/* && seamoth.mainAnimator.GetBool("reaper_attack")*/) {
+					GameObject go = WorldUtil.areAnyObjectsNear(transform.position, 60, obj => {
+							ReaperLeviathan rl = obj.GetComponent<ReaperLeviathan>();
+							return rl && rl.holdingVehicle == seamoth;
+					    }
+					);
+					//SNUtil.writeToChat("Found object "+go);
+					if (go) {
+						go.GetComponent<ReaperLeviathan>().ReleaseVehicle();
+					}
+				}
+				if (lightsOn) {
+		    		GlowOil.handleLightTick(transform);
+		    		if (UnityEngine.Random.Range(0F, 1F) <= 0.02F)
+		    			attractToLight(seamoth);
+				}
 			}
 	    }
 	    
@@ -88,8 +119,9 @@ namespace ReikaKalseki.Ecocean {
 	    		if (UnityEngine.Random.Range(0F, 1F) <= f*dT*data.spawnSuccessRate)
 	    			EcoceanMod.plankton.tickSpawner(ep, data, dT);
 	    	}
-		    EcoceanMod.voidBubble.tickSpawner(ep, time, dT);
 		    Vector3 pos = ep.transform.position;
+		    if (pos.setY(0).magnitude >= 1700) //more than 1200m from center
+		    	EcoceanMod.voidBubble.tickSpawner(ep, time, dT);
 		    if (pos.y <= -UnityEngine.Random.Range(1000F, 1200F) && VanillaBiomes.VOID.isInBiome(pos)) {
 		    	//if (UnityEngine.Object.FindObjectsOfType<VoidTongueTag>().Length == 0)
 		    	//	SNUtil.writeToChat("Check void grab time = "+time.ToString("000.0")+"/"+nextVoidTongueGrab.ToString("000.0"));
@@ -254,6 +286,9 @@ namespace ReikaKalseki.Ecocean {
 						RenderUtil.setGlossiness(r, 4, 2, 0.4F);
 					}
 				}
+				else if (pi && pi.ClassId == "1c34945a-656d-4f70-bf86-8bc101a27eee") {
+	    			go.EnsureComponent<ECMoth>();
+	    		}
 	    	}
 	    }
 		
@@ -279,8 +314,8 @@ namespace ReikaKalseki.Ecocean {
 				}
 				if (!sub) {
 					Rigidbody rb = c.gameObject.FindAncestor<Rigidbody>();
-					if (rb) {
-						float dh = rb.transform.position.y-g.transform.position.y;
+					if (rb) {	
+						float dh = rb.transform.position.y-g.transform.position.y-1.5F;
 						float f = 1F-(dh)/30;
 						if (v)
 							f *= 0.1F;/*
@@ -360,27 +395,29 @@ namespace ReikaKalseki.Ecocean {
 				noise.Invoke("RecalculateNoiseValues", isHorn ? 15 : 10);
 			}
 			float range = 400*strength;
-			HashSet<Creature> set = WorldUtil.getObjectsNearWithComponent<Creature>(obj.transform.position, range);
-			foreach (Creature c in set) {
-				if (!c.GetComponent<WaterParkCreature>() && attractedToSound(c, isHorn)) {
-					float chance = 0.5F*Mathf.Clamp01(1F-Vector3.Distance(c.transform.position, obj.transform.position)/range);
-					if (!Mathf.Approximately(strength, 1))
-						chance *= Mathf.Sqrt(strength);
-					if (isHorn) {
-						chance *= 4;
-						chance = Mathf.Min(chance, 0.05F);
-						if (c is Reefback || c is GhostLeviathan || c is GhostLeviatanVoid || c is ReaperLeviathan || c is SeaDragon) {
-							chance *= 5;
-							chance = Mathf.Min(chance, 0.25F);
-						}
-						if (c is Reefback && isHorn) {
-							chance *= 5;
-							chance = Mathf.Min(chance, 0.5F);
-						}
+			WorldUtil.getGameObjectsNear(obj.transform.position, range, go => tryAttractToSound(go, obj, isHorn, strength, range));
+		}
+		
+		private static void tryAttractToSound(GameObject go, MonoBehaviour obj, bool isHorn, float strength, float range) {
+			Creature c = go.GetComponent<Creature>();
+			if (c && attractedToSound(c, isHorn) && !c.GetComponent<WaterParkCreature>()) {
+				float chance = 0.5F*Mathf.Clamp01(1F-Vector3.Distance(c.transform.position, obj.transform.position)/range);
+				if (!Mathf.Approximately(strength, 1))
+					chance *= Mathf.Sqrt(strength);
+				if (isHorn) {
+					chance *= 4;
+					chance = Mathf.Min(chance, 0.05F);
+					if (c is Reefback || c is GhostLeviathan || c is GhostLeviatanVoid || c is ReaperLeviathan || c is SeaDragon) {
+						chance *= 5;
+						chance = Mathf.Min(chance, 0.25F);
 					}
-					if (UnityEngine.Random.Range(0F, 1F) <= chance)
-						attractCreatureToTarget(c, obj, isHorn);
+					if (c is Reefback && isHorn) {
+						chance *= 5;
+						chance = Mathf.Min(chance, 0.5F);
+					}
 				}
+				if (UnityEngine.Random.Range(0F, 1F) <= chance)
+					attractCreatureToTarget(c, obj, isHorn);
 			}
 		}
 		
@@ -404,14 +441,19 @@ namespace ReikaKalseki.Ecocean {
 		
 		public static void attractToLight(MonoBehaviour obj) {
 			float range = obj is SubRoot ? 150 : 80;
-			HashSet<Creature> set = WorldUtil.getObjectsNearWithComponent<Creature>(obj.transform.position, range);
-			foreach (Creature c in set) {
-				if (attractedToLight(c, obj) && !c.GetComponent<WaterParkCreature>() && (obj is SubRoot || ObjectUtil.isLookingAt(obj.transform, c.transform.position, 45))) {
-					float chance = Mathf.Clamp01(1F-Vector3.Distance(c.transform.position, obj.transform.position)/range);
-					if (UnityEngine.Random.Range(0F, 1F) <= chance)
-						attractCreatureToTarget(c, obj, false);
+			WorldUtil.getGameObjectsNear(obj.transform.position, range, go => tryAttractToLight(go, obj, range));
+		}
+		
+		private static bool tryAttractToLight(GameObject go, MonoBehaviour obj, float range) {
+			Creature c = go.GetComponent<Creature>();
+			if (c && attractedToLight(c, obj) && !c.GetComponent<WaterParkCreature>() && (obj is SubRoot || ObjectUtil.isLookingAt(obj.transform, c.transform.position, 45))) {
+				float chance = Mathf.Clamp01(1F-Vector3.Distance(c.transform.position, obj.transform.position)/range);
+				if (UnityEngine.Random.Range(0F, 1F) <= chance) {
+					attractCreatureToTarget(c, obj, false);
+					return true;
 				}
 			}
+			return false;
 		}
 		
 		internal static void attractCreatureToTarget(Creature c, MonoBehaviour obj, bool isHorn) {

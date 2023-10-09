@@ -208,22 +208,21 @@ namespace ReikaKalseki.Ecocean {
 			spawnEMP();
 			Utils.PlayOneShotPS(ObjectUtil.lookupPrefab(VanillaCreatures.CRASHFISH.prefab).GetComponent<Crash>().detonateParticlePrefab, transform.position, transform.rotation);
 			SoundManager.playSoundAt(explodeSound, transform.position, false, 60, 1);
-			HashSet<GameObject> set = WorldUtil.getObjectsNear(transform.position, 25);
-			set.Add(Player.main.gameObject);
+			HashSet<LiveMixin> set = WorldUtil.getObjectsNearWithComponent<LiveMixin>(transform.position, 25);
+			set.Add(Player.main.liveMixin);
 			HashSet<int> used = new HashSet<int>();
-			foreach (GameObject go in set) {
-				if (used.Contains(go.GetInstanceID()))
+			foreach (LiveMixin lv in set) {
+				if (used.Contains(lv.gameObject.GetInstanceID()))
 					continue;
-				used.Add(go.GetInstanceID());
-				LiveMixin lv = go.GetComponent<LiveMixin>();
-				if (lv && lv.IsAlive()) {
-					float dist = Vector3.Distance(go.transform.position, transform.position);
+				used.Add(lv.gameObject.GetInstanceID());
+				if (lv.IsAlive()) {
+					float dist = Vector3.Distance(lv.transform.position, transform.position);
 					float f = 1;
-					if (!go.FindAncestor<Player>() && !go.FindAncestor<Vehicle>())
+					if (!lv.gameObject.FindAncestor<Player>() && !lv.gameObject.FindAncestor<Vehicle>())
 						f = 1F-(Mathf.Max(0, dist-10F)/20F);
 					//SNUtil.writeToChat("Damaging "+lv+" @ "+dist+" by "+f);
-					lv.TakeDamage(lv.maxHealth*0.8F*f, go.transform.position, DamageType.Explosive, gameObject);
-					lv.TakeDamage(lv.maxHealth*0.5F*f, go.transform.position, DamageType.Electrical, gameObject);
+					lv.TakeDamage(lv.maxHealth*0.8F*f, lv.transform.position, DamageType.Explosive, gameObject);
+					lv.TakeDamage(lv.maxHealth*0.5F*f, lv.transform.position, DamageType.Electrical, gameObject);
 				}
 			}
 			UnityEngine.Object.Destroy(gameObject, 0.5F);
