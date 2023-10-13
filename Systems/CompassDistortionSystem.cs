@@ -69,15 +69,12 @@ namespace ReikaKalseki.Ecocean {
 			getOrCreateGlobalNoise();
 			float time = DayNightCycle.main.timePassedAsFloat;
 			float noise = (float)globalDistortionCutoff.getValue(new Vector3(time, 0, 0));
-			float depth = -pos.y;
+			float depth = Mathf.Max(0, -pos.y);
 			if (BiomeBase.getBiome(pos).isCaveBiome())
 				depth = 0;
-			float globalThresh = 1F+Mathf.Max(0, depth-400)/600F-2*Mathf.Clamp01(EcoceanMod.config.getFloat(ECConfig.ConfigEntries.GLOBALCOMPASS)); //config is 0-1 for "how often"
-			//SNUtil.writeToChat("Global noise level = "+noise.ToString("0.0000")+"/"+globalThresh.ToString("0.0000"));
-			if (noise >= globalThresh) {
-				ret += (float)globalDistortion.getValue(new Vector3(time, 0, 0))*360F;
-				//SNUtil.writeToChat("Disp = "+(globalDistortion.getValue(new Vector3(time, 0, 0))*360F).ToString("00.0000"));
-			}
+			float globalIntensity = 0.5F+0.5F*Mathf.Clamp01(EcoceanMod.config.getFloat(ECConfig.ConfigEntries.GLOBALCOMPASS)); //config is 0-1 for "how often"
+			globalIntensity = Mathf.Clamp01(globalIntensity-(depth-400)/200F);
+			ret += (float)globalDistortion.getValue(new Vector3(time, 0, 0))*360F*globalIntensity;
 			foreach (LocalDistortion ld in localEffects) {
 				if (ld.isInRange(pos)) {
 					ret += ld.calculate(time);

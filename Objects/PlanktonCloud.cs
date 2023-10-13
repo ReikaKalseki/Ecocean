@@ -30,9 +30,9 @@ namespace ReikaKalseki.Ecocean {
 	    internal PlanktonCloud(XMLLocale.LocaleEntry e) : base(e.key, e.name, e.desc) {
 			locale = e;
 			
-			spawnData["sparsereef"] = new BiomeSpawnData(/*5*/9, 0.5F, 1F, 190);
-			spawnData["mountains"] = new BiomeSpawnData(/*8*/30, 1F, 0F, 250);
-			spawnData["cragfield"] = new BiomeSpawnData(/*12*/18, 1, 0.5F, 100);
+			spawnData["sparsereef"] = new BiomeSpawnData(/*5*/9, 0.5F, 1F, 120);
+			spawnData["mountains"] = new BiomeSpawnData(/*8*/30, 1F, 0F, 120);
+			spawnData["cragfield"] = new BiomeSpawnData(/*12*/18, 1, 0.5F, 150);
 			spawnData["void"] = new BiomeSpawnData(/*22*/45, 4, 1, 400);
 			
 			OnFinishedPatching += () => {

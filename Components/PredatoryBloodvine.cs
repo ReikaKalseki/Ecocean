@@ -115,6 +115,9 @@ namespace ReikaKalseki.Ecocean
 				return false;
 			if (p && !p.IsSwimming())
 				return false;
+			Creature c = go.FindAncestor<Creature>();
+			if (c is ReaperLeviathan || c is GhostLeviathan || c is GhostLeviatanVoid || c is SeaDragon || c is Reefback)
+				return false;
 			return true;
 		}
 		
