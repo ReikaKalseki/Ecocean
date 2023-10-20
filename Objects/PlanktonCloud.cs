@@ -30,10 +30,10 @@ namespace ReikaKalseki.Ecocean {
 	    internal PlanktonCloud(XMLLocale.LocaleEntry e) : base(e.key, e.name, e.desc) {
 			locale = e;
 			
-			spawnData["sparsereef"] = new BiomeSpawnData(/*5*/9, 0.5F, 1F, 120);
-			spawnData["mountains"] = new BiomeSpawnData(/*8*/30, 1F, 0F, 120);
-			spawnData["cragfield"] = new BiomeSpawnData(/*12*/18, 1, 0.5F, 150);
-			spawnData["void"] = new BiomeSpawnData(/*22*/45, 4, 1, 400);
+			spawnData["sparsereef"] = new BiomeSpawnData(5, 0.5F, 1F, 120);
+			spawnData["mountains"] = new BiomeSpawnData(6, 1F, 0F, 120);
+			spawnData["cragfield"] = new BiomeSpawnData(12, 1, 0.5F, 150);
+			spawnData["void"] = new BiomeSpawnData(25, 4, 1, 400);
 			
 			OnFinishedPatching += () => {
 				SaveSystem.addSaveHandler(ClassID, new SaveSystem.ComponentFieldSaveHandler<PlanktonCloudTag>().addField("touchIntensity"));
@@ -54,7 +54,7 @@ namespace ReikaKalseki.Ecocean {
 			BloomCreature bc = world.GetComponent<BloomCreature>();
 			PlanktonCloudTag g = world.EnsureComponent<PlanktonCloudTag>();
 			//
-			UnityEngine.Object.DestroyImmediate(bc);
+			UnityEngine.Object.Destroy(bc);
 			ObjectUtil.removeComponent<StayAtLeashPosition>(world);
 			ObjectUtil.removeComponent<SwimBehaviour>(world);
 			ObjectUtil.removeComponent<SplineFollowing>(world);
@@ -91,7 +91,7 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		internal void tickSpawner(Player ep, BiomeSpawnData data, float dT) {
-			HashSet<PlanktonCloudTag> clouds = WorldUtil.getObjectsNearWithComponent<PlanktonCloudTag>(ep.transform.position, 120);
+			HashSet<PlanktonCloudTag> clouds = WorldUtil.getObjectsNearWithComponent<PlanktonCloudTag>(ep.transform.position, 150);
 			//SNUtil.writeToChat(data.spawnSuccessRate+" > "+clouds.Count+"/"+data.maxDensity);
 			float f = (float)(1+densityNoise.getValue(ep.transform.position))*data.densityNoiseIntensity;
 			if (clouds.Count < data.maxDensity*f) {

@@ -112,12 +112,14 @@ namespace ReikaKalseki.Ecocean {
 	    	CompassDistortionSystem.instance.tick(time, dT);
 	    	
 	    	float f = 0.3F-DayNightCycle.main.GetLightScalar()*0.15F;
-		    string biome = ep.GetBiomeString();
-		    	//SNUtil.writeToChat("Doing plankton spawn check - "+biome);
-		    BiomeSpawnData data = EcoceanMod.plankton.getSpawnData(biome);
-		    if (data != null) {
-	    		if (UnityEngine.Random.Range(0F, 1F) <= f*dT*data.spawnSuccessRate)
-	    			EcoceanMod.plankton.tickSpawner(ep, data, dT);
+	    	if (!ep.IsInBase()) {
+			    string biome = ep.GetBiomeString();
+			    	//SNUtil.writeToChat("Doing plankton spawn check - "+biome);
+			    BiomeSpawnData data = EcoceanMod.plankton.getSpawnData(biome);
+			    if (data != null) {
+		    		if (UnityEngine.Random.Range(0F, 1F) <= f*dT*data.spawnSuccessRate)
+		    			EcoceanMod.plankton.tickSpawner(ep, data, dT);
+		    	}
 	    	}
 		    Vector3 pos = ep.transform.position;
 		    if (pos.setY(0).magnitude >= 1700) //more than 1200m from center
@@ -315,7 +317,7 @@ namespace ReikaKalseki.Ecocean {
 				if (!sub) {
 					Rigidbody rb = c.gameObject.FindAncestor<Rigidbody>();
 					if (rb) {	
-						float dh = rb.transform.position.y-g.transform.position.y-1.5F;
+						float dh = rb.transform.position.y-(g.transform.position.y-2.5F);
 						float f = 1F-(dh)/30;
 						if (v)
 							f *= 0.1F;/*
