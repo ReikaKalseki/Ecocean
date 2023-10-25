@@ -26,31 +26,39 @@ namespace ReikaKalseki.Ecocean {
 			
 		}
 		
+		internal XMLLocale.LocaleEntry getLocaleEntry() {
+			return EcoceanMod.locale.getEntry("FoodEffects");
+		}
+		
+		public string getLocaleEntry(string key) {
+			return getLocaleEntry().getField<string>(key);
+		}
+		
 		internal void register() {     	
-			XMLLocale.LocaleEntry e = EcoceanMod.locale.getEntry("FoodEffects");
+			XMLLocale.LocaleEntry e = getLocaleEntry();
 			addEffect(TechType.KooshChunk, (s, go) => Player.main.liveMixin.TakeDamage(UnityEngine.Random.Range(5, 10), Player.main.transform.position, DamageType.Puncture, go), e.getField<string>("koosh"));
 			addDamageOverTimeEffect(TechType.AcidMushroom, 40, 15, DamageType.Acid, e.getField<string>("acidburn"));
 			addDamageOverTimeEffect(TechType.WhiteMushroom, 250, 10, DamageType.Acid, e.getField<string>("acidburn"));
 			
 			addVisualDistortionEffect(TechType.JellyPlant, 1, 15);
 			
-			addVomitingEffect(TechType.RedRollPlantSeed, 30, 25, 3, 2.5F, 5);
-			addVomitingEffect(TechType.RedGreenTentacleSeed, 35, 40, 4, 2.5F, 5);
-			addVomitingEffect(TechType.EyesPlantSeed, 25, 50, 5, 2.5F, 5);
-			addVomitingEffect(TechType.SnakeMushroomSpore, 60, 60, 8, 2F, 10);
-			addVomitingEffect(TechType.RedConePlantSeed, 20, 25, 5, 2F, 5);
-			addVomitingEffect(TechType.PurpleFanSeed, 50, 75, 10, 2F, 5);
-			addVomitingEffect(TechType.PurpleStalkSeed, 80, 80, 10, 1F, 4);
+			addVomitingEffect(TechType.RedRollPlantSeed, 30, 25, 3, 5F, 10);
+			addVomitingEffect(TechType.RedGreenTentacleSeed, 35, 40, 4, 5F, 10);
+			addVomitingEffect(TechType.EyesPlantSeed, 25, 50, 5, 5F, 10);
+			addVomitingEffect(TechType.SnakeMushroomSpore, 60, 60, 8, 4F, 20);
+			addVomitingEffect(TechType.RedConePlantSeed, 20, 25, 5, 4F, 10);
+			addVomitingEffect(TechType.PurpleFanSeed, 50, 75, 10, 4F, 10);
+			addVomitingEffect(TechType.PurpleStalkSeed, 80, 80, 10, 2F, 8);
 			
 			addPoisonEffect(TechType.SnakeMushroomSpore, 40, 20);
 			addPoisonEffect(TechType.RedGreenTentacleSeed, 30, 10);
 			addPoisonEffect(TechType.RedRollPlantSeed, 40, 15);
 			addPoisonEffect(TechType.PurpleStalkSeed, 50, 15);
 			
-			//unimplemented
-			//addEffect(TechType.CreepvineSeedCluster, (s, go) => Player.main.gameObject.EnsureComponent<SlowMovement>().time = DayNightCycle.main.timePassedAsFloat, e.getField<string>("slow"));
+			addEffect(TechType.CreepvineSeedCluster, (s, go) => PlayerMovementSpeedModifier.add(0.4F, 30), e.getField<string>("slow"));
+			addEffect(EcoceanMod.glowOil.TechType, (s, go) => PlayerMovementSpeedModifier.add(0.33F, 60), e.getField<string>("slow"));
 		
-			addVomitingEffect(EcoceanMod.lavaShroom.seed.TechType, 60, 60, 8, 2F, 10);
+			addVomitingEffect(EcoceanMod.lavaShroom.seed.TechType, 60, 60, 8, 4F, 20);
 			addPoisonEffect(EcoceanMod.lavaShroom.seed.TechType, 50, 30);
 			
 			addPoisonEffect(EcoceanMod.planktonItem.TechType, 20, 10);
@@ -59,7 +67,6 @@ namespace ReikaKalseki.Ecocean {
 		
 		public void ensureEatable(Pickupable pp) {
 			TechType tt = pp.GetTechType();
-			SNUtil.log(pp+" > "+tt+" > "+data.ContainsKey(tt));
 			if (tt != TechType.None && data.ContainsKey(tt)) {
 				Eatable ea = pp.GetComponent<Eatable>();
 				if (!ea || (Mathf.Approximately(ea.foodValue, 0) && Mathf.Approximately(ea.waterValue, 0))) {
@@ -69,7 +76,7 @@ namespace ReikaKalseki.Ecocean {
 					ea.kDecayRate = ObjectUtil.lookupPrefab(TechType.CreepvinePiece).GetComponent<Eatable>().kDecayRate;
 					ea.timeDecayStart = DayNightCycle.main.timePassedAsFloat;
 					ea.decomposes = true;
-					SNUtil.log("Adding eatability "+ea.foodValue+"/"+ea.waterValue+" to "+pp);
+					//SNUtil.log("Adding eatability "+ea.foodValue+"/"+ea.waterValue+" to "+pp);
 				}
 			}
 		}
@@ -108,7 +115,7 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		public void addPoisonEffect(TechType tt, float totalDamage, float duration) {
-			addDamageOverTimeEffect(tt, totalDamage, duration, DamageType.Poison, EcoceanMod.locale.getEntry("FoodEffects").getField<string>("poison"));
+			addDamageOverTimeEffect(tt, totalDamage, duration, DamageType.Poison, getLocaleEntry().getField<string>("poison"));
 		}
 		
 		public void addVisualDistortionEffect(TechType tt, float intensity, float duration) {
@@ -116,11 +123,12 @@ namespace ReikaKalseki.Ecocean {
 				VisualDistortionEffect e = Player.main.gameObject.EnsureComponent<VisualDistortionEffect>();
 				e.intensity = intensity;
 				e.timeRemaining = duration;
-			}, EcoceanMod.locale.getEntry("FoodEffects").getField<string>("visual"));
+			}, getLocaleEntry("visual"));
 		}
 		
 		public void addVomitingEffect(TechType tt, float totalFoodLoss, float totalWaterLoss, int maxEvents, float minDelay, float maxDelay) {
 			addEffect(tt, (s, go) => {
+			    PlayerMovementSpeedModifier.add(0.5F, 10F);
 				VomitingEffect e = Player.main.gameObject.EnsureComponent<VomitingEffect>();
 				e.remainingFood = totalFoodLoss;
 				e.remainingWater = totalWaterLoss;
@@ -128,7 +136,7 @@ namespace ReikaKalseki.Ecocean {
 				e.minDelay = minDelay;
 				e.maxDelay = maxDelay;
 				e.survivalObject = s;
-			}, EcoceanMod.locale.getEntry("FoodEffects").getField<string>("vomit"));
+			}, getLocaleEntry("vomit"));
 		}
 		
 		internal void applyTooltip(System.Text.StringBuilder sb, TechType tt, GameObject go) {
@@ -140,12 +148,6 @@ namespace ReikaKalseki.Ecocean {
 			TechType tt = CraftData.GetTechType(go);
 			if (data.ContainsKey(tt))
 				data[tt].trigger(s, go);
-		}
-		
-		class SlowMovement : MonoBehaviour {
-			
-			internal float time;
-			
 		}
 		
 		class VisualDistortionEffect : MonoBehaviour {
@@ -192,9 +194,13 @@ namespace ReikaKalseki.Ecocean {
 			private float nextVomitTime = -1;
 			private int eventCount;
 			
+			void Start() {
+				nextVomitTime = DayNightCycle.main.timePassedAsFloat+UnityEngine.Random.Range(1F, 4F);
+			}
+			
 			void Update() {
 				float time = DayNightCycle.main.timePassedAsFloat;
-				if (time >= nextVomitTime) {
+				if (time >= nextVomitTime && !Player.main.GetPDA().isInUse) {
 					doEffect();
 					nextVomitTime = time+UnityEngine.Random.Range(minDelay, maxDelay);
 				}
@@ -208,6 +214,8 @@ namespace ReikaKalseki.Ecocean {
 				survivalObject.food = Mathf.Max(1, survivalObject.food-remainingFood*(all ? 1 : MathUtil.getRandomPlusMinus(1F/maxEvents, 0.2F)));
 				survivalObject.water = Mathf.Max(1, survivalObject.water-remainingWater*(all ? 1 : MathUtil.getRandomPlusMinus(1F/maxEvents, 0.2F)));
 				SoundManager.playSoundAt(SoundManager.buildSound(Player.main.IsUnderwater() ? "event:/player/Puke_underwater" : "event:/player/Puke"), transform.position, false, 12);
+				PlayerMovementSpeedModifier.add(0.15F, 1.25F);
+				MainCameraControl.main.ShakeCamera(2F, 1.0F, MainCameraControl.ShakeMode.Linear, 0.25F);//SNUtil.shakeCamera(1.2F, 0.5F, 0.2F);
 			}
 		}
 		

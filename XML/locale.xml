@@ -221,6 +221,9 @@
 		<slow>
 			Oily mass is safe to consume but triggers lethargy.
 		</slow>
+		<speed>
+			Causes hyperactivity.
+		</speed>
 		<visual>
 			Has hallucinogenic properties.
 		</visual>

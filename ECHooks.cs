@@ -20,7 +20,6 @@ namespace ReikaKalseki.Ecocean {
 	    
 		private static readonly HashSet<string> bloodVine = new HashSet<string>();
 		
-		private static bool addingExtraGlowOil = false;
 		private static float lastPiezoEMPDamage = -1;
 		
 		private static float lastSonarUsed = -1;
@@ -55,11 +54,13 @@ namespace ReikaKalseki.Ecocean {
 	    	bloodVine.AddRange(VanillaFlora.BLOOD_KELP.getPrefabs(true, true));
 	    }
 	    
-		class ECMoth : MonoBehaviour {
+		public class ECMoth : MonoBehaviour {
 			
 			private SeaMoth seamoth;
 			
 			private bool lightsOn;
+			
+			public Func<float> getLightIntensity = () => 1;
 			
 			private readonly LinkedList<float> lightToggles = new LinkedList<float>();
 			
@@ -76,7 +77,7 @@ namespace ReikaKalseki.Ecocean {
 				}
 				int flashCount = lightToggles.Count;
 				//SNUtil.writeToChat(flashCount+" > "+((flashCount-5)/200F).ToString("0.0000"));
-				if (flashCount > 5 && UnityEngine.Random.Range(0F, 1F) < (flashCount-5)/250F/* && seamoth.mainAnimator.GetBool("reaper_attack")*/) {
+				if (flashCount > 5 && UnityEngine.Random.Range(0F, 1F) < (flashCount-5)/250F*getLightIntensity()/* && seamoth.mainAnimator.GetBool("reaper_attack")*/) {
 					GameObject go = WorldUtil.areAnyObjectsNear(transform.position, 60, obj => {
 							ReaperLeviathan rl = obj.GetComponent<ReaperLeviathan>();
 							return rl && rl.holdingVehicle == seamoth;
@@ -462,6 +463,8 @@ namespace ReikaKalseki.Ecocean {
 			Creature c = go.GetComponent<Creature>();
 			if (c && attractedToLight(c, obj) && !c.GetComponent<WaterParkCreature>() && (obj is SubRoot || ObjectUtil.isLookingAt(obj.transform, c.transform.position, 45))) {
 				float chance = Mathf.Clamp01(1F-Vector3.Distance(c.transform.position, obj.transform.position)/range);
+				if (obj is SeaMoth)
+					chance *= obj.GetComponent<ECMoth>().getLightIntensity();
 				if (UnityEngine.Random.Range(0F, 1F) <= chance) {
 					attractCreatureToTarget(c, obj, false);
 					return true;
