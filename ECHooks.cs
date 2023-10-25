@@ -33,6 +33,9 @@ namespace ReikaKalseki.Ecocean {
 	    	DIHooks.onDamageEvent += onTakeDamage;
 	    	DIHooks.onKnifedEvent += onKnifed;
 	    	DIHooks.onItemPickedUpEvent += onPickup;
+	    	
+	    	DIHooks.itemTooltipEvent += FoodEffectSystem.instance.applyTooltip;
+	    	DIHooks.onEatEvent += FoodEffectSystem.instance.onEaten;
 			
 	    	DIHooks.onPlayerTickEvent += tickPlayer;
 	    	DIHooks.onPrawnTickEvent += tickPrawn;
@@ -40,6 +43,7 @@ namespace ReikaKalseki.Ecocean {
 	    	
 	    	DIHooks.onEMPHitEvent += onEMPHit;
 	    	DIHooks.onEMPTouchEvent += onEMPTouch;
+	    	
 	    	
 	    	DIHooks.getTemperatureEvent += getWaterTemperature;
 	    	
@@ -245,6 +249,7 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		public static void onPickup(Pickupable pp) {
+	    	FoodEffectSystem.instance.ensureEatable(pp);
 			GlowOilTag g = pp.GetComponent<GlowOilTag>();
 			if (g) {
 				g.resetGlow();
@@ -298,8 +303,15 @@ namespace ReikaKalseki.Ecocean {
 			return Vector3.Distance(go.transform.position, new Vector3(-1264, -281, -728)) <= 30;
 		}
 		
+		public static void onGeyserSpawn(Geyser g) {
+			CapsuleCollider cc = g.GetComponent<CapsuleCollider>();
+			cc.center += Vector3.down*1.5F;
+			cc.height += 3.5F;
+		}
+		
 		public static void tickObjectInGeyser(Geyser g, Collider c) {
 			if (g.erupting) {
+				//SNUtil.writeToChat(c.gameObject.name);
 				Vehicle v = c.gameObject.FindAncestor<Vehicle>();
 				if (v) {
 					if (v is SeaMoth) { //will set temp and do a ton of damage
@@ -316,8 +328,8 @@ namespace ReikaKalseki.Ecocean {
 				}
 				if (!sub) {
 					Rigidbody rb = c.gameObject.FindAncestor<Rigidbody>();
-					if (rb) {	
-						float dh = rb.transform.position.y-(g.transform.position.y-2.5F);
+					if (rb && !rb.isKinematic) {	
+						float dh = rb.transform.position.y-(g.transform.position.y-1.5F);
 						float f = 1F-(dh)/30;
 						if (v)
 							f *= 0.1F;/*

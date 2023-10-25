@@ -25,6 +25,10 @@ namespace ReikaKalseki.Ecocean {
 				GameObject root = r.gameObject.FindAncestor<PrefabIdentifier>().gameObject;
 				root.transform.localScale = Vector3.one*1F;
 				ObjectUtil.removeComponent<PickPrefab>(root);
+				Eatable ea = root.EnsureComponent<Eatable>();
+				ea.decomposes = false;
+				ea.foodValue = 6;
+				ea.waterValue = 2;
 				r.materials[0].DisableKeyword("FX_KELP");
 				r.materials[0].color = Color.clear;
 				r.materials[0].SetColor("_Color", Color.clear);

@@ -144,6 +144,8 @@ namespace ReikaKalseki.Ecocean
         ConsoleCommandsHandler.Main.RegisterConsoleCommand<Action<int>>("currentFlowVec", MountainCurrentSystem.instance.registerFlowVector);
                  
        	worldgen.load();
+       	
+       	FoodEffectSystem.instance.register();
 		
 		/*
 		GenUtil.ContainerPrefab pfb = GenUtil.getOrCreateDatabox(planktonScoop.TechType);

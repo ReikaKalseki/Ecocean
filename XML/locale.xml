@@ -196,6 +196,38 @@
 			MushroomStack
 		</header>
 	</mushroomStack>
+	<FoodEffects>
+		<name>
+			
+		</name>
+		<desc>
+			
+		</desc>
+		<pda>
+			
+		</pda>
+		<koosh>
+			Is sharp and difficult to eat.
+		</koosh>
+		<poison>
+			Is dangerously poisonous.
+		</poison>
+		<acidburn>
+			Gives acid burns when eaten.
+		</acidburn>
+		<vomit>
+			Triggers severe nausea and indigestion.
+		</vomit>
+		<slow>
+			Oily mass is safe to consume but triggers lethargy.
+		</slow>
+		<visual>
+			Has hallucinogenic properties.
+		</visual>
+		<tag>
+			
+		</tag>
+	</FoodEffects>
 	<enum>
 		<name>
 			
