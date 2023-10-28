@@ -41,8 +41,7 @@ namespace ReikaKalseki.Ecocean {
 	    	DIHooks.onCyclopsTickEvent += tickCyclops;
 	    	
 	    	DIHooks.onEMPHitEvent += onEMPHit;
-	    	DIHooks.onEMPTouchEvent += onEMPTouch;
-	    	
+	    	DIHooks.onEMPTouchEvent += onEMPTouch;	    	
 	    	
 	    	DIHooks.getTemperatureEvent += getWaterTemperature;
 	    	
