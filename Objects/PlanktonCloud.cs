@@ -139,11 +139,36 @@ namespace ReikaKalseki.Ecocean {
 	}
 	
 	public class PlanktonCloudLeviDetector : MonoBehaviour {
+		
+		private PlanktonCloudTag root;
+		private Collider aoe;
+		//private Collider touchingEntity;
+		
+		internal void init(PlanktonCloudTag e, Collider c) {
+			root = e;
+			aoe = c;
+		}
+		/*
+		private void Update() {
+			if (!aoe)
+				aoe = GetComponent<SphereCollider>();
+			if (touchingEntity) {
+				if (touchingEntity.o.intersects(aoe))
+					root.touch(Time.deltaTime, touchingEntity);
+				else
+					touchingEntity = null;
+			}
+		}*/
 
-	    private void OnTriggerStay(Collider other) { //scoop with seamoth
+		private void OnTriggerEnter(Collider other) {
+			if (!root)
+				return;
+			float time = DayNightCycle.main.timePassedAsFloat;
 			Creature c = other.gameObject.FindAncestor<Creature>();
 			if (c && (c is ReaperLeviathan || c is GhostLeviatanVoid || c is GhostLeviathan || c is SeaDragon/* || c is Reefback*/)) {
-				gameObject.FindAncestor<PlanktonCloudTag>().touch(Time.deltaTime, other);
+				//touchingEntity = other;
+				//root.touch(Time.deltaTime, other);
+				root.addTouchIntensity(4);
 			}
 	    }
 		
@@ -209,7 +234,7 @@ namespace ReikaKalseki.Ecocean {
 					leviSphere.transform.localPosition = Vector3.zero;
 					leviAOE = leviSphere.EnsureComponent<SphereCollider>();
 					leviAOE.isTrigger = true;
-					leviSphere.EnsureComponent<PlanktonCloudLeviDetector>();
+					leviSphere.EnsureComponent<PlanktonCloudLeviDetector>().init(this, leviAOE);
 				}
 			}
 			
@@ -228,30 +253,33 @@ namespace ReikaKalseki.Ecocean {
 			
 			float dT = Time.deltaTime;
 			if (time-ECHooks.getLastSonarUse() <= 10 || time-ECHooks.getLastHornUse() <= 10) {
-				touchIntensity = 1;
+				touchIntensity = Mathf.Max(1, touchIntensity);
 			}
 			if (time-lastVortexCheckTime >= 1) {
-				lastVortexCheckTime = time;
-				SeamothTorpedoWhirlpool sm = WorldUtil.getClosest<SeamothTorpedoWhirlpool>(gameObject);
-				if (sm && sm.sequence.active && Vector3.Distance(sm.transform.position, transform.position) <= 30) {
-					touchIntensity = 1;
+				Vehicle v = Player.main.GetVehicle();
+				if (v is SeaMoth) {
+					lastVortexCheckTime = time;
+					SeamothTorpedoWhirlpool sm = WorldUtil.getClosest<SeamothTorpedoWhirlpool>(gameObject);
+					if (sm && sm.sequence.active && Vector3.Distance(sm.transform.position, transform.position) <= 30) {
+						addTouchIntensity(2);
+					}
 				}
 			}
 			
 			if (isDead) {
 				activation = Mathf.Clamp01(activation-2F*dT);
-				touchIntensity = Mathf.Clamp01(activation-2F*dT);
+				touchIntensity = Mathf.Max(0, activation-2F*dT);
 			}
 			else if (touchIntensity > 0) {
 				activation += 2*dT;
-				touchIntensity = Mathf.Clamp01(touchIntensity-0.1F*dT);
+				touchIntensity = Mathf.Max(0, touchIntensity-0.1F*dT);
 			}
 			else {
 				activation *= (1-0.2F*dT);
 				activation -= 0.05F*dT;
 				if (Player.main) {
-					float dd = Vector3.Distance(Player.main.transform.position, transform.position);
-					if (dd < 32) {
+					float dd = (Player.main.transform.position-transform.position).sqrMagnitude;
+					if (dd < 1024) { //32m
 						float vel = Player.main.rigidBody.velocity.magnitude;
 						Vehicle v = Player.main.GetVehicle();
 						if (v) {
@@ -273,8 +301,8 @@ namespace ReikaKalseki.Ecocean {
 				tgt = Color.Lerp(tgt, scoopColor, f2);
 			}
 			else if (touchIntensity > 0) {
-				f2 = touchIntensity;
-				tgt = Color.Lerp(tgt, touchColor, touchIntensity);
+				f2 = Mathf.Clamp01(touchIntensity);
+				tgt = Color.Lerp(tgt, touchColor, f2);
 			}
 			float f3 = isVoid ? PlanktonCloud.VOID_RANGE_SCALE : 1;
 			currentColor = Color.Lerp(currentColor, tgt, dT*5);
@@ -317,8 +345,12 @@ namespace ReikaKalseki.Ecocean {
 			//SNUtil.writeToChat(other+" touch plankton @ "+this.transform.position+" @ "+lastContactTime);
 	    }
 		
+		internal void addTouchIntensity(float amt) {
+			touchIntensity = Mathf.Max(0, touchIntensity+amt);
+		}
+		
 		internal void touch(float dT, Collider touch) {
-			touchIntensity = Mathf.Clamp01(touchIntensity+2F*dT);
+			addTouchIntensity(2F*dT);
 			if (onPlanktonActivationEvent != null)
 				onPlanktonActivationEvent.Invoke(this, touch);
 		}
