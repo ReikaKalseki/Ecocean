@@ -48,6 +48,7 @@ namespace ReikaKalseki.Ecocean
     public static TreeBud mushTreeResource;
     
     public static MushroomStack mushroomStack;
+    public static PinkBulbStack pinkBulbStack;
     
     internal static TechType waterCurrentCommon;
 		
@@ -98,6 +99,10 @@ namespace ReikaKalseki.Ecocean
 	    
 	    mushroomStack = new MushroomStack(locale.getEntry("mushroomStack"));
 	    mushroomStack.Patch();
+	    
+	    pinkBulbStack = new PinkBulbStack(locale.getEntry("pinkBulbStack"));
+		pinkBulbStack.Patch();
+		CraftData.entClassTechTable[DecoPlants.PINK_BULB_STACK.prefab] = pinkBulbStack.TechType;
 	    
 	    voidBubble = new VoidBubble(locale.getEntry("VoidBubble"));
 	    voidBubble.register();

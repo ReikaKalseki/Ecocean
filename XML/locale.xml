@@ -196,6 +196,22 @@
 			MushroomStack
 		</header>
 	</mushroomStack>
+	<pinkBulbStack>
+		<name>
+			Bulb Chain
+		</name>
+		<desc>
+			A small plant consisting of a group of strands inflated to a sphere at semi-regular intervals.
+		</desc>
+		<pda>
+			Bulb Chain grows in sandy soils with moderate light exposure, taking up ecological niches left behind by more prolific flora species.
+			
+			Assessment: Decorative
+		</pda>
+		<header>
+			PinkBulbStack
+		</header>
+	</pinkBulbStack>
 	<FoodEffects>
 		<name>
 			

@@ -61,6 +61,8 @@ namespace ReikaKalseki.Ecocean {
 			addVomitingEffect(EcoceanMod.lavaShroom.seed.TechType, 60, 60, 8, 4F, 20);
 			addPoisonEffect(EcoceanMod.lavaShroom.seed.TechType, 50, 30);
 			
+			addPoisonEffect(EcoceanMod.pinkBulbStack.seed.TechType, 25, 10);
+			
 			addPoisonEffect(EcoceanMod.planktonItem.TechType, 20, 10);
 			addVisualDistortionEffect(EcoceanMod.planktonItem.TechType, 2, 60);
 		}

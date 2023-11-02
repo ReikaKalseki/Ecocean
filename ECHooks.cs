@@ -31,6 +31,7 @@ namespace ReikaKalseki.Ecocean {
 	    	DIHooks.onSkyApplierSpawnEvent += onSkyApplierSpawn;
 	    	DIHooks.onDamageEvent += onTakeDamage;
 	    	DIHooks.onKnifedEvent += onKnifed;
+	    	DIHooks.knifeAttemptEvent += tryKnife;
 	    	DIHooks.onItemPickedUpEvent += onPickup;
 	    	
 	    	DIHooks.itemTooltipEvent += FoodEffectSystem.instance.applyTooltip;
@@ -233,7 +234,17 @@ namespace ReikaKalseki.Ecocean {
 					dmg.setValue(Mathf.Max(0.001F, dmg.getAmount()*(1-f)));
 				}
 			}
+			PrefabIdentifier pi = dmg.target.GetComponent<PrefabIdentifier>();
+			if (pi && pi.ClassId == DecoPlants.PINK_BULB_STACK.prefab)
+				dmg.setValue(0.1F);
 		}
+	    
+	    public static void tryKnife(DIHooks.KnifeAttempt k) {
+	    	if (CraftData.GetTechType(k.target.gameObject) == EcoceanMod.pinkBulbStack.TechType) {
+	    		k.allowKnife = true;
+	    		return;
+	    	}
+	    }
 		
 		public static void onKnifed(GameObject go) {
 			ExplodingAnchorPod e = go.FindAncestor<ExplodingAnchorPod>();
@@ -295,6 +306,15 @@ namespace ReikaKalseki.Ecocean {
 				}
 				else if (pi && pi.ClassId == "1c34945a-656d-4f70-bf86-8bc101a27eee") {
 	    			go.EnsureComponent<ECMoth>();
+	    		}
+				else if (pi && (pi.ClassId == DecoPlants.VINE_TREE.prefab || pi.ClassId == DecoPlants.VINE_TREE_2.prefab)) {
+					foreach (Renderer r in go.GetComponentsInChildren<Renderer>())
+						r.materials[0].EnableKeyword("UWE_WAVING"); //make leaves move
+				}
+				else if (pi && pi.ClassId == DecoPlants.PINK_BULB_STACK.prefab) {
+	    			go.EnsureComponent<TechTag>().type = EcoceanMod.pinkBulbStack.TechType;
+	    			LiveMixin lv = go.GetComponent<LiveMixin>();
+	    			lv.data.maxHealth = 100;
 	    		}
 	    	}
 	    }
