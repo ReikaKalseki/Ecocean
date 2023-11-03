@@ -163,8 +163,15 @@ namespace ReikaKalseki.Ecocean
     
     [QModPostPatch]
     public static void PostLoad() {
-    	if (InstructionHandlers.getTypeBySimpleName("ReikaKalseki.AqueousEngineering.BaseSonarPinger") != null)
+    	if (InstructionHandlers.getTypeBySimpleName("ReikaKalseki.AqueousEngineering.BaseSonarPinger") != null) { //AE is loaded
     		ReikaKalseki.AqueousEngineering.BaseSonarPinger.onBaseSonarPingedEvent += go => ECHooks.pingSonarFromObject(go.gameObject.GetComponentInChildren<CustomMachineLogic>(), 0.67F);
+    		
+			ReikaKalseki.AqueousEngineering.BaseRoomSpecializationSystem.instance.registerModdedObject(glowOil, 0.2F);
+			ReikaKalseki.AqueousEngineering.BaseRoomSpecializationSystem.instance.registerModdedObject(glowShroom, 0.2F);
+			ReikaKalseki.AqueousEngineering.BaseRoomSpecializationSystem.instance.registerModdedObject(lavaShroom, 0.4F);
+			ReikaKalseki.AqueousEngineering.BaseRoomSpecializationSystem.instance.registerModdedObject(mushroomStack, 0.15F);
+			ReikaKalseki.AqueousEngineering.BaseRoomSpecializationSystem.instance.registerModdedObject(pinkBulbStack, -0.05F);
+    	}
     	
     	foreach (BiomeType b in Enum.GetValues(typeof(BiomeType)))
     		LootDistributionHandler.Main.EditLootDistributionData("0e67804e-4a59-449d-929a-cd3fc2bef82c", b, 0, 0);
