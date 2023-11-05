@@ -257,11 +257,12 @@ namespace ReikaKalseki.Ecocean {
 			}
 			if (time-lastVortexCheckTime >= 1) {
 				Vehicle v = Player.main.GetVehicle();
-				if (v is SeaMoth) {
+				if (v is SeaMoth && Vector3.Distance(transform.position, v.transform.position) <= 150) {
 					lastVortexCheckTime = time;
-					SeamothTorpedoWhirlpool sm = WorldUtil.getClosest<SeamothTorpedoWhirlpool>(gameObject);
-					if (sm && sm.sequence.active && Vector3.Distance(sm.transform.position, transform.position) <= 30) {
-						addTouchIntensity(2);
+					foreach (SeamothTorpedoWhirlpool sm in SeamothTorpedoWhirlpool.allTargets.Values) {
+						if (sm && sm.sequence.active && Vector3.Distance(sm.transform.position, transform.position) <= 30) {
+							addTouchIntensity(2);
+						}
 					}
 				}
 			}

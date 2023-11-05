@@ -107,7 +107,7 @@ namespace ReikaKalseki.Ecocean {
 		public void addDamageOverTimeEffect(TechType tt, float totalDamage, float duration, DamageType type, string tooltip = null) {
 			addEffect(tt, (s, go) => {
 				DamageOverTime dot = Player.main.gameObject.EnsureComponent<DamageOverTime>();
-				dot.doer = go;
+				dot.doer = Player.main.gameObject;//go;
 				dot.damageType = type;
 				dot.totalDamage = totalDamage;
 				dot.duration = duration;
@@ -213,8 +213,12 @@ namespace ReikaKalseki.Ecocean {
 			private void doEffect() {
 				eventCount++;
 				bool all = eventCount >= maxEvents;
-				survivalObject.food = Mathf.Max(1, survivalObject.food-remainingFood*(all ? 1 : MathUtil.getRandomPlusMinus(1F/maxEvents, 0.2F)));
-				survivalObject.water = Mathf.Max(1, survivalObject.water-remainingWater*(all ? 1 : MathUtil.getRandomPlusMinus(1F/maxEvents, 0.2F)));
+				float subFood = remainingFood*(all ? 1 : MathUtil.getRandomPlusMinus(1F/maxEvents, 0.2F));
+				float subWater = remainingWater*(all ? 1 : MathUtil.getRandomPlusMinus(1F/maxEvents, 0.2F));
+				survivalObject.food = Mathf.Max(1, survivalObject.food-subFood);
+				survivalObject.water = Mathf.Max(1, survivalObject.water-subWater);
+				remainingFood -= subFood;
+				remainingWater -= subWater;
 				SoundManager.playSoundAt(SoundManager.buildSound(Player.main.IsUnderwater() ? "event:/player/Puke_underwater" : "event:/player/Puke"), transform.position, false, 12);
 				PlayerMovementSpeedModifier.add(0.15F, 1.25F);
 				MainCameraControl.main.ShakeCamera(2F, 1.0F, MainCameraControl.ShakeMode.Linear, 0.25F);//SNUtil.shakeCamera(1.2F, 0.5F, 0.2F);
