@@ -25,7 +25,7 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		public override void modifySeed(GameObject go) {
-			Eatable ea = go.GetComponent<Eatable>();
+			Eatable ea = go.EnsureComponent<Eatable>();
 			ea.decomposes = true;
 			ea.foodValue = 6;
 			ea.waterValue = 4;

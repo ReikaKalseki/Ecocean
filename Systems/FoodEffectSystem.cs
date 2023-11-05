@@ -37,6 +37,8 @@ namespace ReikaKalseki.Ecocean {
 		internal void register() {     	
 			XMLLocale.LocaleEntry e = getLocaleEntry();
 			addEffect(TechType.KooshChunk, (s, go) => Player.main.liveMixin.TakeDamage(UnityEngine.Random.Range(5, 10), Player.main.transform.position, DamageType.Puncture, go), e.getField<string>("koosh"));
+			addEffect(TechType.PinkFlowerSeed, (s, go) => Player.main.liveMixin.TakeDamage(UnityEngine.Random.Range(15, 20), Player.main.transform.position, DamageType.Puncture, go), e.getField<string>("koosh"));
+			
 			addDamageOverTimeEffect(TechType.AcidMushroom, 40, 15, DamageType.Acid, e.getField<string>("acidburn"));
 			addDamageOverTimeEffect(TechType.WhiteMushroom, 250, 10, DamageType.Acid, e.getField<string>("acidburn"));
 			
@@ -111,7 +113,7 @@ namespace ReikaKalseki.Ecocean {
 				dot.damageType = type;
 				dot.totalDamage = totalDamage;
 				dot.duration = duration;
-				dot.ActivateInterval(0.125F);
+				dot.ActivateInterval(type == DamageType.Poison ? 2F : 0.125F);
 			},
 			tooltip);
 		}

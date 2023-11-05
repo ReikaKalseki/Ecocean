@@ -196,6 +196,17 @@
 			MushroomStack
 		</header>
 	</mushroomStack>
+	<pinkLeaves>
+		<name>
+			Rose Lily
+		</name>
+		<desc>
+			A brightly glowing pink land plant.
+		</desc>
+		<pda>
+			
+		</pda>
+	</pinkLeaves>
 	<pinkBulbStack>
 		<name>
 			Bulb Chain

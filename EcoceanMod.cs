@@ -49,6 +49,7 @@ namespace ReikaKalseki.Ecocean
     
     public static MushroomStack mushroomStack;
     public static PinkBulbStack pinkBulbStack;
+    public static PinkLeaves pinkLeaves;
     
     internal static TechType waterCurrentCommon;
 		
@@ -100,6 +101,9 @@ namespace ReikaKalseki.Ecocean
 	    mushroomStack = new MushroomStack(locale.getEntry("mushroomStack"));
 	    mushroomStack.Patch();
 	    
+	    pinkLeaves = new PinkLeaves(locale.getEntry("pinkLeaves"));
+		pinkLeaves.Patch();
+		
 	    pinkBulbStack = new PinkBulbStack(locale.getEntry("pinkBulbStack"));
 		pinkBulbStack.Patch();
 		CraftData.entClassTechTable[DecoPlants.PINK_BULB_STACK.prefab] = pinkBulbStack.TechType;
@@ -135,6 +139,9 @@ namespace ReikaKalseki.Ecocean
 		
 		//GenUtil.registerSlotWorldgen(mushTreeResource.ClassID, mushTreeResource.PrefabFileName, mushTreeResource.TechType, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Near, BiomeType.MushroomForest_GiantTreeInteriorRecess, 1, 3F);
 		//GenUtil.registerSlotWorldgen(mushTreeResource.ClassID, mushTreeResource.PrefabFileName, mushTreeResource.TechType, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Near, BiomeType.MushroomForest_GiantTreeInteriorSpecial, 1, 5F);
+		
+		//GenUtil.registerSlotWorldgen(pinkLeaves.ClassID, pinkLeaves.PrefabFileName, pinkLeaves.TechType, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Medium, BiomeType.UnderwaterIslands_IslandPlants, 1, 1F);
+		//GenUtil.registerSlotWorldgen(pinkLeaves.ClassID, pinkLeaves.PrefabFileName, pinkLeaves.TechType, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Medium, BiomeType.CrashZone_TrenchSand, 1, 2F);
 		
 		BioReactorHandler.Main.SetBioReactorCharge(lavaShroom.seed.TechType, BaseBioReactor.GetCharge(TechType.SnakeMushroomSpore)*3);
 		BioReactorHandler.Main.SetBioReactorCharge(glowOil.TechType, BaseBioReactor.GetCharge(TechType.BloodOil)*6);
