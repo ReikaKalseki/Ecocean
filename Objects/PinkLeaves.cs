@@ -18,6 +18,7 @@ namespace ReikaKalseki.Ecocean {
 		public PinkLeaves(XMLLocale.LocaleEntry e) : base(e, new FloraPrefabFetch(DecoPlants.BANANA_LEAF.prefab), "daff0e31-dd08-4219-8793-39547fdb745e", "Cuttings") {
 			finalCutBonus = 1;
 			glowIntensity = 1.2F;
+			collectionMethod = HarvestType.DamageAlive;
 			//OnFinishedPatching += () => {addPDAEntry(e.pda, 4F, e.getField<string>("header"));};
 		}
 		
@@ -30,17 +31,26 @@ namespace ReikaKalseki.Ecocean {
 			
 			Transform mdl = r0[0].transform.parent;
 			
-			foreach (Renderer r in r0)
-				UnityEngine.Object.Destroy(r.gameObject);
+			foreach (Renderer r in r0) {
+				if (r)
+					UnityEngine.Object.Destroy(r.gameObject);
+			}
 			
-			//CapsuleCollider cc = go.EnsureComponent<CapsuleCollider>();
-			//cc.radius = 1;
-			//cc.height = 0.4F;
-			//cc.isTrigger = true;
+			if (!go.GetComponentInChildren<Collider>()) {
+				CapsuleCollider cc = go.EnsureComponent<CapsuleCollider>();
+				cc.radius = 0.67F;
+				cc.center = Vector3.up*0.9F;
+				cc.height = 1.75F;
+				cc.isTrigger = true;
+			}
+			
+			go.layer = LayerID.Useable;
+			
+			go.EnsureComponent<LiveMixin>().copyObject<LiveMixin>(ObjectUtil.lookupPrefab(TechType.SeaCrown).GetComponent<LiveMixin>());
 			
 			GameObject pfb = ObjectUtil.lookupPrefab(DecoPlants.BANANA_LEAF.prefab);
 			foreach (Renderer r in pfb.GetComponentsInChildren<Renderer>()) {
-				if (r.name.Contains("LOD"))
+				if (!r || r.name.Contains("LOD"))
 					continue;
 				GameObject rg = UnityEngine.Object.Instantiate(r.gameObject);
 				rg.transform.SetParent(mdl);
@@ -51,7 +61,13 @@ namespace ReikaKalseki.Ecocean {
 			r0 = go.GetComponentsInChildren<Renderer>();
 			RenderUtil.swapToModdedTextures(r0, this);
 			foreach (Renderer r in r0) {
+				if (!r)
+					continue;
 				RenderUtil.makeTransparent(r.materials[0]);
+				if (r.materials.Length > 1)
+					RenderUtil.setEmissivity(r.materials[1], 2);
+				r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+				r.receiveShadows = false;
 				foreach (Material m in r.materials) {
 					m.SetColor("_GlowColor", Color.white);
 					m.EnableKeyword("UWE_WAVING");
@@ -60,6 +76,15 @@ namespace ReikaKalseki.Ecocean {
 					m.SetFloat("_Cutoff", 0.05F);
 				}
 			}
+			
+			Light l = ObjectUtil.addLight(go);
+			l.intensity = 0.5F;
+			l.range = 8;
+			l.lightShadowCasterMode = LightShadowCasterMode.Default;
+			l.shadows = LightShadows.Soft;
+			l.color = new Color(1F, 153/255F, 1F, 1F);
+			
+			go.EnsureComponent<PinkLeavesTag>();
 		}
 		
 		public Dictionary<int, string> getTextureLayers(Renderer r) {
@@ -83,7 +108,33 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		public override bool canGrowUnderWater() {
-			return false;
+			return true;
+		}
+	}
+		
+	class PinkLeavesTag : MonoBehaviour {
+		
+		private GrownPlant grown;
+		
+		void Start() {
+			grown = gameObject.GetComponent<GrownPlant>();
+			if (grown) {
+    			gameObject.SetActive(true);
+    			gameObject.transform.localScale = Vector3.one;
+    			Renderer[] r0 = GetComponentsInChildren<Renderer>();
+    			if (r0.Length > 1) {
+    				for (int i = 1; i < r0.Length; i++) {
+    					UnityEngine.Object.Destroy(r0[i].gameObject);
+	    			}
+    			}
+    			r0[0].transform.localScale = Vector3.one*0.2F;
+				EcoceanMod.pinkLeaves.prepareGameObject(gameObject, r0);
+				LiveMixin lv = gameObject.EnsureComponent<LiveMixin>();
+				lv.copyObject<LiveMixin>(ObjectUtil.lookupPrefab(TechType.SeaCrown).GetComponent<LiveMixin>());
+				if (lv.damageInfo == null)
+					lv.damageInfo = new DamageInfo();
+				lv.ResetHealth();
+    		}
 		}
 		
 	}

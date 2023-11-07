@@ -22,6 +22,8 @@ namespace ReikaKalseki.Ecocean {
 		
 		private readonly Dictionary<TechType, FoodEffect> data = new Dictionary<TechType, FoodEffect>();
 		
+		public event Action<Survival, InfectedMixin, float> onEatenInfectedEvent;
+		
 		private FoodEffectSystem() {
 			
 		}
@@ -150,6 +152,21 @@ namespace ReikaKalseki.Ecocean {
 		
 		internal void onEaten(Survival s, GameObject go) {			
 			TechType tt = CraftData.GetTechType(go);
+			InfectedMixin mix = go.GetComponent<InfectedMixin>();
+			if (mix) {
+				float f = Mathf.Clamp01(0.25F*2*mix.GetInfectedAmount());
+				TemporaryBreathPrevention.add(f*60);
+				if (onEatenInfectedEvent != null)
+					onEatenInfectedEvent.Invoke(s, mix, f);
+				if (f > 0 && UnityEngine.Random.Range(0F, 1F) <= f) {
+					DamageOverTime dot = Player.main.gameObject.EnsureComponent<DamageOverTime>();
+					dot.doer = Player.main.gameObject;//go;
+					dot.damageType = DamageType.Poison;
+					dot.totalDamage = 30;
+					dot.duration = 15;
+					dot.ActivateInterval(2F);
+				}
+			}
 			if (data.ContainsKey(tt))
 				data[tt].trigger(s, go);
 		}
