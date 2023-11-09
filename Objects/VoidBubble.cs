@@ -23,6 +23,9 @@ namespace ReikaKalseki.Ecocean {
 		
 		internal static readonly Simplex3DGenerator densityNoise = (Simplex3DGenerator)new Simplex3DGenerator(483181).setFrequency(0.005);
 		
+		public static event Action<VoidBubbleSpawnerTick> voidBubbleSpawnerTickEvent;
+		public static event Action<VoidBubbleTag> voidBubbleTickEvent;
+		
 		private float lastIterateTime = -1;
 	        
 	    internal VoidBubble(XMLLocale.LocaleEntry e) : base(e.key, e.name, e.desc) {
@@ -74,6 +77,11 @@ namespace ReikaKalseki.Ecocean {
 			ItemRegistry.instance.addItem(this);
 		}
 		
+		internal static void tickBubble(VoidBubbleTag b) {
+			if (voidBubbleTickEvent != null)
+				voidBubbleTickEvent.Invoke(b);
+		}
+		
 		internal void tickSpawner(Player ep, float time, float dT) {
 			if (time-lastIterateTime >= 5) {
 				lastIterateTime = time;
@@ -85,6 +93,11 @@ namespace ReikaKalseki.Ecocean {
 			float depth = -ctr.y;
 			if (depth > 250) {
 				f = Mathf.Max(-0.04F, f-(depth-250F)/500F*0.08F);
+			}
+			if (voidBubbleTickEvent != null) {
+				VoidBubbleSpawnerTick tick = new VoidBubbleSpawnerTick(ep, f);
+				voidBubbleSpawnerTickEvent.Invoke(tick);
+				f = tick.spawnChance;
 			}
 			//SNUtil.writeToChat(densityNoise.getValue(ctr).ToString("0.000")+" > "+f.ToString("0.000")+" > "+(0.94F+f).ToString("0.000"));
 			if (UnityEngine.Random.Range(0F, 1F) < 0.94F+f)
@@ -98,6 +111,21 @@ namespace ReikaKalseki.Ecocean {
 			}
 		}
 			
+	}
+	
+	public class VoidBubbleSpawnerTick {
+		
+		public readonly Player player;
+		public readonly float originalChance;
+		
+		public float spawnChance;
+		
+		internal VoidBubbleSpawnerTick(Player ep, float c) {
+			player = ep;
+			originalChance = c;
+			spawnChance = c;
+		}
+		
 	}
 		
 	public class VoidBubbleTag : MonoBehaviour {
@@ -122,6 +150,8 @@ namespace ReikaKalseki.Ecocean {
 		
 		private float attachCooldown = 0;
 		private float attachFade = 0;
+		private float fadingTime = -1;
+		private float fadeDuration = -1;
 		
 		private float age;
 		
@@ -163,6 +193,8 @@ namespace ReikaKalseki.Ecocean {
 				Disconnect();
 			}
 			
+			VoidBubble.tickBubble(this);
+			
 			float time = DayNightCycle.main.timePassedAsFloat;/*
 			forces.underwaterGravity *= 10F;
 			if (!mainBody.velocity.HasAnyNaNs() && !mainBody.velocity.HasAnyInfs())
@@ -197,6 +229,8 @@ namespace ReikaKalseki.Ecocean {
 			float f = depth > 20 ? 1 : depth/20F;
 			if (stuckTo)
 				f *= 0.8F;
+			if (fadeDuration > 0)
+				f *= fadingTime/fadeDuration;
 			f *= Mathf.Lerp(1, 0.5F, attachFade);
 			transform.localScale = new Vector3(evalSizeNoise(xSize, vec), evalSizeNoise(ySize, vec), evalSizeNoise(zSize, vec))*f;
 			inner.transform.localPosition = Vector3.zero;
@@ -208,6 +242,11 @@ namespace ReikaKalseki.Ecocean {
 				if (depth <= 0)
 					burst();
 			}
+			if (fadingTime >= 0) {
+				fadingTime -= dT;
+				if (fadingTime <= 0)
+					burst();
+			}
 			
 			mainRender.material.SetColor("_SpecColor", color);
 			light.intensity = transform.localScale.magnitude*(stuckTo ? 0.67F : 1F);
@@ -216,6 +255,13 @@ namespace ReikaKalseki.Ecocean {
 			
 			if ((transform.position.y < -50 && !VanillaBiomes.VOID.isInBiome(transform.position+Vector3.up*50)) || UWE.Utils.RaycastIntoSharedBuffer(new Ray(transform.position, Vector3.up), 12, Voxeland.GetTerrainLayerMask()) > 0)
 				burst();
+		}
+		
+		public void fade(float time) {
+			if (fadeDuration > 0) //do not jump fade forward if called again, nor reset it
+				return;
+			fadingTime = time;
+			fadeDuration = time;
 		}
 		
 		public bool isStuckTo(Rigidbody rb) {
