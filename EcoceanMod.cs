@@ -154,6 +154,7 @@ namespace ReikaKalseki.Ecocean
 		lavaShroom.addNativeBiome(VanillaBiomes.ILZ);
 		
         ConsoleCommandsHandler.Main.RegisterConsoleCommand<Action<int>>("currentFlowVec", MountainCurrentSystem.instance.registerFlowVector);
+        ConsoleCommandsHandler.Main.RegisterConsoleCommand<Action<float>>("attackBase", r => {ECHooks.attractCreaturesToBase(Player.main.currentSub, r, c => c is GhostLeviathan || c is GhostLeviatanVoid || c is ReaperLeviathan || c is SeaDragon || c is Shocker || c is CrabSquid || c is BoneShark);});
                  
        	worldgen.load();
        	
@@ -171,13 +172,14 @@ namespace ReikaKalseki.Ecocean
     [QModPostPatch]
     public static void PostLoad() {
     	if (InstructionHandlers.getTypeBySimpleName("ReikaKalseki.AqueousEngineering.BaseSonarPinger") != null) { //AE is loaded
-    		ReikaKalseki.AqueousEngineering.BaseSonarPinger.onBaseSonarPingedEvent += go => ECHooks.pingSonarFromObject(go.gameObject.GetComponentInChildren<CustomMachineLogic>(), 0.67F);
+    		ReikaKalseki.AqueousEngineering.BaseSonarPinger.onBaseSonarPingedEvent += go => ECHooks.pingSonarFromObject(go.gameObject.FindAncestor<SubRoot>(), 0.67F);
     		
 			ReikaKalseki.AqueousEngineering.BaseRoomSpecializationSystem.instance.registerModdedObject(glowOil, 0.2F);
 			ReikaKalseki.AqueousEngineering.BaseRoomSpecializationSystem.instance.registerModdedObject(glowShroom, 0.2F);
 			ReikaKalseki.AqueousEngineering.BaseRoomSpecializationSystem.instance.registerModdedObject(lavaShroom, 0.4F);
 			ReikaKalseki.AqueousEngineering.BaseRoomSpecializationSystem.instance.registerModdedObject(mushroomStack, 0.15F);
 			ReikaKalseki.AqueousEngineering.BaseRoomSpecializationSystem.instance.registerModdedObject(pinkBulbStack, -0.05F);
+			ReikaKalseki.AqueousEngineering.BaseRoomSpecializationSystem.instance.registerModdedObject(pinkLeaves, 0.5F);
     	}
     	
     	foreach (BiomeType b in Enum.GetValues(typeof(BiomeType)))

@@ -157,4 +157,47 @@ namespace ReikaKalseki.Ecocean {
 			return codes.AsEnumerable();
 		}
 	}
+	
+	[HarmonyPatch(typeof(MeleeAttack))]
+	[HarmonyPatch("OnTouch")]
+	public static class MeleeBiteabilityHook {
+		
+		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
+			List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
+			try {
+				int idx = InstructionHandlers.getInstruction(codes, 0, 0, OpCodes.Callvirt, "MeleeAttack", "CanBite", true, new Type[]{typeof(GameObject)});
+				codes[idx].operand = InstructionHandlers.convertMethodOperand("ReikaKalseki.Ecocean.ECHooks", "canMeleeBite", false, typeof(MeleeAttack), typeof(GameObject));
+				FileLog.Log("Done patch "+MethodBase.GetCurrentMethod().DeclaringType);
+			}
+			catch (Exception e) {
+				FileLog.Log("Caught exception when running patch "+MethodBase.GetCurrentMethod().DeclaringType+"!");
+				FileLog.Log(e.Message);
+				FileLog.Log(e.StackTrace);
+				FileLog.Log(e.ToString());
+			}
+			return codes.AsEnumerable();
+		}
+	}
+	
+	[HarmonyPatch(typeof(MeleeAttack))]
+	[HarmonyPatch("GetTarget")]
+	public static class MeleeBaseTargetHook {
+		
+		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
+			List<CodeInstruction> codes = new List<CodeInstruction>();
+			try {
+				codes.Add(new CodeInstruction(OpCodes.Ldarg_0));
+				codes.Add(new CodeInstruction(OpCodes.Ldarg_1));
+				codes.Add(InstructionHandlers.createMethodCall("ReikaKalseki.Ecocean.ECHooks", "getMeleeTarget", false, typeof(MeleeAttack), typeof(Collider)));
+				codes.Add(new CodeInstruction(OpCodes.Ret));
+			}
+			catch (Exception e) {
+				FileLog.Log("Caught exception when running patch "+MethodBase.GetCurrentMethod().DeclaringType+"!");
+				FileLog.Log(e.Message);
+				FileLog.Log(e.StackTrace);
+				FileLog.Log(e.ToString());
+			}
+			return codes.AsEnumerable();
+		}
+	}
 }

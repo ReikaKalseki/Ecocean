@@ -423,10 +423,12 @@ namespace ReikaKalseki.Ecocean {
 	    }
 		
 		public static void attractToSoundPing(MonoBehaviour obj, bool isHorn, float strength) {
-			if (obj is SubRoot) {
+			if (obj is SubRoot && ((SubRoot)obj).isCyclops) {
 				CyclopsNoiseManager noise = obj.gameObject.GetComponentInChildren<CyclopsNoiseManager>();
-				noise.noiseScalar *= isHorn ? 6 : 2;
-				noise.Invoke("RecalculateNoiseValues", isHorn ? 15 : 10);
+				if (noise) {
+					noise.noiseScalar *= isHorn ? 6 : 2;
+					noise.Invoke("RecalculateNoiseValues", isHorn ? 15 : 10);
+				}
 			}
 			float range = 400*strength;
 			WorldUtil.getGameObjectsNear(obj.transform.position, range, go => tryAttractToSound(go, obj, isHorn, strength, range));
@@ -492,8 +494,19 @@ namespace ReikaKalseki.Ecocean {
 			return false;
 		}
 		
+		internal static void attractCreaturesToBase(SubRoot sub, float range, Predicate<Creature> rule = null) {
+			WorldUtil.getGameObjectsNear(sub.transform.position, range, go => {
+			    Creature c = go.GetComponent<Creature>();
+			    if (c && (rule == null || rule.Invoke(c)))
+					attractCreatureToTarget(c, sub, false);
+			});
+		}
+		
 		internal static void attractCreatureToTarget(Creature c, MonoBehaviour obj, bool isHorn) {
+			if (obj is BaseRoot) 
+				obj = obj.GetComponentsInChildren<BaseCell>().GetRandom().GetComponent<LiveMixin>();
 			AttractToTarget ac = c.gameObject.EnsureComponent<AttractToTarget>();
+			//SNUtil.writeToChat("Attracted "+c+" @ "+c.transform.position+" to "+obj+" @ "+obj.transform.position);
 			ac.fire(obj, isHorn);
 			if (c is Reefback && isHorn)
 				SoundManager.playSoundAt(c.GetComponent<FMOD_CustomLoopingEmitter>().asset, c.transform.position, false, -1, 1);
@@ -587,6 +600,10 @@ namespace ReikaKalseki.Ecocean {
 		    		a.lastTarget.SetTarget(target.gameObject);
 			}
 			
+			internal bool isTargeting(GameObject go) {
+				return target.gameObject == go;
+			}
+			
 		}
 		
 		public static void setHUDCompassDirection(uGUI_Compass compass, float dir) { /* 0-1 for 360 */
@@ -607,5 +624,28 @@ namespace ReikaKalseki.Ecocean {
 		public static void tickVortexTorpedo(SeamothTorpedoWhirlpool go) {
 			
 		}*/
+		
+		public static bool canMeleeBite(MeleeAttack me, GameObject go) {
+			BaseCell bc = go.GetComponent<BaseCell>();
+			return (bc && canCreatureAttackBase(bc, me)) || me.CanBite(go);
+		}
+		
+		private static bool canCreatureAttackBase(BaseCell bc, MeleeAttack me) {
+			AttractToTarget att = me.GetComponent<AttractToTarget>();
+			if (att && att.isTargeting(bc.gameObject))
+				return true;
+			Creature c = me.GetComponent<Creature>();
+			return c is GhostLeviatanVoid || c is GhostLeviathan || c is SeaDragon || c is CrabSquid || c is Shocker;
+		}
+		
+		public static GameObject getMeleeTarget(MeleeAttack me, Collider c) {
+			GameObject ret = c.gameObject;
+			BaseCell bc = ret.FindAncestor<BaseCell>();
+			if (bc)
+				ret = bc.gameObject;
+			if (ret.GetComponent<LiveMixin>() == null && c.attachedRigidbody != null)
+				ret = c.attachedRigidbody.gameObject;
+			return ret;
+		}
 	}
 }
