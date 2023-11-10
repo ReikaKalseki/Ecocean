@@ -194,6 +194,26 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		public static void onTakeDamage(DIHooks.DamageToDeal dmg) {
+			BaseRoot bb = dmg.target.gameObject.FindAncestor<BaseRoot>();
+			if (bb) {
+				BaseHullStrength str = bb.GetComponent<BaseHullStrength>();
+				if (str.totalStrength > BaseHullStrength.InitialStrength) {
+					float surplus = str.totalStrength-BaseHullStrength.InitialStrength;
+					float f = 1/(1+surplus*0.1F); //halve at 20 str, third at 30 str, quarter at 40 str, etc
+					dmg.setValue(dmg.getAmount()*f);
+				}
+				else if (str.totalStrength > 0) {
+					dmg.setValue(dmg.getAmount()*(float)MathUtil.linterpolate(str.totalStrength, 0, BaseHullStrength.InitialStrength, 2, 1, true)); //increase to 2x from 10 to 0
+				}
+				else if (str.totalStrength >= -1) {
+					dmg.setValue(dmg.getAmount()*2);
+				}
+				else if (str.totalStrength < -1) {
+					dmg.setValue(dmg.getAmount()*(1-str.totalStrength)); //increase by 100% for every point under -1, plus an additional 100%
+				}
+				//SNUtil.writeToChat("Base damage being modified due to strength "+str.totalStrength+": "+dmg.originalAmount.ToString("0.000")+" > "+dmg.getAmount().ToString("0.000"));
+				return;
+			}
 			Player ep = dmg.target.gameObject.FindAncestor<Player>();
 			if (ep) {
 				float f = 0;
