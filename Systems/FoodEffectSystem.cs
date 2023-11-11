@@ -44,7 +44,7 @@ namespace ReikaKalseki.Ecocean {
 			addDamageOverTimeEffect(TechType.AcidMushroom, 40, 15, DamageType.Acid, e.getField<string>("acidburn"));
 			addDamageOverTimeEffect(TechType.WhiteMushroom, 250, 10, DamageType.Acid, e.getField<string>("acidburn"));
 			
-			addVisualDistortionEffect(TechType.JellyPlant, 1, 15);
+			addVisualDistortionEffect(TechType.JellyPlant, 3, 15);
 			
 			addVomitingEffect(TechType.RedRollPlantSeed, 30, 25, 3, 5F, 10);
 			addVomitingEffect(TechType.RedGreenTentacleSeed, 35, 40, 4, 5F, 10);
@@ -234,13 +234,9 @@ namespace ReikaKalseki.Ecocean {
 				bool all = eventCount >= maxEvents;
 				float subFood = remainingFood*(all ? 1 : MathUtil.getRandomPlusMinus(1F/maxEvents, 0.2F));
 				float subWater = remainingWater*(all ? 1 : MathUtil.getRandomPlusMinus(1F/maxEvents, 0.2F));
-				survivalObject.food = Mathf.Max(1, survivalObject.food-subFood);
-				survivalObject.water = Mathf.Max(1, survivalObject.water-subWater);
+				SNUtil.vomit(survivalObject, subFood, subWater);
 				remainingFood -= subFood;
 				remainingWater -= subWater;
-				SoundManager.playSoundAt(SoundManager.buildSound(Player.main.IsUnderwater() ? "event:/player/Puke_underwater" : "event:/player/Puke"), transform.position, false, 12);
-				PlayerMovementSpeedModifier.add(0.15F, 1.25F);
-				MainCameraControl.main.ShakeCamera(2F, 1.0F, MainCameraControl.ShakeMode.Linear, 0.25F);//SNUtil.shakeCamera(1.2F, 0.5F, 0.2F);
 			}
 		}
 		
