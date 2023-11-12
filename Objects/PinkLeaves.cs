@@ -13,7 +13,7 @@ using ReikaKalseki.DIAlterra;
 
 namespace ReikaKalseki.Ecocean {
 	
-	public class PinkLeaves : BasicCustomPlant, MultiTexturePrefab<FloraPrefabFetch> {
+	public class PinkLeaves : BasicCustomPlant, MultiTexturePrefab {
 		
 		public PinkLeaves(XMLLocale.LocaleEntry e) : base(e, new FloraPrefabFetch(DecoPlants.BANANA_LEAF.prefab), "daff0e31-dd08-4219-8793-39547fdb745e", "Cuttings") {
 			finalCutBonus = 1;

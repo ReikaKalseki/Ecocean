@@ -13,7 +13,7 @@ using ReikaKalseki.DIAlterra;
 
 namespace ReikaKalseki.Ecocean {
 	
-	public abstract class GlowshroomBase<T> : BasicCustomPlant, MultiTexturePrefab<FloraPrefabFetch> where T : GlowShroomTagBase {
+	public abstract class GlowshroomBase<T> : BasicCustomPlant, MultiTexturePrefab where T : GlowShroomTagBase {
 		
 		public GlowshroomBase(string localeKey) : base(EcoceanMod.locale.getEntry(localeKey), new FloraPrefabFetch(VanillaFlora.JELLYSHROOM_LIVE), "7fcf1275-0687-491e-a086-d928dd3ba67a") {
 			glowIntensity = 1.5F;
