@@ -82,7 +82,7 @@ namespace ReikaKalseki.Ecocean {
 			p.modelLocalPosition = p2.modelLocalPosition;
 			p.modelScale = p2.modelScale;
 			p.pickupable = pp;
-			BasicCustomPlant.setPlantSeed(TechType, EcoceanMod.glowShroom);
+			BasicCustomPlant.setPlantSeed(this, EcoceanMod.glowShroom);
 			GlowOilTag g = world.EnsureComponent<GlowOilTag>();
 			world.EnsureComponent<LargeWorldEntity>().cellLevel = LargeWorldEntity.CellLevel.VeryFar;
 			Light l = ObjectUtil.addLight(world);

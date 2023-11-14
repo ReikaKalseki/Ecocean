@@ -120,7 +120,7 @@ namespace ReikaKalseki.Ecocean {
 			grown = gameObject.GetComponent<GrownPlant>();
 			if (grown) {
     			gameObject.SetActive(true);
-    			gameObject.transform.localScale = Vector3.one;
+    			transform.localScale = Vector3.one;
     			Renderer[] r0 = GetComponentsInChildren<Renderer>();
     			if (r0.Length > 1) {
     				for (int i = 1; i < r0.Length; i++) {
@@ -135,6 +135,9 @@ namespace ReikaKalseki.Ecocean {
 					lv.damageInfo = new DamageInfo();
 				lv.ResetHealth();
     		}
+			else {
+    			transform.localScale = Vector3.one*0.5F;
+			}
 		}
 		
 	}

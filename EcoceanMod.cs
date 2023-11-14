@@ -8,6 +8,7 @@ using HarmonyLib;
 using QModManager.API.ModLoading;
 using ReikaKalseki.DIAlterra;
 using ReikaKalseki.Ecocean;
+using ReikaKalseki.AqueousEngineering;
 using SMLHelper.V2.Handlers;
 using SMLHelper.V2.Utility;
 using SMLHelper.V2.Crafting;
@@ -166,20 +167,34 @@ namespace ReikaKalseki.Ecocean
 			GenUtil.registerWorldgen(new PositionedPrefab(pfb.ClassID, new Vector3());
 		}*/
 		
+		glowShroom.addNativeBiome(VanillaBiomes.DUNES);
+		lavaShroom.addNativeBiome(VanillaBiomes.ILZ);
+		pinkBulbStack.addNativeBiome(VanillaBiomes.GRANDREEF);
+		pinkBulbStack.addNativeBiome(VanillaBiomes.REDGRASS, true);
+		pinkBulbStack.addNativeBiome(VanillaBiomes.KOOSH);
+		mushroomStack.addNativeBiome(VanillaBiomes.MOUNTAINS);
+		pinkLeaves.addNativeBiome(VanillaBiomes.CRASH);
+		
 		System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(ECHooks).TypeHandle);
     }
     
     [QModPostPatch]
     public static void PostLoad() {
     	if (InstructionHandlers.getTypeBySimpleName("ReikaKalseki.AqueousEngineering.BaseSonarPinger") != null) { //AE is loaded
-    		ReikaKalseki.AqueousEngineering.BaseSonarPinger.onBaseSonarPingedEvent += go => ECHooks.pingSonarFromObject(go.gameObject.FindAncestor<SubRoot>(), 0.67F);
+    		BaseSonarPinger.onBaseSonarPingedEvent += go => ECHooks.pingSonarFromObject(go.gameObject.FindAncestor<SubRoot>(), 0.67F);
     		
-			ReikaKalseki.AqueousEngineering.BaseRoomSpecializationSystem.instance.registerModdedObject(glowOil, 0.2F);
-			ReikaKalseki.AqueousEngineering.BaseRoomSpecializationSystem.instance.registerModdedObject(glowShroom, 0.2F);
-			ReikaKalseki.AqueousEngineering.BaseRoomSpecializationSystem.instance.registerModdedObject(lavaShroom, 0.4F);
-			ReikaKalseki.AqueousEngineering.BaseRoomSpecializationSystem.instance.registerModdedObject(mushroomStack, 0.15F);
-			ReikaKalseki.AqueousEngineering.BaseRoomSpecializationSystem.instance.registerModdedObject(pinkBulbStack, -0.05F);
-			ReikaKalseki.AqueousEngineering.BaseRoomSpecializationSystem.instance.registerModdedObject(pinkLeaves, 0.5F);
+			BaseRoomSpecializationSystem.instance.registerModdedObject(glowOil, 0.2F);
+			BaseRoomSpecializationSystem.instance.registerModdedObject(glowShroom, 0.2F);
+			BaseRoomSpecializationSystem.instance.registerModdedObject(lavaShroom, 0.4F);
+			BaseRoomSpecializationSystem.instance.registerModdedObject(mushroomStack, 0.15F);
+			BaseRoomSpecializationSystem.instance.registerModdedObject(pinkBulbStack, -0.05F);
+			BaseRoomSpecializationSystem.instance.registerModdedObject(pinkLeaves, 0.5F);
+			
+			ACUEcosystems.addFood(new ACUEcosystems.PlantFood(glowShroom, 0.25F, BiomeRegions.RegionType.Other));
+			ACUEcosystems.addFood(new ACUEcosystems.PlantFood(lavaShroom, 0.25F, BiomeRegions.RegionType.LavaZone));
+			ACUEcosystems.addFood(new ACUEcosystems.PlantFood(mushroomStack, 0.02F, BiomeRegions.RegionType.Other));
+			ACUEcosystems.addFood(new ACUEcosystems.PlantFood(pinkBulbStack, 0.1F, BiomeRegions.RegionType.Koosh, BiomeRegions.RegionType.GrandReef));
+			ACUEcosystems.addFood(new ACUEcosystems.PlantFood(pinkLeaves, 0.1F, BiomeRegions.RegionType.Other));
     	}
     	
     	foreach (BiomeType b in Enum.GetValues(typeof(BiomeType)))
