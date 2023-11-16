@@ -127,8 +127,9 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		private void prepareSubplant(GameObject child) {
-			child.EnsureComponent<LargeWorldEntity>().cellLevel = LargeWorldEntity.CellLevel.Medium;
-			child.EnsureComponent<TechTag>().type = TechType;
+			ObjectUtil.removeComponent<LargeWorldEntity>(child);
+			ObjectUtil.removeComponent<TechTag>(child);
+			ObjectUtil.removeComponent<PrefabIdentifier>(child);
 			
 			foreach (Renderer r in child.GetComponentsInChildren<Renderer>(true)) {
 				r.materials[0].SetColor("_GlowColor", Color.white);

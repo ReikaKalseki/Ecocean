@@ -190,11 +190,11 @@ namespace ReikaKalseki.Ecocean
 			BaseRoomSpecializationSystem.instance.registerModdedObject(pinkBulbStack, -0.05F);
 			BaseRoomSpecializationSystem.instance.registerModdedObject(pinkLeaves, 0.5F);
 			
-			ACUEcosystems.addFood(new ACUEcosystems.PlantFood(glowShroom, 0.25F, BiomeRegions.RegionType.Other));
-			ACUEcosystems.addFood(new ACUEcosystems.PlantFood(lavaShroom, 0.25F, BiomeRegions.RegionType.LavaZone));
-			ACUEcosystems.addFood(new ACUEcosystems.PlantFood(mushroomStack, 0.02F, BiomeRegions.RegionType.Other));
-			ACUEcosystems.addFood(new ACUEcosystems.PlantFood(pinkBulbStack, 0.1F, BiomeRegions.RegionType.Koosh, BiomeRegions.RegionType.GrandReef));
-			ACUEcosystems.addFood(new ACUEcosystems.PlantFood(pinkLeaves, 0.1F, BiomeRegions.RegionType.Other));
+			ACUEcosystems.addFood(new ACUEcosystems.PlantFood(glowShroom, 0.25F, BiomeRegions.Other));
+			ACUEcosystems.addFood(new ACUEcosystems.PlantFood(lavaShroom, 0.25F, BiomeRegions.LavaZone));
+			ACUEcosystems.addFood(new ACUEcosystems.PlantFood(mushroomStack, 0.02F, BiomeRegions.Other));
+			ACUEcosystems.addFood(new ACUEcosystems.PlantFood(pinkBulbStack, 0.1F, BiomeRegions.Koosh, BiomeRegions.GrandReef));
+			ACUEcosystems.addFood(new ACUEcosystems.PlantFood(pinkLeaves, 0.1F, BiomeRegions.Other));
     	}
     	
     	foreach (BiomeType b in Enum.GetValues(typeof(BiomeType)))
