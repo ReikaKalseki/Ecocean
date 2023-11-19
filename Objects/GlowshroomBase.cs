@@ -225,6 +225,10 @@ namespace ReikaKalseki.Ecocean {
 			
 		}
 		
+		public float getLastFiredTime() {
+			return lastEmitTime;
+		}
+		
 		private void emit(float time) {
 			lastEmitTime = time;
 			nextEmitTime = time+getNextFireInterval();

@@ -18,39 +18,35 @@ using ECCLibrary;
 
 namespace ReikaKalseki.Ecocean
 {
-		internal class ECReefback : PassiveSonarEntity {
+		internal class ECTreader : PassiveSonarEntity {
 		
-			private FMOD_CustomLoopingEmitter idleSound;
+			private SeaTreaderSounds sounds;
 			
 			protected new void Update() {
 				base.Update();
-				if (!idleSound) {
-					idleSound = GetComponent<FMOD_CustomLoopingEmitter>();
+				if (!sounds) {
+					sounds = GetComponentInChildren<SeaTreaderSounds>();
+					createRadarSphere(sounds.frontLeg.gameObject, 0.33F);
+					createRadarSphere(sounds.leftLeg.gameObject, 0.33F);
+					createRadarSphere(sounds.rightLeg.gameObject, 0.33F);
 				}
 			}
 			
 			protected override GameObject getSphereRootGO() {
-				return ObjectUtil.getChildObject(gameObject, "Pivot/Reefback/Reefback").GetComponentInChildren<Renderer>().gameObject;
+				return ObjectUtil.getChildObject(gameObject, "Sea_Treader/Sea_Treader_Geo/Sea_Treader");
 			}
 			
 			protected override void setSonarRanges() {
-				minimumDistanceSq = 120*120;
-				maximumDistanceSq = 200*200;
-				if (VanillaBiomes.GRANDREEF.isInBiome(transform.position)) {
-					minimumDistanceSq *= 0.5F;
-					maximumDistanceSq *= 0.25F;
-				}
-				else if (VanillaBiomes.REDGRASS.isInBiome(transform.position)) {
-					minimumDistanceSq *= 1.25F;
-				}
+				minimumDistanceSq = 50*50;
+				maximumDistanceSq = 90*90;
 			}
 			
 			protected override bool isAudible() {
-				return isRoaring(idleSound);
+				return sounds && (sounds.attackSound.evt.hasHandle() || sounds.stepSound.evt.hasHandle() || sounds.stompSound.evt.hasHandle());
 			}
 			
 			protected override Vector3 getRadarSphereSize() {
-				return new Vector3(45, 45, 60);
+				return new Vector3(20, 30, 20);
 			}
 			
 		}

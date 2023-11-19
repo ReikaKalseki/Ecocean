@@ -23,7 +23,7 @@ namespace ReikaKalseki.Ecocean
 			private FMOD_CustomLoopingEmitter roar1;
 			private FMOD_CustomLoopingEmitterWithCallback roar2;
 			
-			protected void Update() {
+			protected new void Update() {
 				base.Update();
 				if (!roar1) {
 					foreach (FMOD_CustomLoopingEmitter em in GetComponents<FMOD_CustomLoopingEmitter>()) {
@@ -34,10 +34,6 @@ namespace ReikaKalseki.Ecocean
 					}
 					roar2 = GetComponent<FMOD_CustomLoopingEmitterWithCallback>();
 				}
-			}
-			
-			protected override Renderer getMainRenderer() {
-				return ObjectUtil.getChildObject(gameObject, "reaper_leviathan/Reaper_Leviathan_geo").GetComponentInChildren<Renderer>();
 			}
 			
 			protected override bool isAudible() {

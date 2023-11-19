@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Xml;
+using System.Linq;
 using System.Xml.Serialization;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -201,7 +202,9 @@ namespace ReikaKalseki.Ecocean {
 		
 		//private float lastContactTime;
 		private float lastScoopTime;
-		private float lastVortexCheckTime;
+		
+		private float lastActivatorCheckTime;
+		private List<GameObject> forcedActivators = new List<GameObject>();
 		
 		private float minParticleSize = 2;
 		private float maxParticleSize = 5;
@@ -255,16 +258,11 @@ namespace ReikaKalseki.Ecocean {
 			if (time-ECHooks.getLastSonarUse() <= 10 || time-ECHooks.getLastHornUse() <= 10) {
 				touchIntensity = Mathf.Max(1, touchIntensity);
 			}
-			if (time-lastVortexCheckTime >= 1) {
-				Vehicle v = Player.main.GetVehicle();
-				if (v is SeaMoth && Vector3.Distance(transform.position, v.transform.position) <= 150) {
-					lastVortexCheckTime = time;
-					foreach (SeamothTorpedoWhirlpool sm in SeamothTorpedoWhirlpool.allTargets.Values) {
-						if (sm && sm.sequence.active && Vector3.Distance(sm.transform.position, transform.position) <= 30) {
-							addTouchIntensity(2);
-						}
-					}
-				}
+			if (time-lastActivatorCheckTime >= 0.5F) {
+				lastActivatorCheckTime = time;
+				forcedActivators.RemoveAll(go => !go || (go.transform.position-transform.position).sqrMagnitude >= 900);
+				if (forcedActivators.Count > 0)
+					addTouchIntensity(2);
 			}
 			
 			if (isDead) {
@@ -345,6 +343,10 @@ namespace ReikaKalseki.Ecocean {
 			}
 			//SNUtil.writeToChat(other+" touch plankton @ "+this.transform.position+" @ "+lastContactTime);
 	    }
+		
+		public void activateBy(GameObject go) {
+			forcedActivators.Add(go);
+		}
 		
 		internal void addTouchIntensity(float amt) {
 			touchIntensity = Mathf.Max(0, touchIntensity+amt);

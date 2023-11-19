@@ -18,39 +18,47 @@ using ECCLibrary;
 
 namespace ReikaKalseki.Ecocean
 {
-		internal class ECReefback : PassiveSonarEntity {
+		internal class GeyserSonarSignal : PassiveSonarEntity {
 		
-			private FMOD_CustomLoopingEmitter idleSound;
+			private Geyser geyser;
 			
 			protected new void Update() {
+				if (!geyser)
+					geyser = GetComponent<Geyser>();
 				base.Update();
-				if (!idleSound) {
-					idleSound = GetComponent<FMOD_CustomLoopingEmitter>();
-				}
+			}
+			
+			protected override float getFadeRate() {
+				return 2;
+			}
+			
+			protected override float getTimeVariationStrength() {
+				return 0.05F;
+			}
+			
+			protected override float getIntensityFactor() {
+				return 1.25F;
 			}
 			
 			protected override GameObject getSphereRootGO() {
-				return ObjectUtil.getChildObject(gameObject, "Pivot/Reefback/Reefback").GetComponentInChildren<Renderer>().gameObject;
+				return gameObject;
 			}
 			
 			protected override void setSonarRanges() {
-				minimumDistanceSq = 120*120;
-				maximumDistanceSq = 200*200;
-				if (VanillaBiomes.GRANDREEF.isInBiome(transform.position)) {
-					minimumDistanceSq *= 0.5F;
-					maximumDistanceSq *= 0.25F;
-				}
-				else if (VanillaBiomes.REDGRASS.isInBiome(transform.position)) {
-					minimumDistanceSq *= 1.25F;
-				}
+				minimumDistanceSq = 30*30;
+				maximumDistanceSq = 50*50;
 			}
 			
 			protected override bool isAudible() {
-				return isRoaring(idleSound);
+				return geyser && geyser.erupting;
 			}
 			
 			protected override Vector3 getRadarSphereSize() {
-				return new Vector3(45, 45, 60);
+				return new Vector3(36, 36, 36);
+			}
+			
+			protected override Vector3 getRadarSphereOffset() {
+				return Vector3.up*20;
 			}
 			
 		}

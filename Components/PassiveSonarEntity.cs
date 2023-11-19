@@ -18,11 +18,11 @@ using ECCLibrary;
 
 namespace ReikaKalseki.Ecocean
 {
-		internal abstract class PassiveSonarEntity : MonoBehaviour {
+		public abstract class PassiveSonarEntity : MonoBehaviour {
 			
 			private static Texture flatTexture = TextureManager.getTexture(EcoceanMod.modDLL, "Textures/reapersonarglow");
 		
-			private Renderer renderer;
+			//private Renderer renderer;
 			
 			private float forcedGlowFactor;
 			
@@ -35,12 +35,12 @@ namespace ReikaKalseki.Ecocean
 				//base.InvokeRepeating("tick", 0f, 1);
 			}
 			
-			protected abstract Renderer getMainRenderer();
+			//protected abstract Renderer getMainRenderer();
 			
 			protected void Update() {
 				if (!MainCamera.camera)
 					return;
-				//SNUtil.log("A");
+				/*SNUtil.log("A");
 				if (!renderer) {
 					renderer = getMainRenderer();
 					//SNUtil.log(""+renderer);
@@ -51,17 +51,18 @@ namespace ReikaKalseki.Ecocean
 					for (int i = 0; i < renderer.materials.Length; i++) {
 						defaultGlows[i] = renderer.materials[i].GetFloat("_GlowStrength");
 						defaultTextures[i] = renderer.materials[i].GetTexture("_Illum");
-					}*/
-				}
+					}*//*
+				}*/
 				if (spheres.Count == 0) {
 					GameObject go = getSphereRootGO();
 					createRadarSphere(go);
+					onCreateSpheres();
 				}
 				//SNUtil.log("B");
 				float distq = (transform.position-MainCamera.camera.transform.position).sqrMagnitude;
 				setSonarRanges();
 				float f = Mathf.Clamp01((distq-minimumDistanceSq)/(maximumDistanceSq-minimumDistanceSq));
-				float glow = 5*f*f*f*0.9F;
+				float glow = 5*f*f*f*0.9F*getIntensityFactor();
 				//SNUtil.writeToChat(distq.ToString("000.0")+">"+f.ToString("0.000")+">"+glow.ToString("0000000.0")+"@"+forcedGlowFactor.ToString("0.000"));
 				//SNUtil.log("C");
 				foreach (Renderer r in spheres) {
@@ -83,16 +84,28 @@ namespace ReikaKalseki.Ecocean
 					if (MainCamera.camera.GetComponent<SonarScreenFX>().enabled) {
 						forcedGlowFactor = Mathf.Max(0, forcedGlowFactor-0.67F*dT);
 					}
-					else if (isAudible() && Mathf.Sin(DayNightCycle.main.timePassedAsFloat*0.8F+gameObject.GetInstanceID()) > 0) { //sin is just because the sound is always "playing"
-						forcedGlowFactor = Mathf.Min(1, forcedGlowFactor+2.5F*dT);
+					else if (isAudible() && 1.001F-getTimeVariationStrength()+Mathf.Sin(DayNightCycle.main.timePassedAsFloat*0.8F+gameObject.GetInstanceID()) > 0) { //sin is just because the sound is always "playing"
+						forcedGlowFactor = Mathf.Min(1, forcedGlowFactor+2.5F*dT*getFadeRate());
 					}
 					else {
-						forcedGlowFactor = Mathf.Max(0, forcedGlowFactor-0.33F*dT);
+						forcedGlowFactor = Mathf.Max(0, forcedGlowFactor-0.33F*dT*getFadeRate());
 					}
 				}
 				else {
 					forcedGlowFactor = 0;
 				}
+			}
+			
+			protected virtual float getFadeRate() {
+				return 1;
+			}
+			
+			protected virtual float getIntensityFactor() {
+				return 1;
+			}
+			
+			protected virtual float getTimeVariationStrength() {
+				return 1;
 			}
 			
 			protected virtual GameObject getSphereRootGO() {
@@ -110,7 +123,11 @@ namespace ReikaKalseki.Ecocean
 					return ms >= 0 && ms <= 1500;
 				}*//*
 				return false;*/
-					return emit != null && emit.playing;
+					return emit && emit.playing;
+			}
+			
+			protected virtual void onCreateSpheres() {
+				
 			}
 			
 			protected virtual void setSonarRanges() {
@@ -133,16 +150,22 @@ namespace ReikaKalseki.Ecocean
 				maximumDistanceSq = x*x*0.8F;
 			}
 			
-			private void createRadarSphere(GameObject go) {
+			protected void createRadarSphere(GameObject go, float scale = 1) {
+				createRadarSphere(go, new Vector3(scale, scale, scale));
+			}
+			
+			protected void createRadarSphere(GameObject go, Vector3 scale) {
 				SNUtil.log("Creating radar sphere for "+go.GetFullHierarchyPath());
 				GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-				sphere.transform.localScale = getRadarSphereSize();
+				sphere.transform.localScale = Vector3.Scale(getRadarSphereSize(), scale);
 				sphere.name = "RadarHalo";
 				sphere.transform.SetParent(go.transform);
-				sphere.transform.localPosition = Vector3.zero;
+				sphere.transform.localPosition = getRadarSphereOffset();
 				ObjectUtil.removeComponent<Collider>(sphere);
 				ECCHelpers.ApplySNShaders(sphere, new UBERMaterialProperties(0, 0, 5));
 				Renderer r = sphere.GetComponentInChildren<Renderer>();
+				r.receiveShadows = false;
+				r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
 				r.materials[0].SetTexture("_Illum", flatTexture);
 				r.materials[0].SetFloat("_Built", 0.3F);
 				r.materials[0].SetFloat("_BuildLinear", 0.1F);
@@ -153,14 +176,18 @@ namespace ReikaKalseki.Ecocean
 				spheres.Add(r);
 				
 				foreach (Transform child in go.transform) {
-					if (child == go.transform || child.gameObject == sphere)
+					if (child == go.transform || child.gameObject == sphere || child.GetComponent<ParticleSystem>())
 						continue;
-					createRadarSphere(child.gameObject);
+					createRadarSphere(child.gameObject, scale);
 				}
 			}
 			
 			protected virtual Vector3 getRadarSphereSize() {
 				return Vector3.one*15;
+			}
+			
+			protected virtual Vector3 getRadarSphereOffset() {
+				return Vector3.zero;
 			}
 			
 			private bool isInVehicleWithSonar() {

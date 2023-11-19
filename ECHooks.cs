@@ -51,6 +51,8 @@ namespace ReikaKalseki.Ecocean {
 	    	
 	    	DIHooks.drillableDrillTickEvent += onDrillableTick;
 	    	
+	    	DIHooks.onTorpedoExplodeEvent += onTorpedoExploded;
+	    	
 	    	bloodVine.AddRange(VanillaFlora.BLOOD_KELP.getPrefabs(true, true));
 	    }
 	    
@@ -314,6 +316,8 @@ namespace ReikaKalseki.Ecocean {
 	    		}
 				else if (pi && pi.ClassId == VanillaCreatures.REAPER.prefab)
 					go.EnsureComponent<ECReaper>();
+				else if (pi && pi.ClassId == VanillaCreatures.SEA_TREADER.prefab)
+					go.EnsureComponent<ECTreader>();
 				else if (pi && pi.ClassId == VanillaCreatures.SEADRAGON.prefab)
 					go.EnsureComponent<ECDragon>();
 				else if (pi && VanillaFlora.getFromID(pi.ClassId) == VanillaFlora.CREEPVINE_FERTILE)
@@ -344,6 +348,7 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		public static void onGeyserSpawn(Geyser g) {
+			g.gameObject.EnsureComponent<GeyserSonarSignal>();
 			CapsuleCollider cc = g.GetComponent<CapsuleCollider>();
 			cc.center += Vector3.down*1.5F;
 			cc.height += 3.5F;
@@ -424,6 +429,23 @@ namespace ReikaKalseki.Ecocean {
 			
 		}
 		
+		public static void onTorpedoExploded(SeamothTorpedo sm, Transform result) {
+			SeamothTorpedoWhirlpool vortex = result.GetComponent<SeamothTorpedoWhirlpool>();
+			//SNUtil.writeToChat(sm+" makes "+result);
+			WorldUtil.getGameObjectsNear(result.position, 50, go => {
+				ExplodingAnchorPod ea = go.FindAncestor<ExplodingAnchorPod>();
+				//SNUtil.writeToChat(result+" hits "+go);
+				if (ea && UnityEngine.Random.Range(0F, 1F) <= 0.5F && Vector3.Distance(ea.getEffectivePodCenter(), result.position) <= 25) {
+					ea.scheduleExplode(UnityEngine.Random.Range(0F, 10F));
+				}
+				if (vortex) {
+					PlanktonCloudTag tag = go.FindAncestor<PlanktonCloudTag>();
+					if (tag)
+						tag.activateBy(result.gameObject);
+				}
+			});
+		}
+		
 		public static void honkCyclopsHorn(CyclopsHornButton b) {
 			attractToSoundPing(b.gameObject.FindAncestor<SubRoot>(), true, 1);
 			lastHornUsed = DayNightCycle.main.timePassedAsFloat;
@@ -440,6 +462,17 @@ namespace ReikaKalseki.Ecocean {
 		public static void pingSonarFromObject(MonoBehaviour mb, float strength = 1) {
 			attractToSoundPing(mb, false, strength);
 			lastSonarUsed = DayNightCycle.main.timePassedAsFloat;
+			float r = 120;
+			WorldUtil.getGameObjectsNear(mb.transform.position, r, go => {
+				float dist = (go.transform.position-mb.transform.position).sqrMagnitude;
+				float f = (float)MathUtil.linterpolate(dist, 400, r*r, 0.05F, 0.02F, true);
+				if (f > 0 && UnityEngine.Random.Range(0F, 1F) < f) {
+					ExplodingAnchorPod ea = go.GetComponent<ExplodingAnchorPod>();
+					if (ea) {
+						ea.scheduleExplode(0.25F+0.004F*Mathf.Sqrt(dist));
+					}
+				}
+			});
 	    }
 		
 		public static void attractToSoundPing(MonoBehaviour obj, bool isHorn, float strength) {

@@ -22,7 +22,7 @@ namespace ReikaKalseki.Ecocean
 		
 			private FMOD_CustomLoopingEmitterWithCallback roar;
 			
-			protected void Update() {
+			protected new void Update() {
 				base.Update();
 				if (!roar) {
 					roar = GetComponent<FMOD_CustomLoopingEmitterWithCallback>();
@@ -32,10 +32,6 @@ namespace ReikaKalseki.Ecocean
 			protected override void setSonarRanges() {
 				minimumDistanceSq = 125*125;
 				maximumDistanceSq = 250*250;
-			}
-			
-			protected override Renderer getMainRenderer() {
-				return ObjectUtil.getChildObject(gameObject, "Sea_Dragon_wholeBody_anim/Sea_Dragon_geo").GetComponentInChildren<Renderer>();
 			}
 			
 			protected override bool isAudible() {

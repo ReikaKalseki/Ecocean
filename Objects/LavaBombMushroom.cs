@@ -19,6 +19,11 @@ namespace ReikaKalseki.Ecocean {
 			
 		}
 		
+		public override void prepareGameObject(GameObject go, Renderer[] r) {
+			base.prepareGameObject(go, r);
+			go.EnsureComponent<LavaShroomSonarSignal>();
+		}
+		
 		public override Color getLightColor() {
 			return new Color(1.0F, 0.5F, 0.1F, 1F);
 		}
@@ -31,6 +36,51 @@ namespace ReikaKalseki.Ecocean {
 			return false;
 		}
 		
+	}
+	
+	public class LavaShroomSonarSignal : PassiveSonarEntity {
+		
+			private LavaShroomTag mushroom;
+			
+			protected new void Update() {
+				if (!mushroom)
+					mushroom = GetComponent<LavaShroomTag>();
+				base.Update();
+			}
+			
+			protected override GameObject getSphereRootGO() {
+				return gameObject;
+			}
+			
+			protected override float getFadeRate() {
+				return 5;
+			}
+			
+			protected override float getTimeVariationStrength() {
+				return 0;
+			}
+			
+			protected override float getIntensityFactor() {
+				return 2F;
+			}
+			
+			protected override void setSonarRanges() {
+				minimumDistanceSq = 50*50;
+				maximumDistanceSq = 50*50;
+			}
+			
+			protected override bool isAudible() {
+				return mushroom && DayNightCycle.main.timePassedAsFloat-mushroom.getLastFiredTime() <= 1.5F;
+			}
+			
+			protected override Vector3 getRadarSphereSize() {
+				return new Vector3(15, 15, 15);
+			}
+			
+			protected override Vector3 getRadarSphereOffset() {
+				return Vector3.up*2;
+			}
+			
 	}
 	
 	public class LavaShroomTag : GlowShroomTagBase {

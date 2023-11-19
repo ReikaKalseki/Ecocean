@@ -14,7 +14,7 @@ using SMLHelper.V2.Utility;
 
 namespace ReikaKalseki.Ecocean
 {
-	public class ExplodingAnchorPod : MonoBehaviour {
+	public class ExplodingAnchorPod : PassiveSonarEntity {
 		
 		private static readonly SoundManager.SoundData explosionSound = SoundManager.registerSound(EcoceanMod.modDLL, "reefpodexplode", "Sounds/reefpod.ogg", SoundManager.soundMode3D);
 		
@@ -46,7 +46,8 @@ namespace ReikaKalseki.Ecocean
 			effectivePodCenter = podRenders.First(r => !ObjectUtil.isLODRenderer(r)).bounds.center;//transform.position+Vector3.up*17.5F;
 		}
 			
-		void Update() {
+		new void Update() {
+			base.Update();
 			float time = DayNightCycle.main.timePassedAsFloat;
 			if (isExploded) {
 				if (UnityEngine.Random.Range(0F, 1F) <= 0.01F && time-lastExplodeTime >= 4) {
@@ -60,6 +61,39 @@ namespace ReikaKalseki.Ecocean
 				if ((explodeIn > 0 && time >= explodeIn && isPlayerInRange(2)) || (UnityEngine.Random.Range(0F, 1F) <= 0.0000015F && canExplodeRandom()))
 					explode();
 			}
+		}
+		
+		public Vector3 getEffectivePodCenter() {
+			return effectivePodCenter;
+		}
+		
+		protected override GameObject getSphereRootGO() {
+			return podGO;
+		}
+			
+		protected override void setSonarRanges() {
+			minimumDistanceSq = 20*20;
+			maximumDistanceSq = 50*50;
+		}
+			
+		protected override bool isAudible() {
+			return DayNightCycle.main.timePassedAsFloat-lastExplodeTime <= 2.5F;
+		}
+			
+		protected override float getFadeRate() {
+			return 5;
+		}
+			
+		protected override float getTimeVariationStrength() {
+			return 0;
+		}
+			
+		protected override Vector3 getRadarSphereSize() {
+			return new Vector3(15, 15, 15);
+		}
+			
+		protected override Vector3 getRadarSphereOffset() {
+			return effectivePodCenter-transform.position;
 		}
 		
 		void showPod() {
@@ -82,7 +116,7 @@ namespace ReikaKalseki.Ecocean
 			return isPlayerInRange(transform.position.y <= -500 ? 0.4F : 1);
 		}
 		
-		private void scheduleExplode(float sec) {
+		internal void scheduleExplode(float sec) {
 			explodeIn = DayNightCycle.main.timePassedAsFloat+sec;
 		}
 
