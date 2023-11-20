@@ -42,6 +42,7 @@ namespace ReikaKalseki.Ecocean
     public static SeamothPlanktonScoop planktonScoop;
     
     public static PiezoCrystal piezo;
+    public static SonarFlora sonarFlora;
     
     public static VoidBubble voidBubble;    
     public static VoidTongue tongue;
@@ -98,6 +99,9 @@ namespace ReikaKalseki.Ecocean
 	    
 	    piezo = new PiezoCrystal(locale.getEntry("piezoCrystal"));
 	    piezo.register();
+	    
+	    sonarFlora = new SonarFlora(locale.getEntry("sonarFlora"));
+	    sonarFlora.Patch();
 	    
 	    mushroomStack = new MushroomStack(locale.getEntry("mushroomStack"));
 	    mushroomStack.Patch();

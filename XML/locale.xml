@@ -223,6 +223,20 @@
 			PinkBulbStack
 		</header>
 	</pinkBulbStack>
+	<sonarFlora>
+		<name>
+			Sonar Flora
+		</name>
+		<desc>
+			
+		</desc>
+		<pda>
+			
+		</pda>
+		<header>
+			Piezo
+		</header>
+	</sonarFlora>
 	<FoodEffects>
 		<name>
 			

@@ -308,34 +308,37 @@ namespace ReikaKalseki.Ecocean {
 	    	if (pi) {
 	    		if (ObjectUtil.isAnchorPod(go) && !isSeaTreaderCave(go))
 	    			go.EnsureComponent<ExplodingAnchorPod>();
-	    		else if (pi && bloodVine.Contains(pi.ClassId))
+	    		else if (bloodVine.Contains(pi.ClassId))
 	    			go.EnsureComponent<PredatoryBloodvine>();
-	    		else if (pi && pi.ClassId == VanillaCreatures.REEFBACK.prefab) {
+	    		else if (pi.ClassId == VanillaCreatures.REEFBACK.prefab) {
 					go.EnsureComponent<ECReefback>();
 	    			go.EnsureComponent<ReefbackJetSuctionManager>();
 	    		}
-				else if (pi && pi.ClassId == VanillaCreatures.REAPER.prefab)
+				else if (pi.ClassId == VanillaCreatures.REAPER.prefab)
 					go.EnsureComponent<ECReaper>();
-				else if (pi && pi.ClassId == VanillaCreatures.SEA_TREADER.prefab)
+				else if (pi.ClassId == VanillaCreatures.SEA_TREADER.prefab)
 					go.EnsureComponent<ECTreader>();
-				else if (pi && pi.ClassId == VanillaCreatures.SEADRAGON.prefab)
+				else if (pi.ClassId == VanillaCreatures.SEADRAGON.prefab)
 					go.EnsureComponent<ECDragon>();
-				else if (pi && VanillaFlora.getFromID(pi.ClassId) == VanillaFlora.CREEPVINE_FERTILE)
-					CreepvineCollisionDetector.addCreepvineSeedCollision(go);
-				else if (pi && (pi.ClassId == VanillaResources.NICKEL.prefab || pi.ClassId == VanillaResources.LARGE_NICKEL.prefab)) {
+				else if (VanillaFlora.CREEPVINE_FERTILE.includes(pi.ClassId) || VanillaFlora.CREEPVINE.includes(pi.ClassId)) {
+					go.EnsureComponent<CreepvineSonarScatterer>();
+					if (VanillaFlora.CREEPVINE_FERTILE.includes(pi.ClassId))
+						CreepvineCollisionDetector.addCreepvineSeedCollision(go);
+				}
+				else if (pi.ClassId == VanillaResources.NICKEL.prefab || pi.ClassId == VanillaResources.LARGE_NICKEL.prefab) {
 					foreach (Renderer r in pi.GetComponentsInChildren<Renderer>()) {
 						RenderUtil.swapTextures(EcoceanMod.modDLL, r, "Textures/Nickel");
 						RenderUtil.setGlossiness(r, 4, 2, 0.4F);
 					}
 				}
-				else if (pi && pi.ClassId == "1c34945a-656d-4f70-bf86-8bc101a27eee") {
+				else if (pi.ClassId == "1c34945a-656d-4f70-bf86-8bc101a27eee") {
 	    			go.EnsureComponent<ECMoth>();
 	    		}
-				else if (pi && (pi.ClassId == DecoPlants.VINE_TREE.prefab || pi.ClassId == DecoPlants.VINE_TREE_2.prefab)) {
+				else if (pi.ClassId == DecoPlants.VINE_TREE.prefab || pi.ClassId == DecoPlants.VINE_TREE_2.prefab) {
 					foreach (Renderer r in go.GetComponentsInChildren<Renderer>())
 						r.materials[0].EnableKeyword("UWE_WAVING"); //make leaves move
 				}
-				else if (pi && pi.ClassId == DecoPlants.PINK_BULB_STACK.prefab) {
+				else if (pi.ClassId == DecoPlants.PINK_BULB_STACK.prefab) {
 	    			go.EnsureComponent<TechTag>().type = EcoceanMod.pinkBulbStack.TechType;
 	    			LiveMixin lv = go.GetComponent<LiveMixin>();
 	    			lv.data.maxHealth = 100;
