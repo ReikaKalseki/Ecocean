@@ -50,32 +50,69 @@ namespace ReikaKalseki.Ecocean {
 		
 		public void setShape(Vector3 c) {
 			aoe = c;
-			foreach (Renderer r in renderers)
-				UnityEngine.GameObject.DestroyImmediate(r.gameObject);
+			foreach (SonarRender r in renderers)
+				UnityEngine.GameObject.DestroyImmediate(r.renderer.gameObject);
 			renderers.Clear();
 		}
 		
 		protected override void Update() {
 			base.Update();
 			if (renderers.Count == 0) {
-				renderers = GetComponentsInChildren<Renderer>().ToList();
-				for (int i = renderers.Count; i < blobCount; i++) {
-					GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-					sphere.transform.localScale = Vector3.one*UnityEngine.Random.Range(minSize, maxSize);
-					sphere.name = "SonarBlob";
-					sphere.transform.SetParent(transform);
-					sphere.transform.localPosition = MathUtil.getRandomVectorAround(baseOffset, aoe);
-					ObjectUtil.removeComponent<Collider>(sphere);
-					ECCHelpers.ApplySNShaders(sphere, new UBERMaterialProperties(0, 10, 8));
+				foreach (Renderer r in GetComponentsInChildren<Renderer>())
+					renderers.Add(new SonarRender(r));
+				if (EcoceanMod.config.getBoolean(ECConfig.ConfigEntries.GOODCREEPSONAR)) {
+					for (int i = renderers.Count; i < blobCount; i++) {
+						GameObject sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+						sphere.transform.localScale = Vector3.one*UnityEngine.Random.Range(minSize, maxSize);
+						sphere.name = "SonarBlob";
+						sphere.transform.SetParent(transform);
+						sphere.transform.localPosition = MathUtil.getRandomVectorAround(baseOffset, aoe);
+						ObjectUtil.removeComponent<Collider>(sphere);
+						ECCHelpers.ApplySNShaders(sphere, new UBERMaterialProperties(0, 10, 8));
+						Renderer r = sphere.GetComponentInChildren<Renderer>();
+						RenderUtil.setEmissivity(r, 8);
+						RenderUtil.setGlossiness(r, 10, 0, 0);
+						r.materials[0].SetColor("_GlowColor", Color.red);
+						r.receiveShadows = false;
+						r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+						renderers.Add(new SonarRender(r));
+					}
+				}
+				else if (renderers.Count == 0) {
+					SNUtil.log("Adding cheap sonar flora halo");
+					GameObject sphere = ObjectUtil.getChildObject(gameObject, "SonarHalo");
+					if (!sphere) {
+						sphere = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+						sphere.name = "SonarHalo";
+						sphere.transform.SetParent(transform);
+						sphere.transform.localPosition = Vector3.zero;
+						sphere.transform.localRotation = Quaternion.identity;
+						sphere.transform.localScale = Vector3.one*12;
+						ECCHelpers.ApplySNShaders(sphere, new UBERMaterialProperties(0, 10, 5));
+						ObjectUtil.removeComponent<Collider>(sphere);
+					}
 					Renderer r = sphere.GetComponentInChildren<Renderer>();
-					RenderUtil.setEmissivity(r, 8);
-					RenderUtil.setGlossiness(r, 10, 0, 0);
-					r.materials[0].SetColor("_GlowColor", Color.red);
-					r.receiveShadows = false;
-					r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-					renderers.Add(r);
+					renderers.Add(prepareCheapSonarHalo(r));
 				}
 			}
+		}
+	
+		public static SonarRender prepareCheapSonarHalo(Renderer r) {
+			r.materials[0].SetColor("_GlowColor", Color.red);
+			r.materials[0].SetColor("_Color", new Color(1, 0.1F, 0.1F, 1));
+			r.receiveShadows = false;
+			r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+			RenderUtil.setEmissivity(r, 5);
+			RenderUtil.setGlossiness(r, 10, 0, 0);
+			r.materials[0].EnableKeyword("FX_BUILDING");
+			r.materials[0].SetVector("_BuildParams", new Vector4(0.4F, 1, 0.25F, 0.2F));
+			r.materials[0].SetColor("_BorderColor", new Color(4.25F, 0, 0, 1));
+			r.materials[0].SetFloat("_NoiseThickness", 0.07F);
+			r.materials[0].SetFloat("_NoiseStr", 0.15F);
+			SonarRender sr = new SonarRender(r);
+			sr.fadeInSpeed = 2.5F;
+			sr.fadeOutSpeed = 0.5F;
+			return sr;
 		}
 		
 	}
