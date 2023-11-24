@@ -332,7 +332,7 @@ namespace ReikaKalseki.Ecocean {
 					}
 				}
 				else if (pi.ClassId == "1c34945a-656d-4f70-bf86-8bc101a27eee") {
-	    			go.EnsureComponent<ECMoth>();
+					go.EnsureComponent<ECMoth>();
 	    		}
 				else if (pi.ClassId == DecoPlants.VINE_TREE.prefab || pi.ClassId == DecoPlants.VINE_TREE_2.prefab) {
 					foreach (Renderer r in go.GetComponentsInChildren<Renderer>())

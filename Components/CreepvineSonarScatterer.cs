@@ -24,8 +24,18 @@ namespace ReikaKalseki.Ecocean
 		
 		void Update() {
 			if (EcoceanMod.config.getBoolean(ECConfig.ConfigEntries.GOODCREEPSONAR)) {
+				float time = DayNightCycle.main.timePassedAsFloat;
+				if (time-lastSonarFloraCleanupTime >= 1) {
+					//SNUtil.log("Removing cheap creepvine sonar halo");
+					lastSonarFloraCleanupTime = time;
+					GameObject capsule = ObjectUtil.getChildObject(gameObject, "SonarHalo");
+					if (capsule)
+						UnityEngine.Object.Destroy(capsule);
+				}
+				
 				if (!sonarFlora) {				
 					if (!sonarFlora) {
+						//SNUtil.log("Adding expensive creepvine sonar halo");
 						Bounds extents = getRenderBox();
 						GameObject go = ObjectUtil.createWorldObject(EcoceanMod.sonarFlora.ClassID);
 						//Light l = GetComponentInChildren<Light>();
@@ -47,32 +57,38 @@ namespace ReikaKalseki.Ecocean
 			else {
 				if (!cheapController)
 					cheapController = gameObject.EnsureComponent<SonarOnlyRenderer>();
-				
-				if (cheapController.renderers.Count == 0) {
-					SNUtil.log("Adding cheap creepvine sonar halo");
-					GameObject capsule = ObjectUtil.getChildObject(gameObject, "SonarHalo");
-					if (!capsule) {
-						Bounds extents = getRenderBox();
-						capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
-						capsule.name = "SonarHalo";
-						capsule.transform.SetParent(transform);
-						capsule.transform.localPosition = extents.center-transform.position;
-						capsule.transform.localRotation = Quaternion.identity;
-						capsule.transform.localScale = extents.extents+Vector3.one;
-						ECCHelpers.ApplySNShaders(capsule, new UBERMaterialProperties(0, 10, 5));
-						ObjectUtil.removeComponent<Collider>(capsule);
+				if (cheapController) {
+					if (cheapController.renderers.Count == 0) {
+						//SNUtil.log("Adding cheap creepvine sonar halo");
+						GameObject capsule = ObjectUtil.getChildObject(gameObject, "SonarHalo");
+						if (!capsule) {
+							//SNUtil.log("Constructing new object");
+							Bounds extents = getRenderBox();
+							capsule = GameObject.CreatePrimitive(PrimitiveType.Capsule);
+							capsule.name = "SonarHalo";
+							capsule.transform.SetParent(transform);
+							capsule.transform.localPosition = extents.center-transform.position;
+							capsule.transform.localRotation = Quaternion.identity;
+							capsule.transform.localScale = extents.extents+Vector3.one;
+							ECCHelpers.ApplySNShaders(capsule, new UBERMaterialProperties(0, 10, 5));
+							ObjectUtil.removeComponent<Collider>(capsule);
+						}
+						Renderer r = capsule.GetComponentInChildren<Renderer>();
+						cheapController.renderers.Add(SonarFloraTag.prepareCheapSonarHalo(r));
 					}
-					Renderer r = capsule.GetComponentInChildren<Renderer>();
-					cheapController.renderers.Add(SonarFloraTag.prepareCheapSonarHalo(r));
-				}
-				foreach (SonarOnlyRenderer.SonarRender r in cheapController.renderers) {
-					r.renderer.materials[0].SetFloat("_Built", Mathf.Lerp(0.475F, 0.52F, r.intensity));
+					//SNUtil.log(cheapController.renderers.toDebugString());
+					if (cheapController.renderers.Count > 0 && cheapController.renderers[0].renderer)
+						cheapController.renderers[0].renderer.materials[0].SetFloat("_Built", Mathf.Lerp(0.475F, 0.52F, cheapController.renderers[0].intensity));
 				}
 				float time = DayNightCycle.main.timePassedAsFloat;
 				if (time-lastSonarFloraCleanupTime >= 1) {
+					//SNUtil.log("Removing expensive creepvine sonar halo");
 					lastSonarFloraCleanupTime = time;
 					SonarFloraTag sf = GetComponentInChildren<SonarFloraTag>();
-					UnityEngine.Object.Destroy(sf.gameObject);
+					if (sf)
+						UnityEngine.Object.Destroy(sf.gameObject);
+					//foreach (Transform t in transform)
+					//	SNUtil.log("Child: "+t.name);
 				}
 			}
 		}

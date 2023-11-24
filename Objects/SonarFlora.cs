@@ -75,6 +75,7 @@ namespace ReikaKalseki.Ecocean {
 						r.materials[0].SetColor("_GlowColor", Color.red);
 						r.receiveShadows = false;
 						r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+						r.enabled = false;
 						renderers.Add(new SonarRender(r));
 					}
 				}
