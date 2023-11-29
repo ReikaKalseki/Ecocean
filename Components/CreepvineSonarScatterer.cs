@@ -23,7 +23,7 @@ namespace ReikaKalseki.Ecocean
 		private float lastSonarFloraCleanupTime = -1;
 		
 		void Update() {
-			if (EcoceanMod.config.getBoolean(ECConfig.ConfigEntries.GOODCREEPSONAR)) {
+			if (EcoceanMod.config.getBoolean(ECConfig.ConfigEntries.GOODCREEPSONAR) && false) {
 				float time = DayNightCycle.main.timePassedAsFloat;
 				if (time-lastSonarFloraCleanupTime >= 1) {
 					//SNUtil.log("Removing cheap creepvine sonar halo");

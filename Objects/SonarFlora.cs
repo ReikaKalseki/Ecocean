@@ -113,6 +113,8 @@ namespace ReikaKalseki.Ecocean {
 			SonarRender sr = new SonarRender(r);
 			sr.fadeInSpeed = 2.5F;
 			sr.fadeOutSpeed = 0.5F;
+			r.enabled = false;
+			sr.intensity = 0;
 			return sr;
 		}
 		

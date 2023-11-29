@@ -266,9 +266,17 @@ namespace ReikaKalseki.Ecocean {
 	    		k.allowKnife = true;
 	    		return;
 	    	}
+	    	if (CraftData.GetTechType(k.target.gameObject) == TechType.LargeFloater) {
+	    		k.allowKnife = true;
+	    		return;
+	    	}
 	    }
 		
 		public static void onKnifed(GameObject go) {
+			if (CraftData.GetTechType(go) == TechType.LargeFloater) {
+	    		InventoryUtil.addItem(TechType.Floater);
+	    		return;
+			}
 			ExplodingAnchorPod e = go.FindAncestor<ExplodingAnchorPod>();
 			if (e) {
 				e.explode();

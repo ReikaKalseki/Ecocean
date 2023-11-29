@@ -220,15 +220,10 @@ namespace ReikaKalseki.Ecocean {
 				//SNUtil.writeToChat("Damaging "+lv.gameObject+": "+lv.gameObject.GetInstanceID());
 				used.Add(lv.gameObject.GetInstanceID());
 				if (lv.IsAlive()) {
-					float dist = Vector3.Distance(lv.transform.position, transform.position);
-					float f = 1;
-					if (!lv.gameObject.FindAncestor<Player>() && !lv.gameObject.FindAncestor<Vehicle>())
-						f = 1F-(Mathf.Max(0, dist-10F)/20F);
-					if (f <= 0)
-						continue;
 					//SNUtil.writeToChat("Damaging "+lv+" @ "+dist+" by "+f);
-					lv.TakeDamage(lv.maxHealth*1.8F*f, lv.transform.position, DamageType.Explosive, gameObject);
-					lv.TakeDamage(lv.maxHealth*1.5F*f, lv.transform.position, DamageType.Electrical, gameObject);
+					lv.TakeDamage(Mathf.Max(lv.maxHealth, 2000), lv.transform.position, DamageType.Normal, gameObject);
+					lv.TakeDamage(Mathf.Max(lv.maxHealth, 300), lv.transform.position, DamageType.Explosive, gameObject);
+					lv.TakeDamage(Mathf.Max(lv.maxHealth, 300), lv.transform.position, DamageType.Heat, gameObject);
 				}
 			}
 			UnityEngine.Object.Destroy(gameObject, 0.5F);
