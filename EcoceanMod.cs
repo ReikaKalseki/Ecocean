@@ -158,7 +158,7 @@ namespace ReikaKalseki.Ecocean
 		glowShroom.addNativeBiome(VanillaBiomes.DUNES);
 		lavaShroom.addNativeBiome(VanillaBiomes.ILZ);
 		
-        ConsoleCommandsHandler.Main.RegisterConsoleCommand<Action<int>>("currentFlowVec", MountainCurrentSystem.instance.registerFlowVector);
+        //ConsoleCommandsHandler.Main.RegisterConsoleCommand<Action<int>>("currentFlowVec", MountainCurrentSystem.instance.registerFlowVector);
         ConsoleCommandsHandler.Main.RegisterConsoleCommand<Action<float>>("attackBase", r => {ECHooks.attractCreaturesToBase(Player.main.currentSub, r, c => c is GhostLeviathan || c is GhostLeviatanVoid || c is ReaperLeviathan || c is SeaDragon || c is Shocker || c is CrabSquid || c is BoneShark);});
                  
        	worldgen.load();
