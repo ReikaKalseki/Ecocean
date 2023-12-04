@@ -97,19 +97,30 @@ namespace ReikaKalseki.Ecocean {
 			float f = (float)(1+densityNoise.getValue(ep.transform.position))*data.densityNoiseIntensity;
 			if (clouds.Count < data.maxDensity*f) {
 				for (int i = 0; i < 16; i++) {
-					Vector3 pos = MathUtil.getRandomVectorAround(ep.transform.position, 120);
-					Vector3 dist = pos-ep.transform.position;
-					pos = ep.transform.position+dist.setLength(UnityEngine.Random.Range(50F, 120F));
+					Vector3 pos = getRandomPosition(ep);
 					BiomeSpawnData data2 = getSpawnData(WaterBiomeManager.main.GetBiome(pos, false));
 		    		if (data2 != null && UnityEngine.Random.Range(0F, 1F) <= data2.spawnSuccessRate) {
+						pos = pos.setY(-UnityEngine.Random.Range(data2.minDepth, data2.maxDepth));
+						while (Vector3.Distance(pos, ep.transform.position) < 50 || (ep.GetVehicle() is SeaMoth && ep.GetVehicle().useRigidbody && Vector3.Distance(pos, ep.transform.position+ep.GetVehicle().useRigidbody.velocity.normalized*20) < 30)) {
+							pos = getRandomPosition(ep, data2);
+						}
 						GameObject go = ObjectUtil.createWorldObject(ClassID);
-						go.transform.position = pos.setY(-UnityEngine.Random.Range(data2.minDepth, data2.maxDepth));
+						go.transform.position = pos;
 						ObjectUtil.fullyEnable(go);
-						//SNUtil.writeToChat("spawned at "+go.transform.position);
-							break;
+						//SNUtil.writeToChat("spawned plankton at "+go.transform.position+" dist="+Vector3.Distance(pos, ep.transform.position));
+						break;
 		    		}
 				}
 		    }
+		}
+		
+		internal Vector3 getRandomPosition(Player ep, BiomeSpawnData data = null) {
+			Vector3 pos = MathUtil.getRandomVectorAround(ep.transform.position, 120);
+			Vector3 dist = pos-ep.transform.position;
+			pos = ep.transform.position+dist.setLength(UnityEngine.Random.Range(50F, 150F));
+			if (data != null)
+				pos = pos.setY(-UnityEngine.Random.Range(data.minDepth, data.maxDepth));
+			return pos;
 		}
 		
 		internal BiomeSpawnData getSpawnData(string biome) {
