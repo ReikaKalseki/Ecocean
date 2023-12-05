@@ -223,6 +223,20 @@
 			PinkBulbStack
 		</header>
 	</pinkBulbStack>
+	<celeryTree>
+		<name>
+			Celery Tree
+		</name>
+		<desc>
+			A large tree-like plant.
+		</desc>
+		<pda>
+			With the small amount of land present on 4546B, with even less being both flat and lush, celery trees are largely confined to the microbiome created by the floating island. While these plants may not be trees in the true botanical sense, they are named as such because of their outward resemblance, being both many times taller than a human and composed of a leafy canopy atop a rigid fibrous trunk.
+		</pda>
+		<header>
+			CeleryTree
+		</header>
+	</celeryTree>
 	<sonarFlora>
 		<name>
 			Sonar Flora

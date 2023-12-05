@@ -62,7 +62,7 @@ namespace ReikaKalseki.Ecocean
 		}
 
 	    private void OnTriggerStay(Collider other) {
-			if (other.gameObject.FindAncestor<Reefback>())
+			if (other.isTrigger || other.gameObject.FindAncestor<Reefback>())
 				return;
 			Rigidbody rb = other.gameObject.FindAncestor<Rigidbody>();
 			//SNUtil.writeToChat("Jet "+gameObject.name+" sucking "+other);

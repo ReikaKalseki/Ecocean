@@ -54,6 +54,7 @@ namespace ReikaKalseki.Ecocean
     public static PinkLeaves pinkLeaves;
     
     internal static TechType waterCurrentCommon;
+    internal static TechType celeryTree;
 		
 	internal static readonly Vector3 reaperlessTripleVent = new Vector3(-1150, -240, -258);
 	internal static readonly Vector3 northDuneBit = new Vector3(-1151, -340, 1444);
@@ -112,6 +113,11 @@ namespace ReikaKalseki.Ecocean
 	    pinkBulbStack = new PinkBulbStack(locale.getEntry("pinkBulbStack"));
 		pinkBulbStack.Patch();
 		CraftData.entClassTechTable[DecoPlants.PINK_BULB_STACK.prefab] = pinkBulbStack.TechType;
+		
+		XMLLocale.LocaleEntry e = locale.getEntry("celeryTree");
+        celeryTree = TechTypeHandler.AddTechType(EcoceanMod.modDLL, e.key, e.name, e.desc);
+		CraftData.entClassTechTable[DecoPlants.CELERY_TREE.prefab] = celeryTree;
+		SNUtil.addPDAEntry(celeryTree, e.key, e.name, 10, "Lifeforms/Flora/Land", e.pda, e.getField<string>("header"));
 	    
 	    voidBubble = new VoidBubble(locale.getEntry("VoidBubble"));
 	    voidBubble.register();
@@ -126,7 +132,7 @@ namespace ReikaKalseki.Ecocean
 		
         glowShroom = new GlowOilMushroom();
 		glowShroom.Patch();	
-		XMLLocale.LocaleEntry e = locale.getEntry(glowShroom.ClassID);
+		e = locale.getEntry(glowShroom.ClassID);
 		glowShroom.addPDAEntry(e.pda, 15F, e.getField<string>("header"));
 		SNUtil.log(" > "+glowShroom);
 		GenUtil.registerSlotWorldgen(glowShroom.ClassID, glowShroom.PrefabFileName, glowShroom.TechType, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Far, BiomeType.Dunes_Grass, 1, 0.25F);		
