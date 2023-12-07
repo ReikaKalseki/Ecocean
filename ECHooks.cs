@@ -28,6 +28,7 @@ namespace ReikaKalseki.Ecocean {
 		internal static float nextVoidTongueGrab = -1;
 	    
 	    static ECHooks() {
+			SNUtil.log("Initializing ECHooks");
 	    	DIHooks.onSkyApplierSpawnEvent += onSkyApplierSpawn;
 	    	DIHooks.onDamageEvent += onTakeDamage;
 	    	DIHooks.onKnifedEvent += onKnifed;
