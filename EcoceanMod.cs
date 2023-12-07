@@ -155,7 +155,7 @@ namespace ReikaKalseki.Ecocean
 		//GenUtil.registerSlotWorldgen(pinkLeaves.ClassID, pinkLeaves.PrefabFileName, pinkLeaves.TechType, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Medium, BiomeType.CrashZone_TrenchSand, 1, 2F);
 		
 		BioReactorHandler.Main.SetBioReactorCharge(lavaShroom.seed.TechType, BaseBioReactor.GetCharge(TechType.SnakeMushroomSpore)*3);
-		BioReactorHandler.Main.SetBioReactorCharge(glowOil.TechType, BaseBioReactor.GetCharge(TechType.BloodOil)*6);
+		BioReactorHandler.Main.SetBioReactorCharge(glowOil.TechType, BaseBioReactor.GetCharge(TechType.BloodOil)*2);
 		BioReactorHandler.Main.SetBioReactorCharge(mushroomStack.seed.TechType, BaseBioReactor.GetCharge(TechType.GarryFish)*0.6F);
 		
 		GenUtil.registerWorldgen(new PositionedPrefab(VanillaCreatures.REAPER.prefab, reaperlessTripleVent.setY(-200)));

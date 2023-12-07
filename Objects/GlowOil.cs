@@ -229,8 +229,8 @@ namespace ReikaKalseki.Ecocean {
 				go.transform.localScale = new Vector3(1, 1, sc0);
 				go.transform.SetParent(transform);
 				go.transform.localPosition = Vector3.zero;
-				go.GetComponentInChildren<Renderer>().transform.localPosition = new Vector3(0, 0, -0.1F/*-1.5F/sc0*/);
 				go.transform.localRotation = UnityEngine.Random.rotationUniform;
+				go.GetComponentInChildren<Renderer>().transform.localPosition = new Vector3(0, 0, -0.1F/*-1.5F/sc0*/);
 				lightCones.Add(new LightCone{go = go, light = l});
 				UnityEngine.Object.DestroyImmediate(main);
 			}
@@ -277,9 +277,11 @@ namespace ReikaKalseki.Ecocean {
 					UnityEngine.Object.DestroyImmediate(gameObject);
 				}
 			}
-			if (spawnTime > 0 && time-spawnTime >= 600) {
+			if (spawnTime > 0 && time-spawnTime >= 240*EcoceanMod.config.getFloat(ECConfig.ConfigEntries.GLOWLIFE)) {
 				explode();
 			}
+			if (!transform)
+				return;
 			dT = Time.deltaTime;
 			if (time-lastRepelTime >= 0.5) {
 				lastRepelTime = time;
@@ -331,6 +333,8 @@ namespace ReikaKalseki.Ecocean {
 							g.go.transform.position = norm*maxD;
 						}
 					}
+					if (!g.go)
+						continue;
 					g.go.transform.localPosition = g.go.transform.localPosition+g.motion*dT;
 					if (isExploding && g.go.transform.position.y > -0.5)
 						g.go.transform.position = g.go.transform.position.setY(-0.5F);

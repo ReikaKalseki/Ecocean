@@ -79,7 +79,7 @@ namespace ReikaKalseki.Ecocean {
 				}
 				int flashCount = lightToggles.Count;
 				//SNUtil.writeToChat(flashCount+" > "+((flashCount-5)/200F).ToString("0.0000"));
-				if (flashCount > 5 && UnityEngine.Random.Range(0F, 1F) < (flashCount-5)/250F*getLightIntensity()/* && seamoth.mainAnimator.GetBool("reaper_attack")*/) {
+				if (flashCount > 5 && UnityEngine.Random.Range(0F, 1F) < (flashCount-5)/250F*getFlashEffectiveness()*getLightIntensity()/* && seamoth.mainAnimator.GetBool("reaper_attack")*/) {
 					GameObject go = WorldUtil.areAnyObjectsNear(transform.position, 60, obj => {
 							ReaperLeviathan rl = obj.GetComponent<ReaperLeviathan>();
 							return rl && rl.holdingVehicle == seamoth;
@@ -95,6 +95,11 @@ namespace ReikaKalseki.Ecocean {
 		    		if (UnityEngine.Random.Range(0F, 1F) <= 0.02F)
 		    			attractToLight(seamoth);
 				}
+			}
+			
+			private float getFlashEffectiveness() {
+				float brightness = DayNightCycle.main.GetLightScalar();
+				return 1.2F-brightness*0.8F;
 			}
 	    }
 	    
