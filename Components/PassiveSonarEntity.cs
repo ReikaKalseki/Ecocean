@@ -66,6 +66,8 @@ namespace ReikaKalseki.Ecocean
 				//SNUtil.writeToChat(distq.ToString("000.0")+">"+f.ToString("0.000")+">"+glow.ToString("0000000.0")+"@"+forcedGlowFactor.ToString("0.000"));
 				//SNUtil.log("C");
 				foreach (Renderer r in spheres) {
+					if (!r)
+						continue;
 					//RenderUtil.setEmissivity(renderer.materials[i], Mathf.Lerp(defaultGlows[i], glow, forcedGlowFactor), "GlowStrength");
 					//renderer.materials[i].SetTexture("_Illum", glow*forcedGlowFactor > 0 ? flatTexture : defaultTextures[i]);
 					float f2 = glow*forcedGlowFactor;

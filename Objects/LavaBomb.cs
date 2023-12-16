@@ -140,7 +140,7 @@ namespace ReikaKalseki.Ecocean {
 			else if (time-lastPLayerDistanceCheckTime >= 0.5) {
 				lastPLayerDistanceCheckTime = time;
 				if (Vector3.Distance(transform.position, Player.main.transform.position) > 250) {
-					UnityEngine.Object.DestroyImmediate(gameObject);
+					UnityEngine.Object.Destroy(gameObject);
 					//SNUtil.writeToChat("Destroyed lava bomb because far");
 				}
 			}
@@ -156,7 +156,7 @@ namespace ReikaKalseki.Ecocean {
 				mainRender.materials[1].SetColor("_GlowColor", Color.Lerp(Color.white, Color.red, 1-f));
 			}
 			if (isCollided) {
-				UnityEngine.Object.DestroyImmediate(gameObject);
+				UnityEngine.Object.Destroy(gameObject);
 				//SNUtil.writeToChat("Destroyed lava bomb because collided");
 			}
 		}

@@ -120,6 +120,8 @@ namespace ReikaKalseki.Ecocean {
 			//if (isGrown)
 			//	f = 0;
 			foreach (Renderer r in renderers) {
+				if (!r)
+					continue;
 				RenderUtil.setEmissivity(r.materials[0], 0.5F+f*1.5F);
 				Color c = Color.Lerp(Color.white, new Color(0.8F, 0, 0, 1), 1-f);
 				//if (isGrown)

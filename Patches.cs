@@ -200,4 +200,25 @@ namespace ReikaKalseki.Ecocean {
 			return codes.AsEnumerable();
 		}
 	}
+	
+	[HarmonyPatch(typeof(FiltrationMachine))]
+	[HarmonyPatch("UpdateFiltering")]
+	public static class WaterFilterSaltRateHook {
+		
+		static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
+			List<CodeInstruction> codes = new List<CodeInstruction>(instructions);
+			try {
+				int idx = InstructionHandlers.getInstruction(codes, 0, 0, OpCodes.Stfld, "FiltrationMachine", "timeRemainingSalt");
+				idx = InstructionHandlers.getLastOpcodeBefore(codes, idx, OpCodes.Ldloc_S);
+				codes.InsertRange(idx+1, new List<CodeInstruction>{new CodeInstruction(OpCodes.Ldarg_0), InstructionHandlers.createMethodCall("ReikaKalseki.Ecocean.ECHooks", "getWaterFilterSaltTickTime", false, typeof(float), typeof(FiltrationMachine))});
+			}
+			catch (Exception e) {
+				FileLog.Log("Caught exception when running patch "+MethodBase.GetCurrentMethod().DeclaringType+"!");
+				FileLog.Log(e.Message);
+				FileLog.Log(e.StackTrace);
+				FileLog.Log(e.ToString());
+			}
+			return codes.AsEnumerable();
+		}
+	}
 }

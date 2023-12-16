@@ -246,7 +246,7 @@ namespace ReikaKalseki.Ecocean {
 					//dmg.target.GetComponent<ExplodingAnchorPod>());
 					//SNUtil.writeToChat("Player '"+ep+"' took damage");
 					foreach (Biter b in WorldUtil.getObjectsNearWithComponent<Biter>(ep.transform.position, 60*f)) {
-						attractCreatureToTarget(b, ep, false);
+						AttractToTarget.attractCreatureToTarget(b, ep, false);
 						//SNUtil.writeToChat("Attracted biter "+b+" @ "+b.transform.position);
 					}
 				}
@@ -280,7 +280,11 @@ namespace ReikaKalseki.Ecocean {
 		
 		public static void onKnifed(GameObject go) {
 			if (CraftData.GetTechType(go) == TechType.LargeFloater) {
-	    		InventoryUtil.addItem(TechType.Floater);
+	    		DIHooks.fireKnifeHarvest(go, new Dictionary<TechType, int>{{TechType.Floater, 1}});
+	    		return;
+			}
+			if (CraftData.GetTechType(go) == TechType.RedTipRockThings) {
+				DIHooks.fireKnifeHarvest(go, new Dictionary<TechType, int>{{TechType.CoralChunk, 1}});
 	    		return;
 			}
 			ExplodingAnchorPod e = go.FindAncestor<ExplodingAnchorPod>();
@@ -445,6 +449,21 @@ namespace ReikaKalseki.Ecocean {
 			}
 			
 		}
+		/*
+		class ECWaterFilter : MonoBehaviour {
+			
+			private FiltrationMachine machine;
+			
+			void Update() {
+				if (!machine)
+					machine = GetComponent<FiltrationMachine>();
+				
+				if (machine && machine.timeRemainingSalt > 0 && VanillaBiomes.LOSTRIVER.isInBiome(transform.position)) {
+					machine.timeRemainingSalt = Mathf.Max(machine.timeRemainingSalt-DayNightCycle.main.dayNightSpeed*2*Time.deltaTime, 0.2F);
+				}
+			}
+			
+		}*/
 		
 		public static void onTorpedoExploded(SeamothTorpedo sm, Transform result) {
 			SeamothTorpedoWhirlpool vortex = result.GetComponent<SeamothTorpedoWhirlpool>();
@@ -523,7 +542,7 @@ namespace ReikaKalseki.Ecocean {
 					}
 				}
 				if (UnityEngine.Random.Range(0F, 1F) <= chance)
-					attractCreatureToTarget(c, obj, isHorn);
+					AttractToTarget.attractCreatureToTarget(c, obj, isHorn);
 			}
 		}
 		
@@ -557,7 +576,7 @@ namespace ReikaKalseki.Ecocean {
 				if (obj is SeaMoth)
 					chance *= obj.GetComponent<ECMoth>().getLightIntensity();
 				if (UnityEngine.Random.Range(0F, 1F) <= chance) {
-					attractCreatureToTarget(c, obj, false);
+					AttractToTarget.attractCreatureToTarget(c, obj, false);
 					return true;
 				}
 			}
@@ -568,18 +587,8 @@ namespace ReikaKalseki.Ecocean {
 			WorldUtil.getGameObjectsNear(sub.transform.position, range, go => {
 			    Creature c = go.GetComponent<Creature>();
 			    if (c && (rule == null || rule.Invoke(c)))
-					attractCreatureToTarget(c, sub, false);
+					AttractToTarget.attractCreatureToTarget(c, sub, false);
 			});
-		}
-		
-		internal static void attractCreatureToTarget(Creature c, MonoBehaviour obj, bool isHorn) {
-			if (obj is BaseRoot) 
-				obj = obj.GetComponentsInChildren<BaseCell>().GetRandom().GetComponent<LiveMixin>();
-			AttractToTarget ac = c.gameObject.EnsureComponent<AttractToTarget>();
-			//SNUtil.writeToChat("Attracted "+c+" @ "+c.transform.position+" to "+obj+" @ "+obj.transform.position);
-			ac.fire(obj, isHorn);
-			if (c is Reefback && isHorn)
-				SoundManager.playSoundAt(c.GetComponent<FMOD_CustomLoopingEmitter>().asset, c.transform.position, false, -1, 1);
 		}
 		
 		public static void applyCurrentForce(Rigidbody rb, Vector3 force, ForceMode mode, Current c) {
@@ -587,93 +596,6 @@ namespace ReikaKalseki.Ecocean {
 			float str = wc ? wc.getCurrentStrength(rb.transform.position) : 1;
 			if (str > 0)
 				rb.AddForce(force*str, mode);
-		}
-		
-		class AttractToTarget : MonoBehaviour {
-			
-			private MonoBehaviour target;
-			private bool isHorn;
-			
-			private Creature owner;
-			private SwimBehaviour swimmer;
-			private StayAtLeashPosition leash;
-			private AttackCyclops cyclopsAttacker;
-			private LastTarget targeter;
-			private MeleeAttack[] attacks;
-			private AggressiveWhenSeeTarget[] targeting;
-			
-			private float lastTick;
-			
-			private float delete;
-			
-			internal void fire(MonoBehaviour from, bool horn) {
-				target = from;
-				isHorn |= horn;
-				delete = Mathf.Max(delete, DayNightCycle.main.timePassedAsFloat+20);
-			}
-			
-			void Update() {
-				if (!owner)
-					owner = GetComponent<Creature>();
-				if (!swimmer)
-					swimmer = GetComponent<SwimBehaviour>();
-				if (!leash)
-					leash = GetComponent<StayAtLeashPosition>();
-				if (!cyclopsAttacker)
-					cyclopsAttacker = GetComponent<AttackCyclops>();
-				if (!targeter)
-					targeter = GetComponent<LastTarget>();
-				if (attacks == null)
-					attacks = GetComponents<MeleeAttack>();
-				if (targeting == null)
-					targeting = GetComponents<AggressiveWhenSeeTarget>();
-				
-				float time = DayNightCycle.main.timePassedAsFloat;
-				if (time >= delete) {
-					UnityEngine.Object.DestroyImmediate(this);
-					return;
-				}
-				
-				if (time-lastTick <= 0.5)
-					return;
-				lastTick = time;
-				
-				if (owner is Reefback && isHorn) {
-					Reefback r = (Reefback)owner;
-					swimmer.SwimTo(target.transform.position, r.maxMoveSpeed);
-					r.friend = target.gameObject;
-					return;
-				}
-				
-				if (target is SubRoot && !(cyclopsAttacker && cyclopsAttacker.isActiveAndEnabled))
-					return;
-				
-				if (Vector3.Distance(transform.position, target.transform.position) >= 40)
-					swimmer.SwimTo(target.transform.position, 10);
-				
-				owner.Aggression.Add(isHorn ? 0.5F : 0.05F);
-				if (cyclopsAttacker)
-					cyclopsAttacker.SetCurrentTarget(target.gameObject, false);
-				if (targeter)
-					targeter.SetTarget(target.gameObject);
-				if (owner is CrabSnake) {
-					CrabSnake cs = (CrabSnake)owner;
-					if (cs.IsInMushroom()) {
-						cs.ExitMushroom(target.transform.position);
-					}
-				}
-				//if (leash)
-				//	leash.
-		    	foreach (MeleeAttack a in attacks)
-		    		a.lastTarget.SetTarget(target.gameObject);
-		    	foreach (AggressiveWhenSeeTarget a in targeting)
-		    		a.lastTarget.SetTarget(target.gameObject);
-			}
-			
-			internal bool isTargeting(GameObject go) {
-				return target.gameObject == go;
-			}
-			
 		}
 		
 		public static void setHUDCompassDirection(uGUI_Compass compass, float dir) { /* 0-1 for 360 */
@@ -716,6 +638,12 @@ namespace ReikaKalseki.Ecocean {
 			if (ret.GetComponent<LiveMixin>() == null && c.attachedRigidbody != null)
 				ret = c.attachedRigidbody.gameObject;
 			return ret;
+		}
+		
+		public static float getWaterFilterSaltTickTime(float val, FiltrationMachine machine) {
+			if (VanillaBiomes.LOSTRIVER.isInBiome(machine.transform.position))
+				val *= 3;
+			return val;
 		}
 	}
 }
