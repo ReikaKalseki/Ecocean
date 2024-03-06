@@ -322,6 +322,8 @@ namespace ReikaKalseki.Ecocean {
 	    
 	    public static void onSkyApplierSpawn(SkyApplier pk) {
 	    	GameObject go = pk.gameObject;
+	    	if (go.name.StartsWith("Seamoth", StringComparison.InvariantCultureIgnoreCase) && go.name.EndsWith("Arm(Clone)", StringComparison.InvariantCultureIgnoreCase))
+	    		return;
 	    	PrefabIdentifier pi = go.FindAncestor<PrefabIdentifier>();
 	    	if (pi) {
 	    		if (ObjectUtil.isAnchorPod(go) && !isSeaTreaderCave(go))
