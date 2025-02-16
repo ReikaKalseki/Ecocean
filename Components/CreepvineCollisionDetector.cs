@@ -64,7 +64,7 @@ namespace ReikaKalseki.Ecocean
 			}
 		}
 		
-		internal static void addCreepvineSeedCollision(GameObject go) {
+		internal static GameObject addCreepvineSeedCollision(GameObject go) {
 			//FruitPlant fp = go.GetComponent<FruitPlant>(); average of centers
 			GameObject light = go.GetComponentInChildren<Light>().gameObject;
 			GameObject put = ObjectUtil.getChildObject(light, "SeedSphere");
@@ -72,12 +72,13 @@ namespace ReikaKalseki.Ecocean
 				put = new GameObject("SeedSphere");
 				put.transform.SetParent(light.transform);
 			}
-			put.transform.localPosition = Vector3.zero;
+			Utils.ZeroTransform(put.transform);
 			SphereCollider sc = put.EnsureComponent<SphereCollider>();
 			sc.radius = 1.5F;
 			sc.center = Vector3.zero;
 			sc.isTrigger = true;
 			put.EnsureComponent<CreepvineCollisionDetector>();
+			return put;
 		}
 		
 	}

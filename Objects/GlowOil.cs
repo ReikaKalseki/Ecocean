@@ -200,6 +200,10 @@ namespace ReikaKalseki.Ecocean {
 		private readonly List<GlowSeed> seeds = new List<GlowSeed>();
 		private readonly List<LightCone> lightCones = new List<LightCone>();
 		
+		void Awake() {
+			LargeWorldStreamer.main.MakeEntityTransient(gameObject);
+		}
+		
 		void Update() {
 			if (!mainRender) {
 				mainRender = GetComponentInChildren<Renderer>();

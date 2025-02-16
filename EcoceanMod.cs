@@ -52,6 +52,7 @@ namespace ReikaKalseki.Ecocean
     public static MushroomStack mushroomStack;
     public static PinkBulbStack pinkBulbStack;
     public static PinkLeaves pinkLeaves;
+    public static readonly MushroomTendril[] mushroomTendrils = new MushroomTendril[2];
     
     internal static TechType waterCurrentCommon;
     internal static TechType celeryTree;
@@ -113,10 +114,15 @@ namespace ReikaKalseki.Ecocean
 	    pinkBulbStack = new PinkBulbStack(locale.getEntry("pinkBulbStack"));
 		pinkBulbStack.Patch();
 		CraftData.entClassTechTable[DecoPlants.PINK_BULB_STACK.prefab] = pinkBulbStack.TechType;
+	    
+		XMLLocale.LocaleEntry e = locale.getEntry("mushroomTendril");
+		mushroomTendrils[0] = new MushroomTendril(e, MushroomTendril.color1);
+		mushroomTendrils[0].Patch();
+		mushroomTendrils[1] = new MushroomTendril(e, MushroomTendril.color2);
+		mushroomTendrils[1].Patch();
 		
-		XMLLocale.LocaleEntry e = locale.getEntry("celeryTree");
-        celeryTree = TechTypeHandler.AddTechType(EcoceanMod.modDLL, e.key, e.name, e.desc);
-		CraftData.entClassTechTable[DecoPlants.CELERY_TREE.prefab] = celeryTree;
+		e = locale.getEntry("celeryTree");
+		celeryTree = SNUtil.addTechTypeToVanillaPrefabs(e, DecoPlants.CELERY_TREE.prefab);
 		SNUtil.addPDAEntry(celeryTree, e.key, e.name, 10, "Lifeforms/Flora/Land", e.pda, e.getField<string>("header"));
 	    
 	    voidBubble = new VoidBubble(locale.getEntry("VoidBubble"));
@@ -135,15 +141,15 @@ namespace ReikaKalseki.Ecocean
 		e = locale.getEntry(glowShroom.ClassID);
 		glowShroom.addPDAEntry(e.pda, 15F, e.getField<string>("header"));
 		SNUtil.log(" > "+glowShroom);
-		GenUtil.registerSlotWorldgen(glowShroom.ClassID, glowShroom.PrefabFileName, glowShroom.TechType, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Far, BiomeType.Dunes_Grass, 1, 0.25F);		
+		GenUtil.registerPrefabWorldgen(glowShroom, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Far, BiomeType.Dunes_Grass, 1, 0.25F);		
 		
 		lavaShroom = new LavaBombMushroom();
 		lavaShroom.Patch();	
 		e = locale.getEntry(lavaShroom.ClassID);
 		lavaShroom.addPDAEntry(e.pda, 20F, e.getField<string>("header"));
 		SNUtil.log(" > "+lavaShroom);
-		GenUtil.registerSlotWorldgen(lavaShroom.ClassID, lavaShroom.PrefabFileName, lavaShroom.TechType, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Far, BiomeType.InactiveLavaZone_Chamber_Floor, 1, 0.08F);		
-		GenUtil.registerSlotWorldgen(lavaShroom.ClassID, lavaShroom.PrefabFileName, lavaShroom.TechType, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Far, BiomeType.InactiveLavaZone_Chamber_Floor_Far, 1, 0.08F);
+		GenUtil.registerPrefabWorldgen(lavaShroom, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Far, BiomeType.InactiveLavaZone_Chamber_Floor, 1, 0.08F);		
+		GenUtil.registerPrefabWorldgen(lavaShroom, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Far, BiomeType.InactiveLavaZone_Chamber_Floor_Far, 1, 0.08F);
 		
 		LootDistributionHandler.EditLootDistributionData(VanillaResources.DIAMOND.prefab, BiomeType.MushroomForest_GiantTreeInteriorFloor, 3F, 1);
 		LootDistributionHandler.EditLootDistributionData(VanillaResources.LITHIUM.prefab, BiomeType.MushroomForest_GiantTreeInteriorFloor, 8F, 1);
@@ -184,6 +190,7 @@ namespace ReikaKalseki.Ecocean
 		pinkBulbStack.addNativeBiome(VanillaBiomes.KOOSH);
 		mushroomStack.addNativeBiome(VanillaBiomes.MOUNTAINS);
 		pinkLeaves.addNativeBiome(VanillaBiomes.CRASH);
+		//lavaLily.addNativeBiome(VanillaBiomes.ALZ);
 		
 		System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(ECHooks).TypeHandle);
     }

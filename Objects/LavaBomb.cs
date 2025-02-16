@@ -113,6 +113,10 @@ namespace ReikaKalseki.Ecocean {
 		
 		private float spawnTime;
 		
+		void Awake() {
+			LargeWorldStreamer.main.MakeEntityTransient(gameObject);
+		}
+		
 		void Update() {
 			if (!mainRender)
 				mainRender = GetComponentInChildren<Renderer>();

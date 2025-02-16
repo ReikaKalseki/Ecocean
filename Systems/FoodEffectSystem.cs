@@ -20,12 +20,15 @@ namespace ReikaKalseki.Ecocean {
 		
 		public static readonly FoodEffectSystem instance = new FoodEffectSystem();
 		
+		private readonly MesmerVisual mesmerVisual;
+		
 		private readonly Dictionary<TechType, FoodEffect> data = new Dictionary<TechType, FoodEffect>();
 		
 		public event Action<Survival, InfectedMixin, float> onEatenInfectedEvent;
 		
 		private FoodEffectSystem() {
-			
+			mesmerVisual = new MesmerVisual();
+	    	ScreenFXManager.instance.addOverride(mesmerVisual);
 		}
 		
 		internal XMLLocale.LocaleEntry getLocaleEntry() {
@@ -171,33 +174,73 @@ namespace ReikaKalseki.Ecocean {
 				data[tt].trigger(s, go);
 		}
 		
-		class VisualDistortionEffect : MonoBehaviour {
+		public class VisualDistortionEffect : MonoBehaviour {
 			
-		    private static MesmerizedScreenFXController mesmerController;
-		    private static MesmerizedScreenFX mesmerShader;
-			
+			internal Vector4 effectColor = ScreenFXManager.instance.defaultMesmerShaderColors;
 			internal float intensity;			
+			
+			internal Color tintColor = ScreenFXManager.instance.defaultSmokeShaderColors;
+			internal float tintIntensity;		
+			
+			private float useIntensity = 0;
+			
 			internal float timeRemaining = 0;
 			
-			void Update() {					
-				if (!mesmerShader) {
-			    	mesmerController = Camera.main.GetComponent<MesmerizedScreenFXController>();
-			    	mesmerShader = Camera.main.GetComponent<MesmerizedScreenFX>();
-				}
-				
-				if (timeRemaining > 0 && mesmerShader) {					
-					mesmerController.enabled = false;
-					mesmerShader.amount = intensity*Mathf.Clamp01(timeRemaining);
-					mesmerShader.enabled = true;
-					
+			void Update() {
+				if (timeRemaining > 0) {		
 					timeRemaining -= Time.deltaTime;
+					if (intensity > 0) {
+						FoodEffectSystem.instance.mesmerVisual.effect = useIntensity*Mathf.Clamp01(timeRemaining);
+						FoodEffectSystem.instance.mesmerVisual.color = effectColor;
+					}
+					if (tintIntensity > 0) {
+						FoodEffectSystem.instance.mesmerVisual.tintEffect = useIntensity*tintIntensity*Mathf.Clamp01(timeRemaining);
+						FoodEffectSystem.instance.mesmerVisual.tintColor = tintColor;
+					}
 				}
 				else {
 					UnityEngine.Object.Destroy(this);
-					if (mesmerController)
-						mesmerController.enabled = true;
 				}
+				if (useIntensity < intensity)
+					useIntensity = Mathf.Min(useIntensity+3*Time.deltaTime, intensity);
 			}
+		    
+		    void OnDisable() {
+				FoodEffectSystem.instance.mesmerVisual.effect = 0;
+		    }
+		    
+		    void OnDestroy() {
+		    	OnDisable();
+		    }
+			
+		}
+		
+		class MesmerVisual : ScreenFXManager.ScreenFXOverride {
+			
+			internal float effect = 0;
+			internal Vector4 color;
+			
+			internal float tintEffect = 0;
+			internal Color tintColor;
+			
+			internal MesmerVisual() : base(200) {
+				
+			}
+	    	
+	    	public override void onTick() {
+		    	if (effect > 0) {
+	    			ScreenFXManager.instance.registerOverrideThisTick(ScreenFXManager.instance.mesmerShader);
+	    			ScreenFXManager.instance.mesmerShader.mat.SetVector("_ColorStrength", color);
+	    			ScreenFXManager.instance.mesmerShader.amount = effect;
+		    	}
+		    	if (tintEffect > 0) {
+	    			ScreenFXManager.instance.registerOverrideThisTick(ScreenFXManager.instance.smokeShader);
+	    			ScreenFXManager.instance.smokeShader.intensity = tintEffect;
+	    			ScreenFXManager.instance.smokeShader.color = tintColor;
+	    			ScreenFXManager.instance.smokeShader.mat.color = tintColor;
+	    			ScreenFXManager.instance.smokeShader.mat.SetColor("_Color", tintColor);
+		    	}
+	    	}
 			
 		}
 		

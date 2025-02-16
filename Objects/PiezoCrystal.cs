@@ -87,7 +87,7 @@ namespace ReikaKalseki.Ecocean {
 			Patch();
 			SNUtil.addPDAEntry(this, 8, "PlanetaryGeology", locale.pda, locale.getField<string>("header"));
 			ItemRegistry.instance.addItem(this);
-			GenUtil.registerSlotWorldgen(ClassID, PrefabFileName, TechType, EntitySlot.Type.Creature, LargeWorldEntity.CellLevel.VeryFar, BiomeType.UnderwaterIslands_OpenDeep_CreatureOnly, 1, 0.042F);
+			GenUtil.registerPrefabWorldgen(this, EntitySlot.Type.Creature, LargeWorldEntity.CellLevel.VeryFar, BiomeType.UnderwaterIslands_OpenDeep_CreatureOnly, 1, 0.042F);
 			GenUtil.registerWorldgen(new ScatteredPiezoGenerator(4, new Vector3(-117, -205, 1002), new Vector3(60, 20, 60)));
 			GenUtil.registerWorldgen(new ScatteredPiezoGenerator(2, new Vector3(-122.5F, -162F, 876.5F), new Vector3(40, 10, 40)));
 			GenUtil.registerWorldgen(new ScatteredPiezoGenerator(1, new Vector3(-138.5F, -221F, 835.5F), new Vector3(20, 10, 20)));

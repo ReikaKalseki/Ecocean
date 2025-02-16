@@ -26,6 +26,8 @@ namespace ReikaKalseki.Ecocean {
 		private static float lastHornUsed = -1;
 		
 		internal static float nextVoidTongueGrab = -1;
+		
+		private static Simplex3DGenerator mushroomTendrilNoise;
 	    
 	    static ECHooks() {
 			SNUtil.log("Initializing ECHooks");
@@ -53,6 +55,9 @@ namespace ReikaKalseki.Ecocean {
 	    	DIHooks.drillableDrillTickEvent += onDrillableTick;
 	    	
 	    	DIHooks.onTorpedoExplodeEvent += onTorpedoExploded;
+	    	
+	    	DIHooks.canCreatureSeeObjectEvent += checkCreatureCanSee;
+	    	DIHooks.aggressiveToPilotingEvent += checkCreaturePilotedAggression;
 	    	
 	    	bloodVine.AddRange(VanillaFlora.BLOOD_KELP.getPrefabs(true, true));
 	    }
@@ -324,6 +329,9 @@ namespace ReikaKalseki.Ecocean {
 	    	GameObject go = pk.gameObject;
 	    	if (go.name.StartsWith("Seamoth", StringComparison.InvariantCultureIgnoreCase) && go.name.EndsWith("Arm(Clone)", StringComparison.InvariantCultureIgnoreCase))
 	    		return;
+			else if (pk.GetComponent<Player>()) {
+				go.EnsureComponent<PlantHidingTracker>().minRadius = 0;
+	    	}
 	    	PrefabIdentifier pi = go.FindAncestor<PrefabIdentifier>();
 	    	if (pi) {
 	    		if (ObjectUtil.isAnchorPod(go) && !isSeaTreaderCave(go))
@@ -342,9 +350,61 @@ namespace ReikaKalseki.Ecocean {
 					go.EnsureComponent<ECDragon>();
 				else if (VanillaFlora.CREEPVINE_FERTILE.includes(pi.ClassId) || VanillaFlora.CREEPVINE.includes(pi.ClassId)) {
 					go.EnsureComponent<CreepvineSonarScatterer>();
-					if (VanillaFlora.CREEPVINE_FERTILE.includes(pi.ClassId))
-						CreepvineCollisionDetector.addCreepvineSeedCollision(go);
+					if (VanillaFlora.CREEPVINE_FERTILE.includes(pi.ClassId)) {
+						GameObject ctr = CreepvineCollisionDetector.addCreepvineSeedCollision(go);
+						if (go.gameObject.FindAncestor<Planter>()) {
+							Light l = pi.GetComponentInChildren<Light>();
+							l.intensity = 0.95F;
+						}
+						foreach (InteractionVolumeCollider c in go.GetComponentsInChildren<InteractionVolumeCollider>()) {
+							if (c.gameObject.name == "core")
+								PlantHidingCollider.addToObject(c, new Color(0.1F, 0.5F, 0.1F));
+						}
+					}
+					else {
+						PlantHidingCollider.addToObject(go.GetComponent<Collider>(), new Color(0.1F, 0.5F, 0.1F));
+					}
 				}
+				else if (VanillaFlora.CAVE_BUSH.includes(pi.ClassId)) {
+					PlantHidingCollider.addToObject(go.GetComponentInChildren<Collider>(), new Color(130/255F, 73/255F, 183/255F));
+				}
+				else if (VanillaFlora.MUSHROOM_DISK.includes(pi.ClassId)) {
+					if (mushroomTendrilNoise == null)
+						mushroomTendrilNoise = ((Simplex3DGenerator)new Simplex3DGenerator(SNUtil.getWorldSeed()).setFrequency(0.2F));
+					if (mushroomTendrilNoise.getValue(go.transform.position) > 0.4F) {
+						GameObject strands = ObjectUtil.getChildObject(go, "StrandHolder");
+						if (!strands) {
+							strands = new GameObject("StrandHolder");
+							strands.transform.SetParent(go.transform);
+							Utils.ZeroTransform(strands.transform);
+						}
+						MeshRenderer[] r0 = strands.GetComponentsInChildren<MeshRenderer>();
+						//float r = Mathf.Max(go.transform.localScale.x, go.transform.localScale.z)*MushroomTendril.getPrefabRadius(pi.ClassId);
+						//int max = 2+pi.GetHashCode()%3;
+						//for (int i = r0.Length; i < max; i++) {
+						BoxCollider bc = go.GetComponentInChildren<BoxCollider>();
+						float r = Mathf.Max(bc.size.x, bc.size.z)*1.5F;
+							GameObject strand = ObjectUtil.createWorldObject(EcoceanMod.mushroomTendrils[go.transform.position.x > 0 ? 1 : 0].ClassID);
+							strand.transform.SetParent(strands.transform);
+							float ang = Mathf.Deg2Rad*UnityEngine.Random.Range(0F, 360F);
+							//strand.transform.localPosition = new Vector3(r*Mathf.Cos(ang), -1.5F, r*Mathf.Sin(ang));
+							strand.transform.localPosition = new Vector3(0, -bc.center.z, 0.2F*Mathf.Sqrt(r));
+							strand.transform.localEulerAngles = new Vector3(90, 0, 0);
+							strand.transform.localScale = new Vector3(r, Mathf.Sqrt(r)-0.05F, r);
+						//}
+					}
+				}
+				else if (VanillaFlora.SPOTTED_DOCKLEAF.includes(pi.ClassId)) {
+					PlantHidingCollider.addToObject(go.GetComponentInChildren<Collider>(), new Color(0.1F, 0.4F, 1F));
+				}/* add component that makes pulse with light?
+				else if (VanillaFlora.MUSHROOM_DISK.includes(pi.ClassId)) {
+					foreach (Renderer r in pi.GetComponentsInChildren<Renderer>()) {
+						r.materials[0].SetFloat("_GlowStrengthNight", 0.25F);
+						if () {
+							r.materials[0].SetColor("_GlowColor", new Color(0.8F, 1.0F, 0.1F));
+						}
+					}
+				}*/
 				else if (pi.ClassId == VanillaResources.NICKEL.prefab || pi.ClassId == VanillaResources.LARGE_NICKEL.prefab) {
 					foreach (Renderer r in pi.GetComponentsInChildren<Renderer>()) {
 						RenderUtil.swapTextures(EcoceanMod.modDLL, r, "Textures/Nickel");
@@ -353,6 +413,7 @@ namespace ReikaKalseki.Ecocean {
 				}
 				else if (pi.ClassId == "1c34945a-656d-4f70-bf86-8bc101a27eee") {
 					go.EnsureComponent<ECMoth>();
+					go.EnsureComponent<PlantHidingTracker>().minRadius = 4;
 	    		}
 				else if (pi.ClassId == DecoPlants.VINE_TREE.prefab || pi.ClassId == DecoPlants.VINE_TREE_2.prefab) {
 					foreach (Renderer r in go.GetComponentsInChildren<Renderer>())
@@ -646,6 +707,18 @@ namespace ReikaKalseki.Ecocean {
 			if (VanillaBiomes.LOSTRIVER.isInBiome(machine.transform.position))
 				val *= 3;
 			return val;
+		}
+		
+		public static void checkCreatureCanSee(DIHooks.CreatureSeeObjectCheck ch) {
+			PlantHidingTracker ph = ch.target.GetComponent<PlantHidingTracker>();
+			if (ph && ph.isActive())
+				ch.canSee = false;
+		}
+		
+		public static void checkCreaturePilotedAggression(DIHooks.AggressiveToPilotingVehicleCheck ch) {
+			PlantHidingTracker ph = ch.vehicle.GetComponent<PlantHidingTracker>();
+			if (ph && ph.isActive())
+				ch.canTarget = false;
 		}
 	}
 }

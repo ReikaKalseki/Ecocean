@@ -207,6 +207,20 @@
 			
 		</pda>
 	</pinkLeaves>
+	<mushroomTendril>
+		<name>
+			Disk Strand
+		</name>
+		<desc>
+			
+		</desc>
+		<pda>
+			
+		</pda>
+		<header>
+			MushroomTendril
+		</header>
+	</mushroomTendril>
 	<pinkBulbStack>
 		<name>
 			Bulb Chain
