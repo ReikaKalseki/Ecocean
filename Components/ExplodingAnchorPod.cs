@@ -122,9 +122,9 @@ namespace ReikaKalseki.Ecocean
 
 	    void OnCollisionEnter(Collision c) {
 			//SNUtil.writeToChat("Collided at speed "+c.relativeVelocity.magnitude);
-			GameObject collider = c.gameObject;
-			if (collider.gameObject.FindAncestor<Player>())
+			if (ObjectUtil.isPlayer(c.collider))
 				return;
+			GameObject collider = c.gameObject;
 			float thresh = 4;
 			Creature cc = collider.gameObject.FindAncestor<Creature>();
 			if (cc)

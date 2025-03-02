@@ -60,6 +60,8 @@ namespace ReikaKalseki.Ecocean {
 			private bool init = false;
 			
 			void Update() {
+				ObjectUtil.cleanUpOriginObjects(this);
+				
 				if (!collider)
 					collider = GetComponentInChildren<BoxCollider>();
 				
@@ -92,13 +94,16 @@ namespace ReikaKalseki.Ecocean {
 						r.materials[1].SetColor("_GlowColor", renderColor);
 						RenderUtil.setEmissivity(r.materials[1], 7F);
 					}
+					
+					if (collider) {
+						collider.size = new Vector3(0.6F, 1.6F, 0.6F);
+						collider.center = Vector3.down*0.8F;
+					}
 					init = true;
 				}
 				
-				if (collider) {
-					collider.size = new Vector3(0.6F, 1.6F, 0.6F);
-					collider.center = Vector3.down*0.8F;
-				}
+				if ((transform.position-Player.main.transform.position).sqrMagnitude >= 22500)
+					return;
 				
 				if (renders != null) {
 					foreach (Renderer r in renders) {
@@ -111,7 +116,7 @@ namespace ReikaKalseki.Ecocean {
 			}
 			
 			void OnTriggerStay(Collider other) {
-				if (!other.isTrigger && other.gameObject.FindAncestor<Player>()) {
+				if (!other.isTrigger && ObjectUtil.isPlayer(other)) {
 					FoodEffectSystem.VisualDistortionEffect e = Player.main.gameObject.EnsureComponent<FoodEffectSystem.VisualDistortionEffect>();
 					e.intensity = 2;
 					e.timeRemaining = 10;

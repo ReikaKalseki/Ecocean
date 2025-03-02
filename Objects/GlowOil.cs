@@ -205,6 +205,8 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		void Update() {
+			ObjectUtil.cleanUpOriginObjects(this);
+			
 			if (!mainRender) {
 				mainRender = GetComponentInChildren<Renderer>();
 			}

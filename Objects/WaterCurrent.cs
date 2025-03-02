@@ -149,7 +149,7 @@ namespace ReikaKalseki.Ecocean {
 			current.activeAtNight = true;
 			if (isHotWater) {
 				foreach (Rigidbody rb in current.rigidbodyList) {
-					if (rb.gameObject.FindAncestor<Player>()) {
+					if (ObjectUtil.isPlayer(rb)) {
 						rb.gameObject.FindAncestor<LiveMixin>().TakeDamage(4*Time.deltaTime, rb.transform.position, DamageType.Heat, gameObject);
 					}
 				}

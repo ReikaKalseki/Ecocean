@@ -26,20 +26,24 @@ namespace ReikaKalseki.Ecocean {
 		
 		internal static readonly Simplex3DGenerator densityNoise = (Simplex3DGenerator)new Simplex3DGenerator(3340487).setFrequency(0.05);
 		
-		private readonly Dictionary<string, BiomeSpawnData> spawnData = new Dictionary<string, BiomeSpawnData>();
+		private static readonly Dictionary<BiomeBase, BiomeSpawnData> spawnData = new Dictionary<BiomeBase, BiomeSpawnData>();
 	        
 	    internal PlanktonCloud(XMLLocale.LocaleEntry e) : base(e.key, e.name, e.desc) {
 			locale = e;
 			
-			spawnData["sparsereef"] = new BiomeSpawnData(5, 0.5F, 1F, 120);
-			spawnData["mountains"] = new BiomeSpawnData(6, 1F, 0F, 120);
-			spawnData["cragfield"] = new BiomeSpawnData(12, 1, 0.5F, 150);
-			spawnData["void"] = new BiomeSpawnData(25, 4, 1, 400);
+			addSpawnData(VanillaBiomes.SPARSE, 5, 0.5F, 1F, 120);
+			addSpawnData(VanillaBiomes.MOUNTAINS, 6, 1F, 0F, 120);
+			addSpawnData(VanillaBiomes.CRAG, 12, 1, 0.5F, 150);
+			addSpawnData(VanillaBiomes.VOID, 25, 4, 1, 400);
 			
 			OnFinishedPatching += () => {
 				SaveSystem.addSaveHandler(ClassID, new SaveSystem.ComponentFieldSaveHandler<PlanktonCloudTag>().addField("touchIntensity"));
 			};
 	    }
+		
+		private static void addSpawnData(BiomeBase bb, int d, float r, float n, int maxd, int mind = 15) {
+			spawnData[bb] = new BiomeSpawnData(bb, d, r, n, maxd, mind);
+		}
 			
 	    public override GameObject GetGameObject() {
 			GameObject world = ObjectUtil.createWorldObject("0e67804e-4a59-449d-929a-cd3fc2bef82c");
@@ -51,26 +55,15 @@ namespace ReikaKalseki.Ecocean {
 			rootCollide.center = Vector3.zero;
 			rootCollide.radius = 8;
 			rootCollide.isTrigger = true;
-			//ObjectUtil.removeComponent<BloomCreature>(world);
-			BloomCreature bc = world.GetComponent<BloomCreature>();
 			PlanktonCloudTag g = world.EnsureComponent<PlanktonCloudTag>();
-			//
-			UnityEngine.Object.Destroy(bc);
-			ObjectUtil.removeComponent<StayAtLeashPosition>(world);
-			ObjectUtil.removeComponent<SwimBehaviour>(world);
-			ObjectUtil.removeComponent<SplineFollowing>(world);
-			ObjectUtil.removeComponent<SwimRandom>(world);
-			ObjectUtil.removeComponent<Locomotion>(world);
-			ObjectUtil.removeComponent<CreatureUtils>(world);
-			//ObjectUtil.removeComponent<LiveMixin>(world);
-			ObjectUtil.removeComponent<BehaviourLOD>(world);
-			ObjectUtil.removeComponent<LastScarePosition>(world);
+			g.init();
 			SphereCollider sc = world.EnsureComponent<SphereCollider>();
 			sc.isTrigger = true;
 			sc.center = Vector3.zero;
 			sc.radius = BASE_RANGE;
 			world.EnsureComponent<LargeWorldEntity>().cellLevel = LargeWorldEntity.CellLevel.VeryFar;
 			world.layer = LayerID.Useable;
+			//SNUtil.log("plankton wiht components: "+world.GetComponents<MonoBehaviour>().Select(c => c.GetType().Name+"="+c.enabled).toDebugString());
 			return world;
 	    }
 		
@@ -98,7 +91,7 @@ namespace ReikaKalseki.Ecocean {
 			if (clouds.Count < data.maxDensity*f) {
 				for (int i = 0; i < 16; i++) {
 					Vector3 pos = getRandomPosition(ep);
-					BiomeSpawnData data2 = getSpawnData(WaterBiomeManager.main.GetBiome(pos, false));
+					BiomeSpawnData data2 = getSpawnData(BiomeBase.getBiome(pos));
 		    		if (data2 != null && UnityEngine.Random.Range(0F, 1F) <= data2.spawnSuccessRate) {
 						pos = pos.setY(-UnityEngine.Random.Range(data2.minDepth, data2.maxDepth));
 						while (Vector3.Distance(pos, ep.transform.position) < 50 || (ep.GetVehicle() is SeaMoth && ep.GetVehicle().useRigidbody && Vector3.Distance(pos, ep.transform.position+ep.GetVehicle().useRigidbody.velocity.normalized*20) < 30)) {
@@ -123,24 +116,27 @@ namespace ReikaKalseki.Ecocean {
 			return pos;
 		}
 		
-		internal BiomeSpawnData getSpawnData(string biome) {
-			if (string.IsNullOrEmpty(biome))
-				biome = "void";
-			biome = biome.ToLowerInvariant();
+		internal static BiomeSpawnData getSpawnData(BiomeBase biome) {
 			return spawnData.ContainsKey(biome) ? spawnData[biome] : null;
+		}
+		
+		internal static void forSpawnData(Action<BiomeSpawnData> call) {
+			spawnData.Values.ForEach(call);
 		}
 			
 	}
 	
-	class BiomeSpawnData {
+	public class BiomeSpawnData {
 		
+		public readonly BiomeBase biome;
 		public readonly int maxDensity;
 		public readonly float spawnSuccessRate;
 		public readonly float densityNoiseIntensity;
 		public readonly int minDepth;
 		public readonly int maxDepth;
 		
-		internal BiomeSpawnData(int d, float r, float n, int maxd, int mind = 15) {
+		internal BiomeSpawnData(BiomeBase b, int d, float r, float n, int maxd, int mind = 15) {
+			biome = b;
 			maxDensity = d;
 			spawnSuccessRate = r;
 			densityNoiseIntensity = n;
@@ -175,6 +171,10 @@ namespace ReikaKalseki.Ecocean {
 		private void OnTriggerEnter(Collider other) {
 			if (!root)
 				return;
+			if (!root.enabled) {
+				ObjectUtil.fullyEnable(root.gameObject);
+				return;
+			}
 			float time = DayNightCycle.main.timePassedAsFloat;
 			Creature c = other.gameObject.FindAncestor<Creature>();
 			if (c && (c is ReaperLeviathan || c is GhostLeviatanVoid || c is GhostLeviathan || c is SeaDragon/* || c is Reefback*/)) {
@@ -200,6 +200,8 @@ namespace ReikaKalseki.Ecocean {
 		
 		private GameObject leviSphere;
 		
+		public BaseCellEnviroHandler isBaseBound;
+		
 		public static event Action<PlanktonCloudTag, Collider> onPlanktonActivationEvent;
 		public static event Action<PlanktonCloudTag, SeaMoth> onPlanktonScoopEvent;
 		
@@ -222,7 +224,30 @@ namespace ReikaKalseki.Ecocean {
 		
 		private bool isDead = false;
 		
+		private float age;
+		
 		private float activation = 0;
+		
+		void Awake() {
+			if (DIHooks.getWorldAge() < 0.5F)
+				UnityEngine.Object.Destroy(gameObject, 0.1F);
+			else
+				Invoke("init", 0.5F);
+		}
+		
+		internal void init() {
+			ObjectUtil.removeComponent<BloomCreature>(gameObject);
+			ObjectUtil.removeComponent<SwimRandom>(gameObject);
+			ObjectUtil.removeComponent<StayAtLeashPosition>(gameObject);
+			ObjectUtil.removeComponent<SwimBehaviour>(gameObject);
+			ObjectUtil.removeComponent<SplineFollowing>(gameObject);
+			ObjectUtil.removeComponent<Locomotion>(gameObject);
+			ObjectUtil.removeComponent<CreatureUtils>(gameObject);
+			ObjectUtil.removeComponent<BehaviourLOD>(gameObject);
+			ObjectUtil.removeComponent<LastScarePosition>(gameObject);
+			health = gameObject.EnsureComponent<LiveMixin>();
+			ObjectUtil.fullyEnable(gameObject);
+		}
 		
 		void Update() {
 			if (!mainRender)
@@ -234,6 +259,11 @@ namespace ReikaKalseki.Ecocean {
 			if (!particles) {
 				particles = GetComponentInChildren<ParticleSystem>();
 				particleCore = particles.main;
+			}
+			if (!particles || !health) {
+				SNUtil.log("destroying incomplete plankton object: "+GetComponents<Component>().Select(c => c.name+" ["+c.GetType()+"]").toDebugString());
+				UnityEngine.Object.Destroy(gameObject);
+				return;
 			}
 			if (!light)
 				light = GetComponentInChildren<Light>();
@@ -262,14 +292,24 @@ namespace ReikaKalseki.Ecocean {
 			bool isVoid = string.IsNullOrEmpty(biome) || biome.ToLowerInvariant().Contains("void");
 			
 			float time = DayNightCycle.main.timePassedAsFloat;
+			
 			//float dtl = time-lastContactTime;
 			float dscl = time-lastScoopTime;
 			
 			float dT = Time.deltaTime;
+			
+			age += dT;
+			
+			if (isBaseBound && age >= 300) { //5 min
+				health.TakeDamage(dT*50, transform.position);
+			}
+			
 			if (time-ECHooks.getLastSonarUse() <= 10 || time-ECHooks.getLastHornUse() <= 10) {
 				touchIntensity = Mathf.Max(1, touchIntensity);
 			}
 			if (time-lastActivatorCheckTime >= 0.5F) {
+				if (GetComponent<BloomCreature>()) //force cleanup
+					init();
 				lastActivatorCheckTime = time;
 				forcedActivators.RemoveAll(go => !go || (go.transform.position-transform.position).sqrMagnitude >= 900);
 				if (forcedActivators.Count > 0)
@@ -318,15 +358,15 @@ namespace ReikaKalseki.Ecocean {
 			currentColor = Color.Lerp(currentColor, tgt, dT*5);
 			aoe.center = Vector3.zero;
 			float r = (float)MathUtil.linterpolate(f, 0, 1, PlanktonCloud.BASE_RANGE, PlanktonCloud.MAX_RANGE)*f3;
-			aoe.radius = r*0.75F;
+			aoe.radius = r*0.75F*(isBaseBound ? 0.75F : 1);
 			particleCore.startColor = currentColor;
-			particleCore.startSize = ((minParticleSize + (maxParticleSize - minParticleSize) * f)*(1+f2))*1.5F;
+			particleCore.startSize = ((minParticleSize + (maxParticleSize - minParticleSize) * f)*(1+f2))*1.5F*(isBaseBound ? 0.75F : 1);
 			particleCore.startLifetimeMultiplier = 1+f*1.5F+f2*2.5F;
 			ParticleSystem.EmissionModule emit = particles.emission;
-			emit.rateOverTimeMultiplier = 2+f+2*f2;
+			emit.rateOverTimeMultiplier = (2+f+2*f2)*(isBaseBound ? 0.5F : 1);
 			ParticleSystem.ShapeModule shape = particles.shape;
 			shape.radius = r*2;
-			light.intensity = f+Mathf.Max(0, 2*f2);
+			light.intensity = (f+Mathf.Max(0, 2*f2))*(isBaseBound ? 0.2F : 1);
 			light.color = currentColor;
 			light.range = f*16+f2*16*f3;
 			leviAOE.radius = r*PlanktonCloud.LEVI_RANGE_SCALE;
@@ -341,16 +381,44 @@ namespace ReikaKalseki.Ecocean {
 		}
 
 	    private void OnTriggerStay(Collider other) { //scoop with seamoth
+			if (!enabled) {
+				init();
+				return;
+			}
+			if (age < 0.5F) //do not apply effects for first 0.5s, prevent pulses of damage from spawned and then killed plankton 
+				return;
+			if (ObjectUtil.isPlayer(other) && (Player.main.currentSub || Player.main.GetVehicle()))
+				return;
 			if (other.gameObject != gameObject) {
+				float dT = Time.deltaTime;
+				if (isBaseBound && other.gameObject.FindAncestor<PlanktonCloudTag>()) { //clear overlapping base plankton
+					health.TakeDamage(dT*50, transform.position);
+					return;
+				}
 				Vehicle v = other.gameObject.FindAncestor<Vehicle>();
 				Player ep = other.gameObject.FindAncestor<Player>();
-				float dT = Time.deltaTime;
-				if (v || ep || other.gameObject.FindAncestor<Creature>() || other.gameObject.FindAncestor<SubRoot>())
+				bool isTouched = v || ep || other.gameObject.FindAncestor<Creature>();
+				if (!isTouched) {
+					SubRoot sub = other.gameObject.FindAncestor<SubRoot>();
+					if (sub && sub.isCyclops)
+						isTouched = true;
+				}
+				if (isTouched)
 					touch(dT, other);//lastContactTime = DayNightCycle.main.timePassedAsFloat;
-				if (v is SeaMoth)
+				if (v is SeaMoth && !isBaseBound)
 					checkAndTryScoop((SeaMoth)v, dT);
-				if (ep)
-					ep.liveMixin.TakeDamage(5*dT, ep.transform.position, DamageType.Poison, gameObject);
+				if (ep) {
+					float f = health.GetHealthFraction();
+					float amt = isBaseBound ? (f < 0.25 ? 0 : 15*dT*f*f) : 5*dT*f;
+					if (isBaseBound) {
+						if (age < 0.6F || DayNightCycle.main.timePassedAsFloat-lastScoopTime <= 0.5F)
+							amt = 0;
+						else
+							amt *= ep.liveMixin.GetHealthFraction();
+					}
+					if (amt > 0)
+						ep.liveMixin.TakeDamage(amt, ep.transform.position, DamageType.Poison, gameObject);
+				}
 			}
 			//SNUtil.writeToChat(other+" touch plankton @ "+this.transform.position+" @ "+lastContactTime);
 	    }
@@ -360,40 +428,44 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		internal void addTouchIntensity(float amt) {
-			touchIntensity = Mathf.Max(0, touchIntensity+amt);
+			touchIntensity = Mathf.Clamp(touchIntensity+amt, 0, 10);
 		}
 		
-		internal void touch(float dT, Collider touch) {
+		internal void touch(float dT, Collider c) {
 			addTouchIntensity(2F*dT);
 			if (onPlanktonActivationEvent != null)
-				onPlanktonActivationEvent.Invoke(this, touch);
+				onPlanktonActivationEvent.Invoke(this, c);
 		}
 		
 		private void checkAndTryScoop(SeaMoth sm, float dT) {
-			if (sm.GetComponent<Rigidbody>().velocity.magnitude >= 4 && Vector3.Distance(sm.transform.position, transform.position) <= 5 && InventoryUtil.vehicleHasUpgrade(sm, EcoceanMod.planktonScoop.TechType)) {
-				lastScoopTime = DayNightCycle.main.timePassedAsFloat;
-				if (UnityEngine.Random.Range(0F, 1F) < 0.075F*dT*EcoceanMod.config.getFloat(ECConfig.ConfigEntries.PLANKTONRATE)) {
-					foreach (SeamothStorageContainer sc in sm.GetComponentsInChildren<SeamothStorageContainer>(true)) {
-						TechTag tt = sc.GetComponent<TechTag>();
-						if (tt && tt.type == EcoceanMod.planktonScoop.TechType) {
-							GameObject go = ObjectUtil.createWorldObject(EcoceanMod.planktonItem.TechType, true, false);
-							sc.container.AddItem(go.GetComponentInChildren<Pickupable>());
-							if (sc.container.IsFull())
-								SNUtil.writeToChat("Plankton scoop is full");
-							break;
-						}
-					}
+			if (Vector3.Distance(sm.transform.position, transform.position) <= 5) {
+				if (SeamothPlanktonScoop.checkAndTryScoop(sm, dT, EcoceanMod.planktonItem.TechType)) {
+					damage(sm, dT);
+					if (onPlanktonScoopEvent != null)
+						onPlanktonScoopEvent.Invoke(this, sm);
 				}
-				if (health.health < health.maxHealth*0.1F) {
-					isDead = true;
+			}
+		}
+		
+		public void damage(Component pos, float dT) {
+			if (!pos) {
+				SNUtil.log("Cannot damage plankton from null pos");
+				return;
+			}
+			lastScoopTime = DayNightCycle.main.timePassedAsFloat;
+			if (!health) {
+				SNUtil.log("Cannot damage plankton without health");
+				init();
+				return;
+			}
+			if (health.health < health.maxHealth * 0.1F) {
+				isDead = true;
+				if (particles)
 					particles.Stop(true, ParticleSystemStopBehavior.StopEmitting);
-					UnityEngine.Object.Destroy(gameObject, 10);
-				}
-				else {
-					health.TakeDamage(health.maxHealth*0.05F*dT, sm.transform.position, DamageType.Drill, sm.gameObject);
-				}
-				if (onPlanktonScoopEvent != null)
-					onPlanktonScoopEvent.Invoke(this, sm);
+				UnityEngine.Object.Destroy(gameObject, 10);
+			}
+			else {
+				health.TakeDamage(health.maxHealth * 0.05F * dT, pos.transform.position, DamageType.Drill, pos.gameObject);
 			}
 		}
 		

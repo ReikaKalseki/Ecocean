@@ -221,6 +221,20 @@
 			MushroomTendril
 		</header>
 	</mushroomTendril>
+	<treeMushroomSpores>
+		<name>
+			Disk Spores
+		</name>
+		<desc>
+			????
+		</desc>
+		<pda>
+			
+		</pda>
+		<header>
+			
+		</header>
+	</treeMushroomSpores>
 	<pinkBulbStack>
 		<name>
 			Bulb Chain
@@ -237,6 +251,26 @@
 			PinkBulbStack
 		</header>
 	</pinkBulbStack>
+	<mushroomVaseStrand>
+		<name>
+			Tonguelily
+		</name>
+		<desc>
+			A small (for 4546B) organism consisting of a bioluminescent tendril anchored in a solid blue socket.
+		</desc>
+		<pda>
+			Despite its flora-like appearance and name, tonguelilies are in fact animals not dissimilar to some sea fans on Earth.
+			
+			Found growing in small clusters in areas with high microorganism levels in the water, tonguelilies thrive by using one or more long glowing tendrils - the "tongues" that are their namesake - to catch pollen, bacteria, or similar drifting by, whereupon it is digested and repurposed to the creature's metabolism, with unused trace materials collecting in the hollow base.
+			
+			Conveniently, these strands are capable of limitless regeneration once removed.
+			
+			Assessment: Possible water filtering applications
+		</pda>
+		<header>
+			MushroomVaseStrand
+		</header>
+	</mushroomVaseStrand>
 	<celeryTree>
 		<name>
 			Celery Tree
@@ -300,6 +334,29 @@
 			
 		</tag>
 	</FoodEffects>
+	<Mouseovers>
+		<name>
+			
+		</name>
+		<desc>
+			
+		</desc>
+		<pda>
+			
+		</pda>
+		<VaseStrandClick>
+			Collect filtered minerals
+		</VaseStrandClick>
+		<VaseStrandCollecting>
+			Accumulating minerals
+		</VaseStrandCollecting>
+		<VaseStrandGrowing>
+			Regenerating tendrils
+		</VaseStrandGrowing>
+		<VaseStrandNoSpawns>
+			Insufficient microbiological matter in this area
+		</VaseStrandNoSpawns>
+	</Mouseovers>
 	<enum>
 		<name>
 			

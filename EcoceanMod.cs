@@ -38,6 +38,7 @@ namespace ReikaKalseki.Ecocean
     
     public static PlanktonCloud plankton;
     public static PlanktonItem planktonItem;
+    public static WorldCollectedItem treeMushroomSpores;
     
     public static SeamothPlanktonScoop planktonScoop;
     
@@ -47,12 +48,13 @@ namespace ReikaKalseki.Ecocean
     public static VoidBubble voidBubble;    
     public static VoidTongue tongue;
     
-    public static TreeBud mushTreeResource;
+    //public static TreeBud mushTreeResource;
     
     public static MushroomStack mushroomStack;
     public static PinkBulbStack pinkBulbStack;
+    public static MushroomVaseStrand mushroomVaseStrand;
     public static PinkLeaves pinkLeaves;
-    public static readonly MushroomTendril[] mushroomTendrils = new MushroomTendril[2];
+    //public static readonly MushroomTendril[] mushroomTendrils = new MushroomTendril[2];
     
     internal static TechType waterCurrentCommon;
     internal static TechType celeryTree;
@@ -95,7 +97,11 @@ namespace ReikaKalseki.Ecocean
 	    plankton = new PlanktonCloud(locale.getEntry("plankton"));
 	    plankton.register();
 	    planktonItem = new PlanktonItem(locale.getEntry("planktonItem"));
-	    planktonItem.register();
+	    planktonItem.Patch();
+	    treeMushroomSpores = new WorldCollectedItem(locale.getEntry("treeMushroomSpores"), "1ce074ee-1a58-439b-bb5b-e5e3d9f0886f");
+		treeMushroomSpores.sprite = TextureManager.getSprite(EcoceanMod.modDLL, "Textures/Items/TreeMushroomSpores");
+		treeMushroomSpores.inventorySize = new Vector2int(2, 1);
+	    treeMushroomSpores.Patch();
 	    
 	    WaterCurrent.register();
 	    
@@ -114,13 +120,19 @@ namespace ReikaKalseki.Ecocean
 	    pinkBulbStack = new PinkBulbStack(locale.getEntry("pinkBulbStack"));
 		pinkBulbStack.Patch();
 		CraftData.entClassTechTable[DecoPlants.PINK_BULB_STACK.prefab] = pinkBulbStack.TechType;
+		
+	    mushroomVaseStrand = new MushroomVaseStrand(locale.getEntry("mushroomVaseStrand"));
+		mushroomVaseStrand.Patch();
+		CraftData.entClassTechTable[DecoPlants.MUSHROOM_VASE_STRANDS.prefab] = mushroomVaseStrand.TechType;
 	    
-		XMLLocale.LocaleEntry e = locale.getEntry("mushroomTendril");
+	    XMLLocale.LocaleEntry e;
+		/*
+		e = locale.getEntry("mushroomTendril");
 		mushroomTendrils[0] = new MushroomTendril(e, MushroomTendril.color1);
 		mushroomTendrils[0].Patch();
 		mushroomTendrils[1] = new MushroomTendril(e, MushroomTendril.color2);
 		mushroomTendrils[1].Patch();
-		
+		*/
 		e = locale.getEntry("celeryTree");
 		celeryTree = SNUtil.addTechTypeToVanillaPrefabs(e, DecoPlants.CELERY_TREE.prefab);
 		SNUtil.addPDAEntry(celeryTree, e.key, e.name, 10, "Lifeforms/Flora/Land", e.pda, e.getField<string>("header"));
@@ -130,8 +142,8 @@ namespace ReikaKalseki.Ecocean
 	    tongue = new VoidTongue(locale.getEntry("VoidTongue"));
 	    tongue.register();
 	    
-	    mushTreeResource = new TreeBud(locale.getEntry("TreeBud"));
-	    mushTreeResource.Patch();
+	    //mushTreeResource = new TreeBud(locale.getEntry("TreeBud"));
+	    //mushTreeResource.Patch();
 	    
 	    planktonScoop = new SeamothPlanktonScoop();
 	    planktonScoop.register();
@@ -192,6 +204,12 @@ namespace ReikaKalseki.Ecocean
 		pinkLeaves.addNativeBiome(VanillaBiomes.CRASH);
 		//lavaLily.addNativeBiome(VanillaBiomes.ALZ);
 		
+		e = locale.getEntry("Mouseovers");
+		foreach (KeyValuePair<string, string> kvp in e.getFields()) {
+			if (!string.IsNullOrEmpty(kvp.Value))
+				CustomLocaleKeyDatabase.registerKey(kvp.Key, kvp.Value);
+		}
+		
 		System.Runtime.CompilerServices.RuntimeHelpers.RunClassConstructor(typeof(ECHooks).TypeHandle);
     }
     
@@ -212,6 +230,14 @@ namespace ReikaKalseki.Ecocean
 			ACUEcosystems.addFood(new ACUEcosystems.PlantFood(mushroomStack, 0.02F, BiomeRegions.Other));
 			ACUEcosystems.addFood(new ACUEcosystems.PlantFood(pinkBulbStack, 0.1F, BiomeRegions.Koosh, BiomeRegions.GrandReef));
 			ACUEcosystems.addFood(new ACUEcosystems.PlantFood(pinkLeaves, 0.1F, BiomeRegions.Other));
+			
+			MushroomVaseStrand.filterDrops.addEntry(TechType.Salt, 50);
+			MushroomVaseStrand.filterDrops.addEntry(TechType.Copper, 10);
+			MushroomVaseStrand.filterDrops.addEntry(TechType.Gold, 5);
+			MushroomVaseStrand.filterDrops.addEntry(TechType.Lead, 8);
+			MushroomVaseStrand.filterDrops.addEntry(TechType.Silver, 6);
+			MushroomVaseStrand.filterDrops.addEntry(TechType.Quartz, 15);
+			MushroomVaseStrand.filterDrops.addEntry(TechType.Lithium, 8);
     	}
     	
     	foreach (BiomeType b in Enum.GetValues(typeof(BiomeType)))

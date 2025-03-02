@@ -35,6 +35,7 @@ namespace ReikaKalseki.Ecocean {
 	    	DIHooks.onDamageEvent += onTakeDamage;
 	    	DIHooks.onKnifedEvent += onKnifed;
 	    	DIHooks.knifeAttemptEvent += tryKnife;
+	    	DIHooks.knifeHarvestEvent += getKnifeHarvest;
 	    	DIHooks.onItemPickedUpEvent += onPickup;
 	    	
 	    	DIHooks.itemTooltipEvent += FoodEffectSystem.instance.applyTooltip;
@@ -58,6 +59,8 @@ namespace ReikaKalseki.Ecocean {
 	    	
 	    	DIHooks.canCreatureSeeObjectEvent += checkCreatureCanSee;
 	    	DIHooks.aggressiveToPilotingEvent += checkCreaturePilotedAggression;
+	    	
+	    	DIHooks.baseRebuildEvent += onBaseRebuild;
 	    	
 	    	bloodVine.AddRange(VanillaFlora.BLOOD_KELP.getPrefabs(true, true));
 	    }
@@ -131,9 +134,7 @@ namespace ReikaKalseki.Ecocean {
 	    	
 	    	float f = 0.3F-DayNightCycle.main.GetLightScalar()*0.15F;
 	    	if (!ep.IsInBase()) {
-			    string biome = ep.GetBiomeString();
-			    	//SNUtil.writeToChat("Doing plankton spawn check - "+biome);
-			    BiomeSpawnData data = EcoceanMod.plankton.getSpawnData(biome);
+			    BiomeSpawnData data = PlanktonCloud.getSpawnData(BiomeBase.getBiome(ep.transform.position));
 			    if (data != null) {
 		    		if (UnityEngine.Random.Range(0F, 1F) <= f*dT*data.spawnSuccessRate)
 		    			EcoceanMod.plankton.tickSpawner(ep, data, dT);
@@ -161,8 +162,7 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		public static void onEMPTouch(EMPBlast e, Collider c) {
-	    	Player ep = c.gameObject.FindAncestor<Player>();
-	    	if (ep) {
+	    	if (ObjectUtil.isPlayer(c)) {
 	    		CompassDistortionSystem.instance.onHitByEMP(e, isPiezo(e) ? 10 : 1); //piezo is only the 15s base since electrionicsDisableTime is zero for piezo
 	    	}
 		}
@@ -277,19 +277,28 @@ namespace ReikaKalseki.Ecocean {
 	    		k.allowKnife = true;
 	    		return;
 	    	}
-	    	if (CraftData.GetTechType(k.target.gameObject) == TechType.LargeFloater) {
+	    	else if (CraftData.GetTechType(k.target.gameObject) == EcoceanMod.mushroomVaseStrand.TechType) {
+	    		k.allowKnife = true;
+	    		return;
+	    	}
+	    	else if (CraftData.GetTechType(k.target.gameObject) == TechType.LargeFloater) {
 	    		k.allowKnife = true;
 	    		return;
 	    	}
 	    }
 		
 		public static void onKnifed(GameObject go) {
-			if (CraftData.GetTechType(go) == TechType.LargeFloater) {
+			TechType tt = CraftData.GetTechType(go);
+			if (tt == TechType.LargeFloater) {
 	    		DIHooks.fireKnifeHarvest(go, new Dictionary<TechType, int>{{TechType.Floater, 1}});
 	    		return;
 			}
-			if (CraftData.GetTechType(go) == TechType.RedTipRockThings) {
-				DIHooks.fireKnifeHarvest(go, new Dictionary<TechType, int>{{TechType.CoralChunk, 1}});
+			if (tt == TechType.RedTipRockThings) {
+				DIHooks.fireKnifeHarvest(go, new Dictionary<TechType, int>{{TechType.CoralChunk, 1}}); //coral tube piece, for disinfected water
+	    		return;
+			}
+			if (tt == EcoceanMod.mushroomVaseStrand.TechType) {
+				DIHooks.fireKnifeHarvest(go, new Dictionary<TechType, int>{{EcoceanMod.mushroomVaseStrand.seed.TechType, 1}});
 	    		return;
 			}
 			ExplodingAnchorPod e = go.FindAncestor<ExplodingAnchorPod>();
@@ -303,6 +312,12 @@ namespace ReikaKalseki.Ecocean {
 				return;
 			}
 		}
+	    
+	    public static void getKnifeHarvest(DIHooks.KnifeHarvest h) {
+			if (h.objectType == EcoceanMod.mushroomVaseStrand.TechType && ObjectUtil.isFarmedPlant(h.hit)) {
+				h.hit.FindAncestor<MushroomVaseStrand.MushroomVaseStrandTag>().tryHarvest();
+	    	}
+	    }
 		
 		public static void onPickup(Pickupable pp, Exosuit prawn, bool isKnife) {
 	    	FoodEffectSystem.instance.ensureEatable(pp);
@@ -369,6 +384,8 @@ namespace ReikaKalseki.Ecocean {
 					PlantHidingCollider.addToObject(go.GetComponentInChildren<Collider>(), new Color(130/255F, 73/255F, 183/255F));
 				}
 				else if (VanillaFlora.MUSHROOM_DISK.includes(pi.ClassId)) {
+					ObjectUtil.removeChildObject(go, "StrandHolder");
+					/*
 					if (mushroomTendrilNoise == null)
 						mushroomTendrilNoise = ((Simplex3DGenerator)new Simplex3DGenerator(SNUtil.getWorldSeed()).setFrequency(0.2F));
 					if (mushroomTendrilNoise.getValue(go.transform.position) > 0.4F) {
@@ -392,7 +409,15 @@ namespace ReikaKalseki.Ecocean {
 							strand.transform.localEulerAngles = new Vector3(90, 0, 0);
 							strand.transform.localScale = new Vector3(r, Mathf.Sqrt(r)-0.05F, r);
 						//}
-					}
+					}*/						
+					GameObject rain = ObjectUtil.getChildObject(go, "RainHolder");
+						if (!rain) {
+							rain = new GameObject("RainHolder");
+							rain.transform.SetParent(go.transform);
+							Utils.ZeroTransform(rain.transform);
+							rain.transform.localEulerAngles = new Vector3(90, 0, 0);
+						}
+					rain.EnsureComponent<MushroomDiskRain>();
 				}
 				else if (VanillaFlora.SPOTTED_DOCKLEAF.includes(pi.ClassId)) {
 					PlantHidingCollider.addToObject(go.GetComponentInChildren<Collider>(), new Color(0.1F, 0.4F, 1F));
@@ -423,6 +448,12 @@ namespace ReikaKalseki.Ecocean {
 	    			go.EnsureComponent<TechTag>().type = EcoceanMod.pinkBulbStack.TechType;
 	    			LiveMixin lv = go.GetComponent<LiveMixin>();
 	    			lv.data.maxHealth = 100;
+	    		}
+				else if (pi.ClassId == DecoPlants.MUSHROOM_VASE_STRANDS.prefab) {
+	    			go.EnsureComponent<TechTag>().type = EcoceanMod.mushroomVaseStrand.TechType;
+	    			LiveMixin lv = go.GetComponent<LiveMixin>();
+	    			lv.data.maxHealth = 100;
+	    			MushroomVaseStrand.setupCollider(go);
 	    		}
 	    	}
 	    }
@@ -469,7 +500,7 @@ namespace ReikaKalseki.Ecocean {
 						Vector3 vec = Vector3.up;
 						vec *= 80*f;
 						rb.AddForce(vec, ForceMode.Force);
-						if (!v && !rb.gameObject.FindAncestor<Player>()) {
+						if (!v && !ObjectUtil.isPlayer(rb)) {
 							GeyserDisplacement obj = rb.gameObject.EnsureComponent<GeyserDisplacement>();
 							obj.geyser = g;
 							obj.destroyIn = DayNightCycle.main.timePassedAsFloat+1.5F;
@@ -719,6 +750,16 @@ namespace ReikaKalseki.Ecocean {
 			PlantHidingTracker ph = ch.vehicle.GetComponent<PlantHidingTracker>();
 			if (ph && ph.isActive())
 				ch.canTarget = false;
+		}
+		
+		public static void onBaseRebuild(Base b) {
+			ObjectUtil.removeComponent<BaseCellEnviroHandler>(b.gameObject);
+			foreach (BaseCell bc in b.GetComponentsInChildren<BaseCell>()) {
+				BaseCellEnviroHandler ce = bc.gameObject.EnsureComponent<BaseCellEnviroHandler>();
+				ce.cell = bc;
+				ce.seabase = b;
+				ce.computeEnvironment();
+			}
 		}
 	}
 }

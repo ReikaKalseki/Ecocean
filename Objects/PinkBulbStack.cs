@@ -61,6 +61,8 @@ namespace ReikaKalseki.Ecocean {
 				rg.transform.Rotate(new Vector3(-90, 0, 0), Space.Self);
 				rg.transform.localScale = r.transform.localScale*81.70F; //why do they DO this; grue clusters are still worse though
 			}
+			
+			go.EnsureComponent<PinkBulbStackTag>();
 		}
 		
 		public override float getScaleInGrowbed(bool indoors) {
@@ -68,6 +70,10 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		public override bool isResource() {
+			return false;
+		}
+		
+		protected override bool isExploitable() {
 			return false;
 		}
 		
@@ -81,6 +87,17 @@ namespace ReikaKalseki.Ecocean {
 		
 		public override bool canGrowUnderWater() {
 			return true;
+		}
+		
+		class PinkBulbStackTag : MonoBehaviour {
+			
+			void Start() {
+				foreach (Renderer r in GetComponentsInChildren<Renderer>()) {
+					if (r.gameObject.name.StartsWith("coral_reef_plant_middle_05", StringComparison.InvariantCultureIgnoreCase))
+						UnityEngine.Object.Destroy(r.gameObject);
+				}
+			}
+			
 		}
 		
 	}

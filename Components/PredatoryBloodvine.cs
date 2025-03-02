@@ -111,7 +111,7 @@ namespace ReikaKalseki.Ecocean
 			if (!live || !live.IsAlive())
 				return false;
 			Player p = go.FindAncestor<Player>();
-			if (p && gameObject.FindAncestor<Planter>())
+			if (gameObject.FindAncestor<Planter>() && (p || go.FindAncestor<Vehicle>()))
 				return false;
 			if (p && !p.IsSwimming())
 				return false;

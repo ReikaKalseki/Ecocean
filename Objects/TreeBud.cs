@@ -13,6 +13,7 @@ using ReikaKalseki.DIAlterra;
 
 namespace ReikaKalseki.Ecocean {
 	
+	[Obsolete]
 	public class TreeBud : Spawnable {
 		
 		private static readonly List<TechType> drops = new List<TechType>();

@@ -61,7 +61,7 @@ namespace ReikaKalseki.Ecocean
 				contacts.RemoveWhere(c => !(c && (c.transform.position-transform.position).sqrMagnitude < 900));
 				lastCheckTime = time;
 			}
-			if (gameObject.name == "Player") {
+			if (ObjectUtil.isPlayer(this) || (Player.main.GetVehicle() && Player.main.GetVehicle().GetComponent<PlantHidingTracker>() == this)) {
 				float dT = Time.deltaTime;
 				bool active = isActive();
 				if (active) {
