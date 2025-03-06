@@ -96,6 +96,7 @@ namespace ReikaKalseki.Ecocean {
 						pos = pos.setY(-UnityEngine.Random.Range(data2.minDepth, data2.maxDepth));
 						while (Vector3.Distance(pos, ep.transform.position) < 50 || (ep.GetVehicle() is SeaMoth && ep.GetVehicle().useRigidbody && Vector3.Distance(pos, ep.transform.position+ep.GetVehicle().useRigidbody.velocity.normalized*20) < 30)) {
 							pos = getRandomPosition(ep, data2);
+							pos = pos.setY(-UnityEngine.Random.Range(data2.minDepth, data2.maxDepth));
 						}
 						GameObject go = ObjectUtil.createWorldObject(ClassID);
 						go.transform.position = pos;

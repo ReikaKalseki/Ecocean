@@ -4,6 +4,7 @@ using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Xml;
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -174,7 +175,7 @@ namespace ReikaKalseki.Ecocean {
 				data[tt].trigger(s, go);
 		}
 		
-		public class VisualDistortionEffect : MonoBehaviour {
+		public class VisualDistortionEffect : MonoBehaviour, CustomSerializedComponent {
 			
 			internal Vector4 effectColor = ScreenFXManager.instance.defaultMesmerShaderColors;
 			internal float intensity;			
@@ -212,6 +213,16 @@ namespace ReikaKalseki.Ecocean {
 		    void OnDestroy() {
 		    	OnDisable();
 		    }
+		
+			public virtual void saveToXML(XmlElement e) {
+				e.addProperty("timer", timeRemaining);
+				e.addProperty("intensity", intensity);
+			}
+			
+			public virtual void readFromXML(XmlElement e) {
+				timeRemaining = (float)e.getFloat("timer", 0);
+				intensity = (float)e.getFloat("intensity", 0);
+			}
 			
 		}
 		
@@ -244,7 +255,7 @@ namespace ReikaKalseki.Ecocean {
 			
 		}
 		
-		class VomitingEffect : MonoBehaviour {
+		class VomitingEffect : MonoBehaviour, CustomSerializedComponent {
 			
 			internal float remainingFood;
 			internal float remainingWater;
@@ -280,6 +291,22 @@ namespace ReikaKalseki.Ecocean {
 				SNUtil.vomit(survivalObject, subFood, subWater);
 				remainingFood -= subFood;
 				remainingWater -= subWater;
+			}
+		
+			public virtual void saveToXML(XmlElement e) {
+				e.addProperty("food", remainingFood);
+				e.addProperty("water", remainingWater);
+				e.addProperty("mindelay", minDelay);
+				e.addProperty("maxdelay", maxDelay);
+				e.addProperty("events", maxEvents);
+			}
+			
+			public virtual void readFromXML(XmlElement e) {
+				remainingFood = (float)e.getFloat("food", 0);
+				remainingWater = (float)e.getFloat("water", 0);
+				minDelay = (float)e.getFloat("mindelay", 0);
+				maxDelay = (float)e.getFloat("maxdelay", 0);
+				maxEvents = e.getInt("intensity", 1);
 			}
 		}
 		

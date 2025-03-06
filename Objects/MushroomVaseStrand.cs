@@ -127,6 +127,8 @@ namespace ReikaKalseki.Ecocean {
 			
 			private Animator animator;
 			
+			private LiveMixin health;
+			
 			private CapsuleCollider interactTrigger;
 			
 			private float lastSiblingCheck;
@@ -217,10 +219,10 @@ namespace ReikaKalseki.Ecocean {
 	    					r.gameObject.SetActive(false);
 					}
 	    			
-					LiveMixin lv = GetComponent<LiveMixin>();
-					lv.data.maxHealth = 80; //only applies to farmed
-					lv.data.knifeable = true;
-					lv.health = lv.maxHealth;
+					health = GetComponentInChildren<LiveMixin>();
+					health.data.maxHealth = 80; //only applies to farmed
+					health.data.knifeable = true;
+					health.health = health.maxHealth;
 	    		}
 			}
 			
@@ -234,7 +236,7 @@ namespace ReikaKalseki.Ecocean {
 						}
 					}
 					float time = DayNightCycle.main.timePassedAsFloat;
-					if (time-lastSiblingCheck >= 2.5F) {
+					if (DIHooks.getWorldAge() > 0.5F && time-lastSiblingCheck >= 2.5F) {
 						Planter p = grown.gameObject.FindAncestor<Planter>();
 						if (!p) {
 							SNUtil.log("Farmed mushroom vase strand without a planter?! "+gameObject.GetFullHierarchyPath());
@@ -256,6 +258,13 @@ namespace ReikaKalseki.Ecocean {
 						r.materials[0].SetColor("_GlowColor", new Color(1, 1, 1+3*(int)Mathf.Clamp01(resourceGenerationProgress), 1));
 					}
 				}
+				
+				if (health && health.maxHealth < 80) {
+					health.data.maxHealth = 80;
+					health.data.knifeable = true;
+					health.health = health.maxHealth;
+				}
+				
 				strandsShowingPrev = strandsShowing;
 				if (isHarvested())
 					resourceGenerationProgress = 0;
@@ -275,8 +284,10 @@ namespace ReikaKalseki.Ecocean {
 			
 			internal bool tryHarvest() {
 				if (isHarvested()) {
-					if (DayNightCycle.main.timePassedAsFloat-lastHarvest < 0.5F) //in case double code call, or a misclick
+					if (DayNightCycle.main.timePassedAsFloat-lastHarvest > 0.25F) { //in case double code call, or a misclick
+						SNUtil.log("Destroying already-harvested mushroom vase strand, dT="+(DayNightCycle.main.timePassedAsFloat-lastHarvest));
 						GetComponent<LiveMixin>().TakeDamage(9999, transform.position); //destroy
+					}
 					return false;
 				}
 				pickResource();

@@ -162,6 +162,8 @@ namespace ReikaKalseki.Ecocean
 		SNUtil.log(" > "+lavaShroom);
 		GenUtil.registerPrefabWorldgen(lavaShroom, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Far, BiomeType.InactiveLavaZone_Chamber_Floor, 1, 0.08F);		
 		GenUtil.registerPrefabWorldgen(lavaShroom, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Far, BiomeType.InactiveLavaZone_Chamber_Floor_Far, 1, 0.08F);
+		GenUtil.registerPrefabWorldgen(lavaShroom, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Far, BiomeType.InactiveLavaZone_Corridor_Floor_Far, 1, 0.067F);
+		GenUtil.registerPrefabWorldgen(lavaShroom, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Far, BiomeType.InactiveLavaZone_Corridor_Floor, 1, 0.04F);
 		
 		LootDistributionHandler.EditLootDistributionData(VanillaResources.DIAMOND.prefab, BiomeType.MushroomForest_GiantTreeInteriorFloor, 3F, 1);
 		LootDistributionHandler.EditLootDistributionData(VanillaResources.LITHIUM.prefab, BiomeType.MushroomForest_GiantTreeInteriorFloor, 8F, 1);

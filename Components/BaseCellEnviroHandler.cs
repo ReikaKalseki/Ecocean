@@ -23,6 +23,7 @@ namespace ReikaKalseki.Ecocean
 		private bool hasMoonpool;
 		private Bounds boundingBox;
 		
+		private float timeSinceEnviro;
 		private BiomeBase currentBiome;
 		private float temperature;
 		private float depth;
@@ -36,15 +37,21 @@ namespace ReikaKalseki.Ecocean
 		void Update() {
 			if (!cell)
 				cell = GetComponent<BaseCell>();
-			if (currentBiome == null && DIHooks.isWorldLoaded() && (transform.position-Player.main.transform.position).sqrMagnitude < 160000)
+			if ((currentBiome == null || timeSinceEnviro > 120) && DIHooks.isWorldLoaded() && (transform.position-Player.main.transform.position).sqrMagnitude < 160000) {
+				if (currentBiome == null) //do not recompute this just because 2 min since enviro
+					computeBaseCell();
 				computeEnvironment();
+			}
 			
 			float dT = Time.deltaTime;
 			
 			age += dT;
+			timeSinceEnviro += dT;
 			
 			if (plankton) {
 				timeSincePlankton = 0;
+				if (planktonSpawnRate <= 0)
+					UnityEngine.Object.Destroy(plankton);
 			}
 			else if (age > 120 && planktonSpawnRate > 0 && depth > 5 && (hasHatch || hasMoonpool) && baseSize > 2 && (Player.main.transform.position-transform.position).sqrMagnitude < 40000) {
 				timeSincePlankton += dT;
@@ -70,15 +77,7 @@ namespace ReikaKalseki.Ecocean
 				UnityEngine.Object.DestroyImmediate(plankton);
 		}
 		
-		public void computeEnvironment() {
-			depth = -transform.position.y;
-			currentBiome = BiomeBase.getBiome(transform.position);
-			if (currentBiome == VanillaBiomes.VOID) { //void base very unlikely, probably loaded in with null
-				currentBiome = null;
-				return;
-			}
-			temperature = WaterTemperatureSimulation.main.GetTemperature(transform.position);
-			
+		public void computeBaseCell() {			
 			UseableDiveHatch h = GetComponentInChildren<UseableDiveHatch>();
 			hasHatch = h && !h.isForEscapePod && !h.isForWaterPark && !h.IsInside() && !h.GetOnLand();
 			
@@ -94,9 +93,21 @@ namespace ReikaKalseki.Ecocean
 			if (!seabase)
 				seabase = gameObject.FindAncestor<Base>();
 			baseSize = seabase.GetComponentsInChildren<BaseCell>().Length;
+		}
+		
+		public void computeEnvironment() {
+			depth = -transform.position.y;
+			currentBiome = BiomeBase.getBiome(transform.position);
+			if (currentBiome == VanillaBiomes.VOID) { //void base very unlikely, probably loaded in with null
+				currentBiome = null;
+				return;
+			}
+			temperature = WaterTemperatureSimulation.main.GetTemperature(transform.position);
 			
 			planktonSpawnRate = MushroomVaseStrand.getSpawnRate(currentBiome);
 			SNUtil.log("Computed plankton spawn rate of "+planktonSpawnRate+" for base cell "+transform.position+" ("+currentBiome.displayName+")");
+			
+			timeSinceEnviro = 0;
 		}
 		
 	}

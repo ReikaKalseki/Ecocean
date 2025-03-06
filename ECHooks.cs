@@ -208,7 +208,7 @@ namespace ReikaKalseki.Ecocean {
 		
 		public static void onTakeDamage(DIHooks.DamageToDeal dmg) {
 			BaseRoot bb = dmg.target.gameObject.FindAncestor<BaseRoot>();
-			if (bb) {
+			if (bb && !dmg.target.gameObject.FindAncestor<Planter>()) { //bases but NOT farmed plants
 				BaseHullStrength str = bb.GetComponent<BaseHullStrength>();
 				if (str.totalStrength > BaseHullStrength.InitialStrength) {
 					float surplus = str.totalStrength-BaseHullStrength.InitialStrength;
@@ -435,6 +435,11 @@ namespace ReikaKalseki.Ecocean {
 						RenderUtil.swapTextures(EcoceanMod.modDLL, r, "Textures/Nickel");
 						RenderUtil.setGlossiness(r, 4, 2, 0.4F);
 					}
+				}
+				else if (pi.ClassId == VanillaResources.LARGE_URANIUM.prefab) {
+					RadiatePlayerInRange rad = go.EnsureComponent<RadiatePlayerInRange>(); //will not do damage unless add a DamagePlayerInRadius
+					rad.tracker = go.EnsureComponent<PlayerDistanceTracker>();
+					rad.radiateRadius = 10;
 				}
 				else if (pi.ClassId == "1c34945a-656d-4f70-bf86-8bc101a27eee") {
 					go.EnsureComponent<ECMoth>();
