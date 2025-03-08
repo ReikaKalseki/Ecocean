@@ -104,7 +104,7 @@ namespace ReikaKalseki.Ecocean
 			}
 			temperature = WaterTemperatureSimulation.main.GetTemperature(transform.position);
 			
-			planktonSpawnRate = MushroomVaseStrand.getSpawnRate(currentBiome);
+			planktonSpawnRate = transform.position.y < -500 ? 0 : MushroomVaseStrand.getSpawnRate(currentBiome); //there are no plankton spawns below -500
 			SNUtil.log("Computed plankton spawn rate of "+planktonSpawnRate+" for base cell "+transform.position+" ("+currentBiome.displayName+")");
 			
 			timeSinceEnviro = 0;

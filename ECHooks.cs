@@ -45,6 +45,8 @@ namespace ReikaKalseki.Ecocean {
 	    	DIHooks.onPrawnTickEvent += tickPrawn;
 	    	DIHooks.onCyclopsTickEvent += tickCyclops;
 	    	
+			DIHooks.onSeamothModulesChangedEvent += updateSeamothModules;
+	    	
 	    	DIHooks.onEMPHitEvent += onEMPHit;
 	    	DIHooks.onEMPTouchEvent += onEMPTouch;	    	
 	    	
@@ -205,7 +207,29 @@ namespace ReikaKalseki.Ecocean {
 		public static float getLastHornUse() {
 			return lastHornUsed;
 		}
-		
+	    
+		public static void updateSeamothModules(SeaMoth sm, int slotID, TechType tt, bool added) {/*
+			if (added && sm.storageInputs != null && slotID < sm.storageInputs.Length) {
+				if (tt == EcoceanMod.planktonScoop.TechType) {
+					sm.storageInputs[slotID].gameObject.SetActive(true);
+					sm.storageInputs[slotID].enabled = false;
+					sm.storageInputs[slotID].gameObject.EnsureComponent<PlanktonScoopInteraction>().enabled = true;
+				}
+				else if (tt == TechType.VehicleStorageModule) {
+					sm.storageInputs[slotID].gameObject.SetActive(true);
+					sm.storageInputs[slotID].enabled = true;
+					sm.storageInputs[slotID].gameObject.EnsureComponent<PlanktonScoopInteraction>().enabled = false;
+				}
+				else {
+					sm.storageInputs[slotID].gameObject.SetActive(false);
+				}
+			}*/
+		}
+		/*
+		class PlanktonScoopInteraction : MonoBehaviour, IHandTarget {
+			
+		}
+		*/
 		public static void onTakeDamage(DIHooks.DamageToDeal dmg) {
 			BaseRoot bb = dmg.target.gameObject.FindAncestor<BaseRoot>();
 			if (bb && !dmg.target.gameObject.FindAncestor<Planter>()) { //bases but NOT farmed plants
@@ -439,6 +463,7 @@ namespace ReikaKalseki.Ecocean {
 				else if (pi.ClassId == VanillaResources.LARGE_URANIUM.prefab) {
 					RadiatePlayerInRange rad = go.EnsureComponent<RadiatePlayerInRange>(); //will not do damage unless add a DamagePlayerInRadius
 					rad.tracker = go.EnsureComponent<PlayerDistanceTracker>();
+					rad.tracker.timeBetweenUpdates = 0.3F;
 					rad.radiateRadius = 10;
 				}
 				else if (pi.ClassId == "1c34945a-656d-4f70-bf86-8bc101a27eee") {
@@ -646,7 +671,7 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		internal static bool attractedToSound(Creature c, bool horn) {
-			if (c is GhostLeviathan || c is GhostLeviatanVoid || c is ReaperLeviathan || c is SeaDragon)
+			if (c is GhostLeviathan || c is GhostLeviatanVoid || c is ReaperLeviathan || c is SeaDragon || c.gameObject.FindAncestor<PrefabIdentifier>().ClassId == "GulperLeviathan")
 				return true;
 			if (c is Reefback || c is BoneShark)
 				return horn;

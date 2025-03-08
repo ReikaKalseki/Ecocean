@@ -29,7 +29,7 @@ namespace ReikaKalseki.Ecocean {
 		}
 
 		public override SeamothModule.SeamothModuleStorage getStorage() {
-			return new SeamothModule.SeamothModuleStorage("SCOOP STORAGE", 6, 6);
+			return new SeamothModule.SeamothModuleStorage("SCOOP STORAGE", StorageAccessType.BOX, 6, 6);
 		}
 		
 		public void register() {
