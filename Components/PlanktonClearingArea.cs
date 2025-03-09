@@ -33,5 +33,10 @@ namespace ReikaKalseki.Ecocean
 			}
 	    }
 		
+		internal void tickExternal() {
+			if (onClearTick != null)
+				onClearTick.Invoke(null, Time.deltaTime*clearingRate);
+		}
+		
 	}
 }

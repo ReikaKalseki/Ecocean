@@ -122,6 +122,10 @@ namespace ReikaKalseki.Ecocean {
 					if (sm) {
 						SeamothPlanktonScoop.checkAndTryScoop(sm, Time.deltaTime, EcoceanMod.treeMushroomSpores.TechType);
 					}
+					PlanktonClearingArea area = other.gameObject.FindAncestor<PlanktonClearingArea>();
+					if (area) {
+						area.tickExternal();
+					}
 				}
 			}
 		}
