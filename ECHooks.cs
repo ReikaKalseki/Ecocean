@@ -343,7 +343,8 @@ namespace ReikaKalseki.Ecocean {
 	    	}
 	    }
 		
-		public static void onPickup(Pickupable pp, Exosuit prawn, bool isKnife) {
+		public static void onPickup(DIHooks.ItemPickup ip) {
+			Pickupable pp = ip.item;
 	    	FoodEffectSystem.instance.ensureEatable(pp);
 			GlowOilTag g = pp.GetComponent<GlowOilTag>();
 			if (g) {
