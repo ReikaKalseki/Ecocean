@@ -294,6 +294,8 @@ namespace ReikaKalseki.Ecocean {
 			PrefabIdentifier pi = dmg.target.GetComponent<PrefabIdentifier>();
 			if (pi && pi.ClassId == DecoPlants.PINK_BULB_STACK.prefab)
 				dmg.setValue(0.1F);
+			if (pi && pi.ClassId == VanillaCreatures.PRECURSORCRAB.prefab && dmg.type == DamageType.Drill) //player prawn
+				precursorCrabRetaliate(dmg.target, false);
 		}
 	    
 	    public static void tryKnife(DIHooks.KnifeAttempt k) {
@@ -321,6 +323,10 @@ namespace ReikaKalseki.Ecocean {
 				DIHooks.fireKnifeHarvest(go, new Dictionary<TechType, int>{{TechType.CoralChunk, 1}}); //coral tube piece, for disinfected water
 	    		return;
 			}
+			if (tt == TechType.PrecursorDroid) {
+				precursorCrabRetaliate(go, true);
+	    		return;
+			}
 			if (tt == EcoceanMod.mushroomVaseStrand.TechType) {
 				DIHooks.fireKnifeHarvest(go, new Dictionary<TechType, int>{{EcoceanMod.mushroomVaseStrand.seed.TechType, 1}});
 	    		return;
@@ -335,6 +341,16 @@ namespace ReikaKalseki.Ecocean {
 				vb.Disconnect();
 				return;
 			}
+		}
+		
+		public static void precursorCrabRetaliate(GameObject go, bool single) {
+			GameObject tgt = Player.main.gameObject;
+			Vehicle v = Player.main.GetVehicle();
+			if (v)
+				tgt = v.gameObject;
+			LiveMixin lv = tgt.GetComponent<LiveMixin>();
+			lv.TakeDamage(lv.maxHealth*(single ? 0.67F : Time.deltaTime*6.0F), go.transform.position, DamageType.LaserCutter, go);
+			WorldUtil.spawnParticlesAt(Vector3.Lerp(go.transform.position, tgt.transform.position, 0.5F), "361b23ed-58dd-4f45-9c5f-072fa66db88a", 0.5F, true);
 		}
 	    
 	    public static void getKnifeHarvest(DIHooks.KnifeHarvest h) {
@@ -388,6 +404,8 @@ namespace ReikaKalseki.Ecocean {
 					go.EnsureComponent<ECTreader>();
 				else if (pi.ClassId == VanillaCreatures.SEADRAGON.prefab)
 					go.EnsureComponent<ECDragon>();
+				else if (pi.ClassId == VanillaCreatures.EMPEROR_JUVENILE.prefab)
+					go.EnsureComponent<ECEmperor>();
 				else if (VanillaFlora.CREEPVINE_FERTILE.includes(pi.ClassId) || VanillaFlora.CREEPVINE.includes(pi.ClassId)) {
 					go.EnsureComponent<CreepvineSonarScatterer>();
 					if (VanillaFlora.CREEPVINE_FERTILE.includes(pi.ClassId)) {
@@ -462,10 +480,16 @@ namespace ReikaKalseki.Ecocean {
 					}
 				}
 				else if (pi.ClassId == VanillaResources.LARGE_URANIUM.prefab) {
+					/*
 					RadiatePlayerInRange rad = go.EnsureComponent<RadiatePlayerInRange>(); //will not do damage unless add a DamagePlayerInRadius
 					rad.tracker = go.EnsureComponent<PlayerDistanceTracker>();
-					rad.tracker.timeBetweenUpdates = 0.3F;
+					rad.tracker.timeBetweenUpdates = 0.75F;//0.3F;
 					rad.radiateRadius = 10;
+					rad.tracker.maxDistance = rad.radiateRadius;
+					*/
+					AoERadiationZone aoe = go.EnsureComponent<AoERadiationZone>();
+					aoe.setRadii(10, 2);
+					aoe.maxIntensity = 0.3F;
 				}
 				else if (pi.ClassId == "1c34945a-656d-4f70-bf86-8bc101a27eee") {
 					go.EnsureComponent<ECMoth>();

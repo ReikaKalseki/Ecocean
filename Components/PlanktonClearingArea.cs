@@ -13,7 +13,9 @@ using SMLHelper.V2.Utility;
 
 namespace ReikaKalseki.Ecocean
 {
-	internal class PlanktonClearingArea : MonoBehaviour {
+	public class PlanktonClearingArea : MonoBehaviour {
+		
+		public static bool skipPlanktonClear;
 		
 		//private CapsuleCollider AoE;
 		
@@ -24,7 +26,10 @@ namespace ReikaKalseki.Ecocean
 	    private void OnTriggerStay(Collider other) {
 			if (Time.deltaTime <= 0)
 				return;
-			PlanktonCloudTag pc = other.gameObject.FindAncestor<PlanktonCloudTag>();
+			//SNUtil.writeToChat("Plankton clearer "+gameObject.name+" ticking with collider "+other.gameObject.GetFullHierarchyPath());
+			if (skipPlanktonClear)
+				return;
+			PlanktonCloudTag pc = other.GetComponent<PlanktonCloudTag>(); //NOT ancestor - only interact with main entity
 			if (pc && pc.enabled) {
 				float amt = Time.deltaTime*clearingRate;
 				pc.damage(this, amt);

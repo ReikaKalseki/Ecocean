@@ -56,8 +56,8 @@ namespace ReikaKalseki.Ecocean
     public static PinkLeaves pinkLeaves;
     //public static readonly MushroomTendril[] mushroomTendrils = new MushroomTendril[2];
     
-    internal static TechType waterCurrentCommon;
-    internal static TechType celeryTree;
+    public static TechType waterCurrentCommon;
+    public static TechType celeryTree;
 		
 	internal static readonly Vector3 reaperlessTripleVent = new Vector3(-1150, -240, -258);
 	internal static readonly Vector3 northDuneBit = new Vector3(-1151, -340, 1444);

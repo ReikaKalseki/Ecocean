@@ -182,8 +182,8 @@ namespace ReikaKalseki.Ecocean {
 	    					Utils.ZeroTransform(go.transform);
 	    				}
 	    				planktonClearingArea = go.EnsureComponent<CapsuleCollider>();
-	    				planktonClearingArea.height = 3.5F;
-	    				planktonClearingArea.radius = 0.6F;
+	    				planktonClearingArea.height = 7.5F;
+	    				planktonClearingArea.radius = 6.0F;//4.0F;
 	    				planktonClearingArea.isTrigger = true;
 	    				planktonClearingMgr = go.EnsureComponent<PlanktonClearingArea>();
 	    				planktonClearingMgr.clearingRate = 0.4F;

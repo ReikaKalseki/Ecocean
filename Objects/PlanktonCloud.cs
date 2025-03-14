@@ -19,8 +19,8 @@ namespace ReikaKalseki.Ecocean {
 		
 		private readonly XMLLocale.LocaleEntry locale;
 		
-		internal static readonly float BASE_RANGE = 4;
-		internal static readonly float MAX_RANGE = 8;
+		internal static readonly float BASE_RANGE = 10;
+		internal static readonly float MAX_RANGE = 18;
 		internal static readonly float VOID_RANGE_SCALE = 2;
 		internal static readonly float LEVI_RANGE_SCALE = 3;
 		
@@ -147,7 +147,7 @@ namespace ReikaKalseki.Ecocean {
 		
 	}
 	
-	public class PlanktonCloudLeviDetector : MonoBehaviour {
+	public class PlanktonCloudLeviDetector : MonoBehaviour { //also detects cyclops
 		
 		private PlanktonCloudTag root;
 		private Collider aoe;
@@ -178,10 +178,11 @@ namespace ReikaKalseki.Ecocean {
 			}
 			float time = DayNightCycle.main.timePassedAsFloat;
 			Creature c = other.gameObject.FindAncestor<Creature>();
-			if (c && (c is ReaperLeviathan || c is GhostLeviatanVoid || c is GhostLeviathan || c is SeaDragon/* || c is Reefback*/)) {
+			SubRoot sub = other.gameObject.FindAncestor<SubRoot>();
+			if ((c && c.GetComponent<AggressiveWhenSeeTarget>()) || (sub && sub.isCyclops)) {
 				//touchingEntity = other;
 				//root.touch(Time.deltaTime, other);
-				root.addTouchIntensity(4);
+				root.addTouchIntensity(sub ? 15 : 8);
 			}
 	    }
 		
@@ -203,7 +204,7 @@ namespace ReikaKalseki.Ecocean {
 		
 		public BaseCellEnviroHandler isBaseBound;
 		
-		public static event Action<PlanktonCloudTag, Collider> onPlanktonActivationEvent;
+		public static event Action<PlanktonCloudTag, GameObject> onPlanktonActivationEvent;
 		public static event Action<PlanktonCloudTag, SeaMoth> onPlanktonScoopEvent;
 		
 		private static readonly Color glowNew = new Color(0, 0.75F, 0.1F, 1F);
@@ -219,6 +220,7 @@ namespace ReikaKalseki.Ecocean {
 		
 		private float lastActivatorCheckTime;
 		private List<GameObject> forcedActivators = new List<GameObject>();
+		private List<GameObject> touching = new List<GameObject>();
 		
 		private float minParticleSize = 2;
 		private float maxParticleSize = 5;
@@ -237,6 +239,7 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		internal void init() {
+			SNUtil.log("Forcing enable of plankton @ "+transform.position+" @ "+DayNightCycle.main.timePassedAsFloat);
 			ObjectUtil.removeComponent<BloomCreature>(gameObject);
 			ObjectUtil.removeComponent<SwimRandom>(gameObject);
 			ObjectUtil.removeComponent<StayAtLeashPosition>(gameObject);
@@ -301,6 +304,29 @@ namespace ReikaKalseki.Ecocean {
 			
 			age += dT;
 			
+			//if (touching.Count > 0)
+			//	SNUtil.writeToChat("ticking plankton with "+touching.Count+" contacts");
+			foreach (GameObject other in touching) {
+				if (!other)
+					continue;
+				touch(dT, other);//lastContactTime = DayNightCycle.main.timePassedAsFloat;
+				SeaMoth s = other.GetComponent<SeaMoth>();
+				if (s && !isBaseBound)
+					checkAndTryScoop(s, dT);
+				if (ObjectUtil.isPlayer(other)) {
+					float hf = health.GetHealthFraction();
+					float amt = isBaseBound ? (hf < 0.25 ? 0 : 15*dT*hf*hf) : 5*dT*hf;
+					if (isBaseBound) {
+						if (age < 0.6F || DayNightCycle.main.timePassedAsFloat-lastScoopTime <= 0.5F)
+							amt = 0;
+						else
+							amt *= Player.main.liveMixin.GetHealthFraction();
+					}
+					if (amt > 0)
+						Player.main.liveMixin.TakeDamage(amt, Player.main.transform.position, DamageType.Poison, gameObject);
+				}
+			}
+			
 			if (isBaseBound && age >= 300) { //5 min
 				health.TakeDamage(dT*50, transform.position);
 			}
@@ -330,11 +356,11 @@ namespace ReikaKalseki.Ecocean {
 				activation -= 0.05F*dT;
 				if (Player.main) {
 					float dd = (Player.main.transform.position-transform.position).sqrMagnitude;
-					if (dd < 1024) { //32m
+					if (dd < 1600) { //40m
 						float vel = Player.main.rigidBody.velocity.magnitude;
 						Vehicle v = Player.main.GetVehicle();
 						if (v) {
-							vel = v.GetComponent<Rigidbody>().velocity.magnitude;
+							vel = v.useRigidbody.velocity.magnitude*2.0F;
 							if (v is SeaMoth) {
 								vel *= 2.5F;
 							}
@@ -374,14 +400,18 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		void OnDestroy() {
-			
+			touching.Clear();
 		}
 		
 		void OnDisable() {
 			UnityEngine.Object.Destroy(gameObject);
 		}
+		
+		public static bool skipPlanktonTouch;
 
-	    private void OnTriggerStay(Collider other) { //scoop with seamoth
+	    private void OnTriggerEnter(Collider other) { //scoop with seamoth
+			if (other.isTrigger || skipPlanktonTouch)
+				return;
 			if (!enabled) {
 				init();
 				return;
@@ -391,38 +421,24 @@ namespace ReikaKalseki.Ecocean {
 			if (ObjectUtil.isPlayer(other) && (Player.main.currentSub || Player.main.GetVehicle()))
 				return;
 			if (other.gameObject != gameObject) {
-				float dT = Time.deltaTime;
-				if (isBaseBound && other.gameObject.FindAncestor<PlanktonCloudTag>()) { //clear overlapping base plankton
-					health.TakeDamage(dT*50, transform.position);
-					return;
+				GameObject go = getRoot(other);
+				bool flag = false;
+				if (go && (ObjectUtil.isPlayer(go) || go.GetComponent<SeaMoth>() || (!isBaseBound && go.GetComponent<Creature>()))) {
+					touching.Add(go);
+					flag = true;
 				}
-				Vehicle v = other.gameObject.FindAncestor<Vehicle>();
-				Player ep = other.gameObject.FindAncestor<Player>();
-				bool isTouched = v || ep || other.gameObject.FindAncestor<Creature>();
-				if (!isTouched) {
-					SubRoot sub = other.gameObject.FindAncestor<SubRoot>();
-					if (sub && sub.isCyclops)
-						isTouched = true;
-				}
-				if (isTouched)
-					touch(dT, other);//lastContactTime = DayNightCycle.main.timePassedAsFloat;
-				if (v is SeaMoth && !isBaseBound)
-					checkAndTryScoop((SeaMoth)v, dT);
-				if (ep) {
-					float f = health.GetHealthFraction();
-					float amt = isBaseBound ? (f < 0.25 ? 0 : 15*dT*f*f) : 5*dT*f;
-					if (isBaseBound) {
-						if (age < 0.6F || DayNightCycle.main.timePassedAsFloat-lastScoopTime <= 0.5F)
-							amt = 0;
-						else
-							amt *= ep.liveMixin.GetHealthFraction();
-					}
-					if (amt > 0)
-						ep.liveMixin.TakeDamage(amt, ep.transform.position, DamageType.Poison, gameObject);
-				}
+				//SNUtil.writeToChat("Touching "+other.name+" > "+go.name+" > "+flag);
 			}
 			//SNUtil.writeToChat(other+" touch plankton @ "+this.transform.position+" @ "+lastContactTime);
 	    }
+		
+		private void OnTriggerExit(Collider other) {
+			touching.Remove(getRoot(other));
+		}
+		
+		private GameObject getRoot(Collider other) {
+			return ObjectUtil.isPlayer(other) ? other.gameObject : UWE.Utils.GetEntityRoot(other.gameObject);
+		}
 		
 		public void activateBy(GameObject go) {
 			forcedActivators.Add(go);
@@ -432,7 +448,7 @@ namespace ReikaKalseki.Ecocean {
 			touchIntensity = Mathf.Clamp(touchIntensity+amt, 0, 10);
 		}
 		
-		internal void touch(float dT, Collider c) {
+		internal void touch(float dT, GameObject c) {
 			addTouchIntensity(2F*dT);
 			if (onPlanktonActivationEvent != null)
 				onPlanktonActivationEvent.Invoke(this, c);
