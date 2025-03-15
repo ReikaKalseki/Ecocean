@@ -145,6 +145,8 @@ namespace ReikaKalseki.Ecocean {
 		private readonly SimplexNoiseGenerator ySize = (SimplexNoiseGenerator)new Simplex1DGenerator(UnityEngine.Random.Range(0, 999999)).setFrequency(0.5F);
 		private readonly SimplexNoiseGenerator zSize = (SimplexNoiseGenerator)new Simplex1DGenerator(UnityEngine.Random.Range(0, 999999)).setFrequency(0.5F);
 		
+		private readonly Vector3 rotation = UnityEngine.Random.onUnitSphere*UnityEngine.Random.Range(0F, 3F);
+		
 		private Rigidbody stuckTo;
 		private FixedJoint joint;
 		
@@ -203,8 +205,13 @@ namespace ReikaKalseki.Ecocean {
 			forces.enabled = stuckTo;
 			if (mainBody) {
 				mainBody.isKinematic = false;
-				if (!stuckTo)
+				if (stuckTo) {
+					mainBody.angularVelocity = Vector3.zero;
+				}
+				else {
 					mainBody.velocity = Vector3.up*velocity;
+					mainBody.angularVelocity = rotation;
+				}
 			}
 			float dT = Time.deltaTime;
 			if (stuckTo) {
@@ -308,6 +315,7 @@ namespace ReikaKalseki.Ecocean {
 			//	hit = c.collider.gameObject.FindAncestor<Creature>();
 			if (!hit)
 				hit = c.collider.gameObject.FindAncestor<SubRoot>();
+			
 			Rigidbody rb = hit ? hit.GetComponentInChildren<Rigidbody>() : null;
 			if (rb) {
 				//SNUtil.writeToChat("Stick to "+rb);
@@ -329,6 +337,11 @@ namespace ReikaKalseki.Ecocean {
 				}*/
 				ObjectUtil.addCyclopsHologramWarning(rb, gameObject, Sprite.Create(TextureManager.getTexture(EcoceanMod.modDLL, "Textures/CyclopsVoidBubbleIcon"), new Rect (0, 0, 100, 100), new Vector2(0, 0)));
 			}
+			else {
+				VoidBubbleReaction r = c.collider.GetComponentInParent<VoidBubbleReaction>();
+				if (r != null)
+					r.onVoidBubbleTouch(this);
+			}
 		}
 		
 		void OnDestroy() {
@@ -342,6 +355,12 @@ namespace ReikaKalseki.Ecocean {
 		private void burst() {
 			UnityEngine.Object.Destroy(gameObject);
 		}
+		
+	}
+	
+	public interface VoidBubbleReaction {
+		
+		void onVoidBubbleTouch(VoidBubbleTag tag);
 		
 	}
 }
