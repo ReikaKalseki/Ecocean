@@ -49,7 +49,6 @@ namespace ReikaKalseki.Ecocean {
 			GameObject world = ObjectUtil.createWorldObject("0e67804e-4a59-449d-929a-cd3fc2bef82c");
 			world.EnsureComponent<TechTag>().type = TechType;
 			world.EnsureComponent<PrefabIdentifier>().ClassId = ClassID;
-			world.GetComponent<Rigidbody>().isKinematic = true;
 			ObjectUtil.removeComponent<Collider>(world);
 			SphereCollider rootCollide = world.EnsureComponent<SphereCollider>();
 			rootCollide.center = Vector3.zero;
@@ -183,6 +182,7 @@ namespace ReikaKalseki.Ecocean {
 				//touchingEntity = other;
 				//root.touch(Time.deltaTime, other);
 				root.addTouchIntensity(sub ? 15 : 8);
+				//SNUtil.writeToChat("Levisense Touching "+other.name+" > "+other.gameObject.name+" @ "+DayNightCycle.main.timePassedAsFloat);
 			}
 	    }
 		
@@ -195,7 +195,7 @@ namespace ReikaKalseki.Ecocean {
 		private Renderer mainRender;
 		private ParticleSystem particles;
 		private ParticleSystem.MainModule particleCore;
-		private Rigidbody mainBody;
+		//private Rigidbody mainBody;
 		private LiveMixin health;
 		private SphereCollider aoe;
 		private SphereCollider leviAOE;
@@ -251,13 +251,14 @@ namespace ReikaKalseki.Ecocean {
 			ObjectUtil.removeComponent<LastScarePosition>(gameObject);
 			health = gameObject.EnsureComponent<LiveMixin>();
 			ObjectUtil.fullyEnable(gameObject);
+			ObjectUtil.removeComponent<Rigidbody>(gameObject);
 		}
 		
 		void Update() {
 			if (!mainRender)
 				mainRender = GetComponentInChildren<Renderer>();
-			if (!mainBody)
-				mainBody = GetComponentInChildren<Rigidbody>();
+			//if (!mainBody)
+			//	mainBody = GetComponentInChildren<Rigidbody>();
 			if (!health)
 				health = GetComponentInChildren<LiveMixin>();
 			if (!particles) {
@@ -290,7 +291,7 @@ namespace ReikaKalseki.Ecocean {
 			leviSphere.transform.localPosition = Vector3.zero;
 			transform.localScale = Vector3.one*0.5F;
 			
-			mainBody.constraints = RigidbodyConstraints.FreezeAll;
+			//mainBody.constraints = RigidbodyConstraints.FreezeAll;
 			
 			string biome = WaterBiomeManager.main.GetBiome(transform.position);
 			bool isVoid = string.IsNullOrEmpty(biome) || biome.ToLowerInvariant().Contains("void");
@@ -396,7 +397,7 @@ namespace ReikaKalseki.Ecocean {
 			light.intensity = (f+Mathf.Max(0, 2*f2))*(isBaseBound ? 0.2F : 1);
 			light.color = currentColor;
 			light.range = f*16+f2*16*f3;
-			leviAOE.radius = r*PlanktonCloud.LEVI_RANGE_SCALE;
+			leviAOE.radius = r*PlanktonCloud.LEVI_RANGE_SCALE*(isBaseBound ? 0.2F : 1);
 		}
 		
 		void OnDestroy() {
@@ -427,7 +428,7 @@ namespace ReikaKalseki.Ecocean {
 					touching.Add(go);
 					flag = true;
 				}
-				//SNUtil.writeToChat("Touching "+other.name+" > "+go.name+" > "+flag);
+				//SNUtil.writeToChat("Touching "+other.name+" > "+go.name+" > "+flag+" @ "+DayNightCycle.main.timePassedAsFloat);
 			}
 			//SNUtil.writeToChat(other+" touch plankton @ "+this.transform.position+" @ "+lastContactTime);
 	    }
