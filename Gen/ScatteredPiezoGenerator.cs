@@ -35,7 +35,7 @@ namespace ReikaKalseki.Ecocean
 			e.addProperty("range", scatterRange);
 		}
 		
-		public override void generate(List<GameObject> generated) {
+		public override bool generate(List<GameObject> generated) {
 			for (int i = 0; i < numberToGen; i++) {
 				Vector3 pos = MathUtil.getRandomVectorAround(position, scatterRange);
 				GameObject go = ObjectUtil.createWorldObject(EcoceanMod.piezo.ClassID);
@@ -43,6 +43,11 @@ namespace ReikaKalseki.Ecocean
 				go.transform.rotation = UnityEngine.Random.rotationUniform;
 				generated.Add(go);
 			}
+			return true;
+		}
+		
+		public override LargeWorldEntity.CellLevel getCellLevel() {
+			return LargeWorldEntity.CellLevel.VeryFar;
 		}
 		
 		public override string ToString() {

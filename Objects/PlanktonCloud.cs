@@ -175,6 +175,8 @@ namespace ReikaKalseki.Ecocean {
 				ObjectUtil.fullyEnable(root.gameObject);
 				return;
 			}
+			if (root.isTouchDisabled())
+				return;
 			float time = DayNightCycle.main.timePassedAsFloat;
 			Creature c = other.gameObject.FindAncestor<Creature>();
 			SubRoot sub = other.gameObject.FindAncestor<SubRoot>();
@@ -305,26 +307,28 @@ namespace ReikaKalseki.Ecocean {
 			
 			age += dT;
 			
-			//if (touching.Count > 0)
-			//	SNUtil.writeToChat("ticking plankton with "+touching.Count+" contacts");
-			foreach (GameObject other in touching) {
-				if (!other)
-					continue;
-				touch(dT, other);//lastContactTime = DayNightCycle.main.timePassedAsFloat;
-				SeaMoth s = other.GetComponent<SeaMoth>();
-				if (s && !isBaseBound)
-					checkAndTryScoop(s, dT);
-				if (ObjectUtil.isPlayer(other)) {
-					float hf = health.GetHealthFraction();
-					float amt = isBaseBound ? (hf < 0.25 ? 0 : 15*dT*hf*hf) : 5*dT*hf;
-					if (isBaseBound) {
-						if (age < 0.6F || DayNightCycle.main.timePassedAsFloat-lastScoopTime <= 0.5F)
-							amt = 0;
-						else
-							amt *= Player.main.liveMixin.GetHealthFraction();
+			if (age > 0.5F) { //do not apply effects for first 0.5s, prevent pulses of damage from spawned and then killed plankton
+				//if (touching.Count > 0)
+				//	SNUtil.writeToChat("ticking plankton with "+touching.Count+" contacts");
+				foreach (GameObject other in touching) {
+					if (!other)
+						continue;
+					touch(dT, other);//lastContactTime = DayNightCycle.main.timePassedAsFloat;
+					SeaMoth s = other.GetComponent<SeaMoth>();
+					if (s && !isBaseBound)
+						checkAndTryScoop(s, dT);
+					if (ObjectUtil.isPlayer(other)) {
+						float hf = health.GetHealthFraction();
+						float amt = isBaseBound ? (hf < 0.25 ? 0 : 15 * dT * hf * hf) : 5 * dT * hf;
+						if (isBaseBound) {
+							if (age < 0.6F || DayNightCycle.main.timePassedAsFloat - lastScoopTime <= 0.5F)
+								amt = 0;
+							else
+								amt *= Player.main.liveMixin.GetHealthFraction();
+						}
+						if (amt > 0)
+							Player.main.liveMixin.TakeDamage(amt, Player.main.transform.position, DamageType.Poison, gameObject);
 					}
-					if (amt > 0)
-						Player.main.liveMixin.TakeDamage(amt, Player.main.transform.position, DamageType.Poison, gameObject);
 				}
 			}
 			
@@ -394,7 +398,7 @@ namespace ReikaKalseki.Ecocean {
 			emit.rateOverTimeMultiplier = (2+f+2*f2)*(isBaseBound ? 0.5F : 1);
 			ParticleSystem.ShapeModule shape = particles.shape;
 			shape.radius = r*2;
-			light.intensity = (f+Mathf.Max(0, 2*f2))*(isBaseBound ? 0.2F : 1);
+			light.intensity = (f+Mathf.Max(0, 2*f2))*(isBaseBound ? 0.07F : 1);
 			light.color = currentColor;
 			light.range = f*16+f2*16*f3;
 			leviAOE.radius = r*PlanktonCloud.LEVI_RANGE_SCALE*(isBaseBound ? 0.2F : 1);
@@ -409,16 +413,18 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		public static bool skipPlanktonTouch;
+		
+		public bool isTouchDisabled() {
+			return isBaseBound && Player.main.currentSub && Player.main.currentSub.isBase;
+		}
 
 	    private void OnTriggerEnter(Collider other) { //scoop with seamoth
-			if (other.isTrigger || skipPlanktonTouch)
+			if (other.isTrigger || skipPlanktonTouch || isTouchDisabled())
 				return;
 			if (!enabled) {
 				init();
 				return;
 			}
-			if (age < 0.5F) //do not apply effects for first 0.5s, prevent pulses of damage from spawned and then killed plankton 
-				return;
 			if (ObjectUtil.isPlayer(other) && (Player.main.currentSub || Player.main.GetVehicle()))
 				return;
 			if (other.gameObject != gameObject) {

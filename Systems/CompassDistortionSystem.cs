@@ -63,27 +63,27 @@ namespace ReikaKalseki.Ecocean {
 			}
 		}
 		
-		/** Returns degrees */
-			public float getTotalDisplacement(Vector3 pos) {
-				float ret = empDisplacement;
-				getOrCreateGlobalNoise();
-				float time = DayNightCycle.main.timePassedAsFloat;
-				float noise = (float)globalDistortionCutoff.getValue(new Vector3(time, 0, 0));
-				float depth = Mathf.Max(0, -pos.y);
-				if (BiomeBase.getBiome(pos).isCaveBiome())
-					depth = 0;
-				if (noise > 0) {
-					float globalIntensity = 0.5F+0.5F*Mathf.Clamp01(EcoceanMod.config.getFloat(ECConfig.ConfigEntries.GLOBALCOMPASS)); //config is 0-1 for "how often"
-					globalIntensity = Mathf.Clamp01(globalIntensity-(depth-400)/200F);
-					ret += (float)globalDistortion.getValue(new Vector3(time, 0, 0))*360F*globalIntensity*Mathf.Sqrt(noise);
-				}
-				foreach (LocalDistortion ld in localEffects) {
-					if (ld.isInRange(pos)) {
-						ret += ld.calculate(time);
-					}
-				}
-				return (ret%360F)*(1-uSkyManager.main.Eclipse());
+		/// <returns>Angle in degrees</returns>
+		public float getTotalDisplacement(Vector3 pos) {
+			float ret = empDisplacement;
+			getOrCreateGlobalNoise();
+			float time = DayNightCycle.main.timePassedAsFloat;
+			float noise = (float)globalDistortionCutoff.getValue(new Vector3(time, 0, 0));
+			float depth = Mathf.Max(0, -pos.y);
+			if (BiomeBase.getBiome(pos).isCaveBiome())
+				depth = 0;
+			if (noise > 0) {
+				float globalIntensity = 0.5F + 0.5F * Mathf.Clamp01(EcoceanMod.config.getFloat(ECConfig.ConfigEntries.GLOBALCOMPASS)); //config is 0-1 for "how often"
+				globalIntensity = Mathf.Clamp01(globalIntensity - (depth - 400) / 200F);
+				ret += (float)globalDistortion.getValue(new Vector3(time, 0, 0)) * 360F * globalIntensity * Mathf.Sqrt(noise);
 			}
+			foreach (LocalDistortion ld in localEffects) {
+				if (ld.isInRange(pos)) {
+					ret += ld.calculate(time);
+				}
+			}
+			return (ret % 360F) * (1 - uSkyManager.main.Eclipse());
+		}
 		
 		public void onHitByEMP(EMPBlast emp, float intensityFactor) {
 			lastEMPHitTime = DayNightCycle.main.timePassedAsFloat;

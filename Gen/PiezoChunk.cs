@@ -29,7 +29,7 @@ namespace ReikaKalseki.Ecocean
 			
 		}
 		
-		public override void generate(List<GameObject> generated) {
+		public override bool generate(List<GameObject> generated) {
 			int n = UnityEngine.Random.Range(4, 7); //4-6 horizontal
 			Vector3[] angs = new Vector3[n+2];
 			for (int i = 0; i < n; i++) {
@@ -46,10 +46,11 @@ namespace ReikaKalseki.Ecocean
 				go.transform.position = go.transform.position+go.transform.up*UnityEngine.Random.Range(0.25F, 0.5F);
 				generated.Add(go);
 			}
+			return true;
 		}
 		
-		public override string ToString() {
-			return base.ToString();
+		public override LargeWorldEntity.CellLevel getCellLevel() {
+			return LargeWorldEntity.CellLevel.VeryFar;
 		}
 	}
 }
