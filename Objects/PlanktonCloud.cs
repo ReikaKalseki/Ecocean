@@ -190,7 +190,7 @@ namespace ReikaKalseki.Ecocean {
 		
 	}
 		
-	public class PlanktonCloudTag : MonoBehaviour {
+	public class PlanktonCloudTag : PlanktonCloudClearableContactZone {
 		
 		private Light light;
 		
@@ -200,9 +200,9 @@ namespace ReikaKalseki.Ecocean {
 		//private Rigidbody mainBody;
 		private LiveMixin health;
 		private SphereCollider aoe;
-		private SphereCollider leviAOE;
 		
-		private GameObject leviSphere;
+		private AuxSphere leviSphere = new AuxSphere("leviSphere");
+		private AuxSphere clearingSphere = new AuxSphere("clearingSphere");
 		
 		public BaseCellEnviroHandler isBaseBound;
 		
@@ -257,6 +257,8 @@ namespace ReikaKalseki.Ecocean {
 		}
 		
 		void Update() {
+			parent = this;
+			
 			if (!mainRender)
 				mainRender = GetComponentInChildren<Renderer>();
 			//if (!mainBody)
@@ -277,20 +279,9 @@ namespace ReikaKalseki.Ecocean {
 			if (!aoe)
 				aoe = GetComponentInChildren<SphereCollider>();
 			
-			if (!leviSphere) {
-				leviSphere = ObjectUtil.getChildObject(gameObject, "leviSphere");
-				if (!leviSphere) {
-					leviSphere = new GameObject("leviSphere");
-					leviSphere.transform.SetParent(transform);
-					leviSphere.transform.localPosition = Vector3.zero;
-					leviAOE = leviSphere.EnsureComponent<SphereCollider>();
-					leviAOE.isTrigger = true;
-					leviSphere.EnsureComponent<PlanktonCloudLeviDetector>().init(this, leviAOE);
-				}
-			}
+			setupAuxSphere(leviSphere, s => s.entity.EnsureComponent<PlanktonCloudLeviDetector>().init(this, s.collider));
+			setupAuxSphere(clearingSphere, s => s.entity.EnsureComponent<PlanktonCloudClearableContactZone>().parent = this);
 			
-			leviAOE.center = Vector3.zero;
-			leviSphere.transform.localPosition = Vector3.zero;
 			transform.localScale = Vector3.one*0.5F;
 			
 			//mainBody.constraints = RigidbodyConstraints.FreezeAll;
@@ -317,7 +308,7 @@ namespace ReikaKalseki.Ecocean {
 					SeaMoth s = other.GetComponent<SeaMoth>();
 					if (s && !isBaseBound)
 						checkAndTryScoop(s, dT);
-					if (ObjectUtil.isPlayer(other)) {
+					if (ObjectUtil.isPlayer(other) && !Player.main.currentSub && !Player.main.GetVehicle()) {
 						float hf = health.GetHealthFraction();
 						float amt = isBaseBound ? (hf < 0.25 ? 0 : 15 * dT * hf * hf) : 5 * dT * hf;
 						if (isBaseBound) {
@@ -392,16 +383,35 @@ namespace ReikaKalseki.Ecocean {
 			float r = (float)MathUtil.linterpolate(f, 0, 1, PlanktonCloud.BASE_RANGE, PlanktonCloud.MAX_RANGE)*f3;
 			aoe.radius = r*0.75F*(isBaseBound ? 0.75F : 1);
 			particleCore.startColor = currentColor;
-			particleCore.startSize = ((minParticleSize + (maxParticleSize - minParticleSize) * f)*(1+f2))*1.5F*(isBaseBound ? 0.75F : 1);
+			float f4 = isBaseBound ? 0.2F : f;
+			particleCore.startSize = ((minParticleSize + (maxParticleSize - minParticleSize) * f4)*(1+f2))*1.5F*(isBaseBound ? 0.67F : 1);
 			particleCore.startLifetimeMultiplier = 1+f*1.5F+f2*2.5F;
 			ParticleSystem.EmissionModule emit = particles.emission;
 			emit.rateOverTimeMultiplier = (2+f+2*f2)*(isBaseBound ? 0.5F : 1);
 			ParticleSystem.ShapeModule shape = particles.shape;
-			shape.radius = r*2;
+			shape.radius = r*(isBaseBound ? 0.6F : 2F);
 			light.intensity = (f+Mathf.Max(0, 2*f2))*(isBaseBound ? 0.07F : 1);
 			light.color = currentColor;
 			light.range = f*16+f2*16*f3;
-			leviAOE.radius = r*PlanktonCloud.LEVI_RANGE_SCALE*(isBaseBound ? 0.2F : 1);
+			leviSphere.radius = r*PlanktonCloud.LEVI_RANGE_SCALE*(isBaseBound ? 0.2F : 1);
+			clearingSphere.radius = isBaseBound ? 7.5F : 20;
+		}
+		
+		private void setupAuxSphere(AuxSphere field, Action<AuxSphere> onSetup = null) {
+			if (!field.entity) {
+				field.entity = ObjectUtil.getChildObject(gameObject, field.name);
+				if (!field.entity) {
+					field.entity = new GameObject(field.name);//GameObject.CreatePrimitive(PrimitiveType.Sphere);
+					field.entity.transform.SetParent(transform);
+					field.entity.transform.localPosition = Vector3.zero;
+					field.collider = field.entity.EnsureComponent<SphereCollider>();
+					field.collider.isTrigger = true;
+					if (onSetup != null)
+						onSetup.Invoke(field);
+				}
+			}
+			field.entity.transform.localPosition = Vector3.zero;
+			field.collider.center = Vector3.zero;
 		}
 		
 		void OnDestroy() {
@@ -491,6 +501,34 @@ namespace ReikaKalseki.Ecocean {
 			else {
 				health.TakeDamage(health.maxHealth * 0.05F * dT, pos.transform.position, DamageType.Drill, pos.gameObject);
 			}
+		}
+		
+	}
+	
+	public class PlanktonCloudClearableContactZone : MonoBehaviour {
+		
+		internal PlanktonCloudTag parent;
+		
+	}
+	
+	internal class AuxSphere {
+		
+		internal GameObject entity;
+		internal SphereCollider collider;
+		internal readonly string name;
+		
+		public float radius {
+			get {
+				return collider.radius;
+			}
+			set {
+				collider.radius = value;
+				entity.transform.localScale = Vector3.one;//*2*value; //default sphere has a radius of 0.5F
+			}
+		}
+		
+		internal AuxSphere(string n) {
+			name = n;
 		}
 		
 	}

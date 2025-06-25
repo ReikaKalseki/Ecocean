@@ -29,12 +29,12 @@ namespace ReikaKalseki.Ecocean
 			//SNUtil.writeToChat("Plankton clearer "+gameObject.name+" ticking with collider "+other.gameObject.GetFullHierarchyPath());
 			if (skipPlanktonClear)
 				return;
-			PlanktonCloudTag pc = other.GetComponent<PlanktonCloudTag>(); //NOT ancestor - only interact with main entity
-			if (pc && pc.enabled) {
+			PlanktonCloudClearableContactZone pc = other.GetComponent<PlanktonCloudClearableContactZone>(); //NOT ancestor - only interact with specific colliders
+			if (pc && pc.parent && pc.parent.enabled) {
 				float amt = Time.deltaTime*clearingRate;
-				pc.damage(this, amt);
+				pc.parent.damage(this, amt);
 				if (onClearTick != null)
-					onClearTick.Invoke(pc, amt);
+					onClearTick.Invoke(pc.parent, amt);
 			}
 	    }
 		

@@ -23,6 +23,8 @@ namespace ReikaKalseki.Ecocean
 		private bool hasMoonpool;
 		private Bounds boundingBox;
 		
+		private readonly List<Bounds> boundingBoxPlanktonSpawns = new List<Bounds>();
+		
 		private float timeSinceEnviro;
 		private BiomeBase currentBiome;
 		private float temperature;
@@ -57,8 +59,9 @@ namespace ReikaKalseki.Ecocean
 				float iVal = (float)MathUtil.linterpolate(baseSize, 5, 30, 60, 10, true);
 				if (timeSincePlankton >= iVal) {
 					if (UnityEngine.Random.Range(0F, 1F) <= planktonSpawnRate) {
+						Bounds bb = boundingBoxPlanktonSpawns.GetRandom();
 						plankton = ObjectUtil.createWorldObject(EcoceanMod.plankton.ClassID);
-						plankton.transform.position = MathUtil.getRandomVectorAround(boundingBox.RandomWithin(), new Vector3(5, 0, 5));
+						plankton.transform.position = MathUtil.getRandomVectorAround(bb.RandomWithin(), new Vector3(3, 0, 3));
 						plankton.transform.localScale = Vector3.one*0.5F;
 						ObjectUtil.fullyEnable(plankton);
 						plankton.GetComponent<PlanktonCloudTag>().isBaseBound = this;
@@ -78,16 +81,32 @@ namespace ReikaKalseki.Ecocean
 		}
 		
 		public void computeBaseCell() {			
-			UseableDiveHatch h = GetComponentInChildren<UseableDiveHatch>();
-			hasHatch = h && !h.isForEscapePod && !h.isForWaterPark;
-			
-			hasMoonpool = (bool)GetComponentInChildren<VehicleDockingBay>();
+			UseableDiveHatch[] hatches = GetComponentsInChildren<UseableDiveHatch>();
+			boundingBoxPlanktonSpawns.Clear();
+			hasHatch = false;
+			for (int i = 0; i < hatches.Length; i++) {
+				UseableDiveHatch h = hatches[i];
+				if (!h.isForEscapePod && !h.isForWaterPark) {
+					hasHatch = true;
+					Bounds bb = new Bounds(cell.transform.position, Vector3.zero);
+					foreach (Collider c in h.GetComponentsInChildren<Collider>()) {
+						bb.Encapsulate(c.bounds);
+					}
+					boundingBoxPlanktonSpawns.Add(bb);
+				}
+			}	
 			
 			boundingBox = new Bounds(cell.transform.position, Vector3.zero);
 			foreach (Collider c in cell.GetComponentsInChildren<Collider>()) {
 				if (c.gameObject.GetFullHierarchyPath().Contains("/AdjustableSupport/"))
 					continue;
 				boundingBox.Encapsulate(c.bounds);
+			}		
+			
+			hasMoonpool = (bool)GetComponentInChildren<VehicleDockingBay>();
+			if (hasMoonpool) {
+				boundingBoxPlanktonSpawns.Clear();
+				boundingBoxPlanktonSpawns.Add(boundingBox);
 			}
 			
 			if (!seabase)

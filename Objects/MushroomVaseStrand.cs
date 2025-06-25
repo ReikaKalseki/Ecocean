@@ -271,7 +271,7 @@ namespace ReikaKalseki.Ecocean {
 			}
 			
 			internal float getResourceFilterEfficiency() {
-				return (float)MathUtil.linterpolate(siblingCount, 1, 24, 1, 0.05F, true);
+				return (float)MathUtil.linterpolate(siblingCount, 2, 12, 1, 0.033F, true);
 			}
 		
 			internal bool isHarvested() {
