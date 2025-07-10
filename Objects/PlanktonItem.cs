@@ -25,6 +25,7 @@ namespace ReikaKalseki.Ecocean {
 				GameObject root = r.gameObject.FindAncestor<PrefabIdentifier>().gameObject;
 				root.transform.localScale = Vector3.one*1F;
 				ObjectUtil.removeComponent<PickPrefab>(root);
+				ObjectUtil.removeComponent<Plantable>(root);
 				Eatable ea = root.EnsureComponent<Eatable>();
 				ea.decomposes = false;
 				ea.foodValue = 6;
