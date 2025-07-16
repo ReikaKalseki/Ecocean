@@ -38,7 +38,7 @@ namespace ReikaKalseki.Ecocean
 		public override bool generate(List<GameObject> generated) {
 			for (int i = 0; i < numberToGen; i++) {
 				Vector3 pos = MathUtil.getRandomVectorAround(position, scatterRange);
-				GameObject go = ObjectUtil.createWorldObject(EcoceanMod.piezo.ClassID);
+				GameObject go = spawner(EcoceanMod.piezo.ClassID);
 				go.transform.position = pos;
 				go.transform.rotation = UnityEngine.Random.rotationUniform;
 				generated.Add(go);

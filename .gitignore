@@ -42,3 +42,5 @@ $RECYCLE.BIN/
 obj/*
 bin/*
 npp session
+
+Components/CallOfVoidWaterCurrent.cs

@@ -40,7 +40,7 @@ namespace ReikaKalseki.Ecocean
 			angs[angs.Length-1] = new Vector3(UnityEngine.Random.Range(-30F, 30F), UnityEngine.Random.Range(0, 360F), 0);
 			angs[angs.Length-2] = new Vector3(UnityEngine.Random.Range(150F, 210F), UnityEngine.Random.Range(0, 360F), 0);
 			foreach (Vector3 ang in angs) {
-				GameObject go = ObjectUtil.createWorldObject(EcoceanMod.piezo.ClassID);
+				GameObject go = spawner(EcoceanMod.piezo.ClassID);
 				go.transform.position = position;
 				go.transform.rotation = Quaternion.Euler(ang.x, ang.y, ang.z);//UnityEngine.Random.rotationUniform;
 				go.transform.position = go.transform.position+go.transform.up*UnityEngine.Random.Range(0.25F, 0.5F);
