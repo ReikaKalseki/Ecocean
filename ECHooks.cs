@@ -1,87 +1,87 @@
 ﻿using System;
-using System.IO;
-using System.Xml;
-using System.Reflection;
-
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using SMLHelper.V2.Handlers;
-using SMLHelper.V2.Assets;
-using SMLHelper.V2.Utility;
-
-using UnityEngine;
+using System.Reflection;
+using System.Xml;
 
 using ReikaKalseki.DIAlterra;
 using ReikaKalseki.Ecocean;
 
+using SMLHelper.V2.Assets;
+using SMLHelper.V2.Handlers;
+using SMLHelper.V2.Utility;
+
+using UnityEngine;
+
 namespace ReikaKalseki.Ecocean {
-	
+
 	public static class ECHooks {
-	    
+
 		private static readonly HashSet<string> bloodVine = new HashSet<string>();
-		
+
 		private static float lastPiezoEMPDamage = -1;
-		
+
 		private static float lastSonarUsed = -1;
 		private static float lastHornUsed = -1;
-		
+
 		internal static float nextVoidTongueGrab = -1;
-		
-		private static Simplex3DGenerator mushroomTendrilNoise;
-	    
-	    static ECHooks() {
+
+		static ECHooks() {
 			SNUtil.log("Initializing ECHooks");
-	    	DIHooks.onSkyApplierSpawnEvent += onSkyApplierSpawn;
-	    	DIHooks.onDamageEvent += onTakeDamage;
-	    	DIHooks.onKnifedEvent += onKnifed;
-	    	DIHooks.knifeAttemptEvent += tryKnife;
-	    	DIHooks.knifeHarvestEvent += getKnifeHarvest;
-	    	DIHooks.onItemPickedUpEvent += onPickup;
-	    	
-	    	DIHooks.itemTooltipEvent += FoodEffectSystem.instance.applyTooltip;
-	    	DIHooks.onEatEvent += FoodEffectSystem.instance.onEaten;
-			
-	    	DIHooks.onPlayerTickEvent += tickPlayer;
-	    	DIHooks.onPrawnTickEvent += tickPrawn;
-	    	DIHooks.onCyclopsTickEvent += tickCyclops;
-	    	
+			DIHooks.onSkyApplierSpawnEvent += onSkyApplierSpawn;
+			DIHooks.onDamageEvent += onTakeDamage;
+			DIHooks.onKnifedEvent += onKnifed;
+			DIHooks.knifeAttemptEvent += tryKnife;
+			DIHooks.knifeHarvestEvent += getKnifeHarvest;
+			DIHooks.onItemPickedUpEvent += onPickup;
+
+			DIHooks.itemTooltipEvent += FoodEffectSystem.instance.applyTooltip;
+			DIHooks.onEatEvent += FoodEffectSystem.instance.onEaten;
+
+			DIHooks.onPlayerTickEvent += tickPlayer;
+			DIHooks.onPrawnTickEvent += tickPrawn;
+			DIHooks.onCyclopsTickEvent += tickCyclops;
+
 			DIHooks.onSeamothModulesChangedEvent += updateSeamothModules;
-	    	
-	    	DIHooks.onEMPHitEvent += onEMPHit;
-	    	DIHooks.onEMPTouchEvent += onEMPTouch;	    	
-	    	
-	    	DIHooks.getTemperatureEvent += getWaterTemperature;
-	    	
-	    	DIHooks.onSeamothSonarUsedEvent += pingSeamothSonar;
-	    	DIHooks.onCyclopsSonarUsedEvent += pingCyclopsSonar;
-	    	
-	    	DIHooks.drillableDrillTickEvent += onDrillableTick;
-	    	
-	    	DIHooks.onTorpedoExplodeEvent += onTorpedoExploded;
-	    	
-	    	DIHooks.canCreatureSeeObjectEvent += checkCreatureCanSee;
-	    	DIHooks.aggressiveToPilotingEvent += checkCreaturePilotedAggression;
-	    	
-	    	DIHooks.baseRebuildEvent += onBaseRebuild;
-	    	
-	    	bloodVine.AddRange(VanillaFlora.BLOOD_KELP.getPrefabs(true, true));
-	    }
-	    
+
+			DIHooks.onEMPHitEvent += onEMPHit;
+			DIHooks.onEMPTouchEvent += onEMPTouch;
+
+			DIHooks.getTemperatureEvent += getWaterTemperature;
+
+			DIHooks.onSeamothSonarUsedEvent += pingSeamothSonar;
+			DIHooks.onCyclopsSonarUsedEvent += pingCyclopsSonar;
+
+			DIHooks.drillableDrillTickEvent += onDrillableTick;
+
+			DIHooks.onTorpedoExplodeEvent += onTorpedoExploded;
+
+			DIHooks.canCreatureSeeObjectEvent += checkCreatureCanSee;
+			DIHooks.aggressiveToPilotingEvent += checkCreaturePilotedAggression;
+
+			DIHooks.baseRebuildEvent += onBaseRebuild;
+
+			DIHooks.growingPlantTickEvent += tickGrowingPlant;
+
+			bloodVine.AddRange(VanillaFlora.BLOOD_KELP.getPrefabs(true, true));
+		}
+
 		public class ECMoth : MonoBehaviour {
-			
+
 			private SeaMoth seamoth;
-			
+
 			private bool lightsOn;
-			
+
 			public Func<float> getLightIntensity = () => 1;
-			
+
 			private readonly LinkedList<float> lightToggles = new LinkedList<float>();
-			
+
 			void Update() {
 				if (!seamoth)
-					seamoth = GetComponent<SeaMoth>();
+					seamoth = this.GetComponent<SeaMoth>();
 				float time = DayNightCycle.main.timePassedAsFloat;
-				while (lightToggles.First != null && time-lightToggles.First.Value > 3) {
+				while (lightToggles.First != null && time - lightToggles.First.Value > 3) {
 					lightToggles.RemoveFirst();
 				}
 				if (seamoth.toggleLights.lightsActive != lightsOn) {
@@ -90,11 +90,11 @@ namespace ReikaKalseki.Ecocean {
 				}
 				int flashCount = lightToggles.Count;
 				//SNUtil.writeToChat(flashCount+" > "+((flashCount-5)/200F).ToString("0.0000"));
-				if (flashCount > 5 && UnityEngine.Random.Range(0F, 1F) < (flashCount-5)/250F*getFlashEffectiveness()*getLightIntensity()/* && seamoth.mainAnimator.GetBool("reaper_attack")*/) {
+				if (flashCount > 5 && UnityEngine.Random.Range(0F, 1F) < (flashCount - 5) / 250F * this.getFlashEffectiveness() * getLightIntensity()/* && seamoth.mainAnimator.GetBool("reaper_attack")*/) {
 					GameObject go = WorldUtil.areAnyObjectsNear(transform.position, 60, obj => {
-							ReaperLeviathan rl = obj.GetComponent<ReaperLeviathan>();
-							return rl && rl.holdingVehicle == seamoth;
-					    }
+						ReaperLeviathan rl = obj.GetComponent<ReaperLeviathan>();
+						return rl && rl.holdingVehicle == seamoth;
+					}
 					);
 					//SNUtil.writeToChat("Found object "+go);
 					if (go) {
@@ -102,112 +102,111 @@ namespace ReikaKalseki.Ecocean {
 					}
 				}
 				if (lightsOn) {
-		    		GlowOil.handleLightTick(transform);
-		    		if (UnityEngine.Random.Range(0F, 1F) <= 0.02F)
-		    			attractToLight(seamoth);
+					GlowOil.handleLightTick(transform);
+					if (UnityEngine.Random.Range(0F, 1F) <= 0.02F)
+						attractToLight(seamoth);
 				}
 			}
-			
+
 			private float getFlashEffectiveness() {
 				float brightness = DayNightCycle.main.GetLightScalar();
-				return 1.2F-brightness*0.8F;
+				return 1.2F - (brightness * 0.8F);
 			}
-	    }
-	    
-	    public static void tickPrawn(Exosuit e) {
-	    	if (true) //lights always on
-	    		GlowOil.handleLightTick(e.transform);
-	    }
-	    
-	    public static void tickCyclops(SubRoot sub) {
+		}
+
+		public static void tickPrawn(Exosuit e) {
+			if (true) //lights always on
+				GlowOil.handleLightTick(e.transform);
+		}
+
+		public static void tickCyclops(SubRoot sub) {
 			if (sub.subLightsOn) {
-	    		GlowOil.handleLightTick(sub.transform);
-	    		if (UnityEngine.Random.Range(0F, 1F) <= 0.04F)
-	    			attractToLight(sub);
+				GlowOil.handleLightTick(sub.transform);
+				if (UnityEngine.Random.Range(0F, 1F) <= 0.04F)
+					attractToLight(sub);
 			}
-	    }
-	    
-	    public static void tickPlayer(Player ep) {	    
-			float time = DayNightCycle.main.timePassedAsFloat;	
-	    	GlowOil.checkPlayerLightTick(time, ep);
-	    	
-	    	float dT = Time.deltaTime;
-	    	CompassDistortionSystem.instance.tick(time, dT);
-	    	
-	    	float f = 0.3F-DayNightCycle.main.GetLightScalar()*0.15F;
-	    	if (!ep.IsInBase()) {
-			    BiomeSpawnData data = PlanktonCloud.getSpawnData(BiomeBase.getBiome(ep.transform.position));
-			    if (data != null) {
-		    		if (UnityEngine.Random.Range(0F, 1F) <= f*dT*data.spawnSuccessRate)
-		    			EcoceanMod.plankton.tickSpawner(ep, data, dT);
-		    	}
-	    	}
-		    Vector3 pos = ep.transform.position;
-		    if (pos.setY(0).magnitude >= 1700) //more than 1200m from center
-		    	EcoceanMod.voidBubble.tickSpawner(ep, time, dT);
-		    if (pos.y <= -UnityEngine.Random.Range(1000F, 1200F) && VanillaBiomes.VOID.isInBiome(pos)) {
-		    	//if (UnityEngine.Object.FindObjectsOfType<VoidTongueTag>().Length == 0)
-		    	//	SNUtil.writeToChat("Check void grab time = "+time.ToString("000.0")+"/"+nextVoidTongueGrab.ToString("000.0"));
-		    	if (time >= nextVoidTongueGrab) {
-		    		nextVoidTongueGrab = time+10;
-		    		GameObject go = ObjectUtil.createWorldObject(EcoceanMod.tongue.ClassID);
-		    		ObjectUtil.fullyEnable(go);
-		    		float depth = Mathf.Min(pos.y-UnityEngine.Random.Range(400F, 500F)*(ep.currentSub ? 2 : 1));
-		    		Vector3 put = MathUtil.getRandomVectorAround(pos, 60).setY(depth);
-		    		go.transform.position = put;
-		    		//go.transform.position = MathUtil.getRandomVectorAround(pos+Camera.main.transform.forward.normalized*400, 40).setY(-1600);
-		    		VoidTongueTag v = go.GetComponent<VoidTongueTag>();
-		    		v.enabled = true;
-		    		v.startGrab(Mathf.Max(-depth-(ep.currentSub ? 250 : 150), -pos.y+UnityEngine.Random.Range(200F, 400F)*(ep.currentSub ? 0.75F : 1)));
-		    	}
-		    }
 		}
-		
+
+		public static void tickPlayer(Player ep) {
+			float time = DayNightCycle.main.timePassedAsFloat;
+			GlowOil.checkPlayerLightTick(time, ep);
+
+			float dT = Time.deltaTime;
+			CompassDistortionSystem.instance.tick(time, dT);
+
+			float f = 0.3F-(DayNightCycle.main.GetLightScalar()*0.15F);
+			if (!ep.IsInBase()) {
+				BiomeSpawnData data = PlanktonCloud.getSpawnData(BiomeBase.getBiome(ep.transform.position));
+				if (data != null) {
+					if (UnityEngine.Random.Range(0F, 1F) <= f * dT * data.spawnSuccessRate)
+						EcoceanMod.plankton.tickSpawner(ep, data, dT);
+				}
+			}
+			Vector3 pos = ep.transform.position;
+			if (pos.setY(0).magnitude >= 1700) //more than 1200m from center
+				EcoceanMod.voidBubble.tickSpawner(ep, time, dT);
+			if (pos.y <= -UnityEngine.Random.Range(1000F, 1200F) && VanillaBiomes.VOID.isInBiome(pos)) {
+				//if (UnityEngine.Object.FindObjectsOfType<VoidTongueTag>().Length == 0)
+				//	SNUtil.writeToChat("Check void grab time = "+time.ToString("000.0")+"/"+nextVoidTongueGrab.ToString("000.0"));
+				if (time >= nextVoidTongueGrab) {
+					nextVoidTongueGrab = time + 10;
+					GameObject go = ObjectUtil.createWorldObject(EcoceanMod.tongue.ClassID);
+					go.fullyEnable();
+					float depth = Mathf.Min(pos.y-(UnityEngine.Random.Range(400F, 500F)*(ep.currentSub ? 2 : 1)));
+					Vector3 put = MathUtil.getRandomVectorAround(pos, 60).setY(depth);
+					go.transform.position = put;
+					//go.transform.position = MathUtil.getRandomVectorAround(pos+Camera.main.transform.forward.normalized*400, 40).setY(-1600);
+					VoidTongueTag v = go.GetComponent<VoidTongueTag>();
+					v.enabled = true;
+					v.startGrab(Mathf.Max(-depth - (ep.currentSub ? 250 : 150), -pos.y + (UnityEngine.Random.Range(200F, 400F) * (ep.currentSub ? 0.75F : 1))));
+				}
+			}
+		}
+
 		public static void onEMPTouch(EMPBlast e, Collider c) {
-	    	if (ObjectUtil.isPlayer(c)) {
-	    		CompassDistortionSystem.instance.onHitByEMP(e, isPiezo(e) ? 10 : 1); //piezo is only the 15s base since electrionicsDisableTime is zero for piezo
-	    	}
+			if (c.isPlayer()) {
+				CompassDistortionSystem.instance.onHitByEMP(e, isPiezo(e) ? 10 : 1); //piezo is only the 15s base since electrionicsDisableTime is zero for piezo
+			}
 		}
-	    
-	    public static void onEMPHit(EMPBlast e, GameObject go) { //might be called many times
+
+		public static void onEMPHit(EMPBlast e, GameObject go) { //might be called many times
 			if (isPiezo(e)) {
-	    		//SNUtil.writeToChat("Match");
-	    		float time = DayNightCycle.main.timePassedAsFloat;
-	    		SubRoot sub = go.gameObject.FindAncestor<SubRoot>();
-		    	float amt = UnityEngine.Random.Range(1F, 4F);
-	    		Vehicle v = go.gameObject.FindAncestor<Vehicle>();
-		    	if (v) {
-		    		if (time >= lastPiezoEMPDamage+1F) {
-		    			go.GetComponent<LiveMixin>().TakeDamage(UnityEngine.Random.Range(10F, 20F), v.transform.position, DamageType.Electrical, e.gameObject);
-		    			lastPiezoEMPDamage = time;
-		    		}
-		    		v.ConsumeEnergy(amt*3); //must be first as will no-op if electronics is disabled
-		    		if (amt > 3)
-		    			v.energyInterface.DisableElectronicsForTime(amt-3);
-		    		if (v is SeaMoth)
-		    			ObjectUtil.createSeamothSparkSphere((SeaMoth)v);
-		    	}
-	    		else if (sub && sub.isCyclops) {
-		    		float trash;
-		    		sub.powerRelay.ConsumeEnergy(amt*6, out trash);
-		    		if (amt > 2)
-		    			sub.powerRelay.DisableElectronicsForTime((amt-2)*3);
-	    		}
-	    	}
-	    }
-		
+				//SNUtil.writeToChat("Match");
+				float time = DayNightCycle.main.timePassedAsFloat;
+				SubRoot sub = go.gameObject.FindAncestor<SubRoot>();
+				float amt = UnityEngine.Random.Range(1F, 4F);
+				Vehicle v = go.gameObject.FindAncestor<Vehicle>();
+				if (v) {
+					if (time >= lastPiezoEMPDamage + 1F) {
+						go.GetComponent<LiveMixin>().TakeDamage(UnityEngine.Random.Range(10F, 20F), v.transform.position, DamageType.Electrical, e.gameObject);
+						lastPiezoEMPDamage = time;
+					}
+					v.ConsumeEnergy(amt * 3); //must be first as will no-op if electronics is disabled
+					if (amt > 3)
+						v.energyInterface.DisableElectronicsForTime(amt - 3);
+					if (v is SeaMoth sm)
+						ObjectUtil.createSeamothSparkSphere(sm);
+				}
+				else if (sub && sub.isCyclops) {
+					sub.powerRelay.ConsumeEnergy(amt * 6, out float trash);
+					if (amt > 2)
+						sub.powerRelay.DisableElectronicsForTime((amt - 2) * 3);
+				}
+			}
+		}
+
 		private static bool isPiezo(EMPBlast e) {
 			return e.gameObject.name.StartsWith("PiezoCrystal_EMPulse", StringComparison.InvariantCultureIgnoreCase);
 		}
-		
+
 		public static float getLastSonarUse() {
 			return lastSonarUsed;
 		}
-		
+
 		public static float getLastHornUse() {
 			return lastHornUsed;
 		}
-	    
+
 		public static void updateSeamothModules(SeaMoth sm, int slotID, TechType tt, bool added) {/*
 			if (added && sm.storageInputs != null && slotID < sm.storageInputs.Length) {
 				if (tt == EcoceanMod.planktonScoop.TechType) {
@@ -236,17 +235,17 @@ namespace ReikaKalseki.Ecocean {
 				BaseHullStrength str = bb.GetComponent<BaseHullStrength>();
 				if (str.totalStrength > BaseHullStrength.InitialStrength) {
 					float surplus = str.totalStrength-BaseHullStrength.InitialStrength;
-					float f = 1/(1+surplus*0.1F); //halve at 20 str, third at 30 str, quarter at 40 str, etc
-					dmg.setValue(dmg.getAmount()*f);
+					float f = 1/(1+(surplus*0.1F)); //halve at 20 str, third at 30 str, quarter at 40 str, etc
+					dmg.setValue(dmg.getAmount() * f);
 				}
 				else if (str.totalStrength > 0) {
-					dmg.setValue(dmg.getAmount()*(float)MathUtil.linterpolate(str.totalStrength, 0, BaseHullStrength.InitialStrength, 2, 1, true)); //increase to 2x from 10 to 0
+					dmg.setValue(dmg.getAmount() * (float)MathUtil.linterpolate(str.totalStrength, 0, BaseHullStrength.InitialStrength, 2, 1, true)); //increase to 2x from 10 to 0
 				}
 				else if (str.totalStrength >= -1) {
-					dmg.setValue(dmg.getAmount()*2);
+					dmg.setValue(dmg.getAmount() * 2);
 				}
 				else if (str.totalStrength < -1) {
-					dmg.setValue(dmg.getAmount()*(1-str.totalStrength)); //increase by 100% for every point under -1, plus an additional 100%
+					dmg.setValue(dmg.getAmount() * (1 - str.totalStrength)); //increase by 100% for every point under -1, plus an additional 100%
 				}
 				//SNUtil.writeToChat("Base damage being modified due to strength "+str.totalStrength+": "+dmg.originalAmount.ToString("0.000")+" > "+dmg.getAmount().ToString("0.000"));
 				return;
@@ -254,7 +253,7 @@ namespace ReikaKalseki.Ecocean {
 			Player ep = dmg.target.gameObject.FindAncestor<Player>();
 			if (ep) {
 				float f = 0;
-				switch(dmg.type) {
+				switch (dmg.type) {
 					case DamageType.Normal:
 					case DamageType.Puncture:
 						f = 1;
@@ -274,7 +273,7 @@ namespace ReikaKalseki.Ecocean {
 				if (f > 0) {
 					//dmg.target.GetComponent<ExplodingAnchorPod>());
 					//SNUtil.writeToChat("Player '"+ep+"' took damage");
-					foreach (Biter b in WorldUtil.getObjectsNearWithComponent<Biter>(ep.transform.position, 60*f)) {
+					foreach (Biter b in WorldUtil.getObjectsNearWithComponent<Biter>(ep.transform.position, 60 * f)) {
 						AttractToTarget.attractCreatureToTarget(b, ep, false);
 						//SNUtil.writeToChat("Attracted biter "+b+" @ "+b.transform.position);
 					}
@@ -282,13 +281,13 @@ namespace ReikaKalseki.Ecocean {
 			}
 			if (dmg.type == DamageType.Electrical && dmg.dealer && dmg.dealer.GetComponentInParent<ElectricalDefense>()) {
 				dmg.setValue(Mathf.Min(EcoceanMod.config.getFloat(ECConfig.ConfigEntries.DEFENSECLAMP), dmg.getAmount()));
-	    		//SNUtil.writeToChat(dmg.target+" > "+dmg.getAmount()+" from "+dmg.originalAmount);
+				//SNUtil.writeToChat(dmg.target+" > "+dmg.getAmount()+" from "+dmg.originalAmount);
 			}
 			Creature c = dmg.target.gameObject.FindAncestor<Creature>();
 			if (c is SeaDragon || c is GhostLeviatanVoid || c is GhostLeviathan || c is ReaperLeviathan || c is Reefback) {
 				float f = EcoceanMod.config.getFloat(ECConfig.ConfigEntries.LEVIIMMUNE);
 				if (f > 0) {
-					dmg.setValue(Mathf.Max(0.001F, dmg.getAmount()*(1-f)));
+					dmg.setValue(Mathf.Max(0.001F, dmg.getAmount() * (1 - f)));
 				}
 			}
 			PrefabIdentifier pi = dmg.target.GetComponent<PrefabIdentifier>();
@@ -297,39 +296,39 @@ namespace ReikaKalseki.Ecocean {
 			if (pi && pi.ClassId == VanillaCreatures.PRECURSORCRAB.prefab && dmg.type == DamageType.Drill) //player prawn
 				precursorCrabRetaliate(dmg.target, false);
 		}
-	    
-	    public static void tryKnife(DIHooks.KnifeAttempt k) {
-	    	if (CraftData.GetTechType(k.target.gameObject) == EcoceanMod.pinkBulbStack.TechType) {
-	    		k.allowKnife = true;
-	    		return;
-	    	}
-	    	else if (CraftData.GetTechType(k.target.gameObject) == EcoceanMod.mushroomVaseStrand.TechType) {
-	    		k.allowKnife = true;
-	    		return;
-	    	}
-	    	else if (CraftData.GetTechType(k.target.gameObject) == TechType.LargeFloater) {
-	    		k.allowKnife = true;
-	    		return;
-	    	}
-	    }
-		
+
+		public static void tryKnife(DIHooks.KnifeAttempt k) {
+			if (CraftData.GetTechType(k.target.gameObject) == EcoceanMod.pinkBulbStack.TechType) {
+				k.allowKnife = true;
+				return;
+			}
+			else if (CraftData.GetTechType(k.target.gameObject) == EcoceanMod.mushroomVaseStrand.TechType) {
+				k.allowKnife = true;
+				return;
+			}
+			else if (CraftData.GetTechType(k.target.gameObject) == TechType.LargeFloater) {
+				k.allowKnife = true;
+				return;
+			}
+		}
+
 		public static void onKnifed(GameObject go) {
 			TechType tt = CraftData.GetTechType(go);
 			if (tt == TechType.LargeFloater) {
-	    		DIHooks.fireKnifeHarvest(go, new Dictionary<TechType, int>{{TechType.Floater, 1}});
-	    		return;
+				DIHooks.fireKnifeHarvest(go, new Dictionary<TechType, int> { { TechType.Floater, 1 } });
+				return;
 			}
 			if (tt == TechType.RedTipRockThings) {
-				DIHooks.fireKnifeHarvest(go, new Dictionary<TechType, int>{{TechType.CoralChunk, 1}}); //coral tube piece, for disinfected water
-	    		return;
+				DIHooks.fireKnifeHarvest(go, new Dictionary<TechType, int> { { TechType.CoralChunk, 1 } }); //coral tube piece, for disinfected water
+				return;
 			}
 			if (tt == TechType.PrecursorDroid) {
 				precursorCrabRetaliate(go, true);
-	    		return;
+				return;
 			}
 			if (tt == EcoceanMod.mushroomVaseStrand.TechType) {
-				DIHooks.fireKnifeHarvest(go, new Dictionary<TechType, int>{{EcoceanMod.mushroomVaseStrand.seed.TechType, 1}});
-	    		return;
+				DIHooks.fireKnifeHarvest(go, new Dictionary<TechType, int> { { EcoceanMod.mushroomVaseStrand.seed.TechType, 1 } });
+				return;
 			}
 			ExplodingAnchorPod e = go.FindAncestor<ExplodingAnchorPod>();
 			if (e) {
@@ -342,32 +341,32 @@ namespace ReikaKalseki.Ecocean {
 				return;
 			}
 		}
-		
+
 		public static void precursorCrabRetaliate(GameObject go, bool single) {
 			GameObject tgt = Player.main.gameObject;
 			Vehicle v = Player.main.GetVehicle();
 			if (v)
 				tgt = v.gameObject;
 			LiveMixin lv = tgt.GetComponent<LiveMixin>();
-			lv.TakeDamage(lv.maxHealth*(single ? 0.67F : Time.deltaTime*6.0F), go.transform.position, DamageType.LaserCutter, go);
+			lv.TakeDamage(lv.maxHealth * (single ? 0.67F : Time.deltaTime * 6.0F), go.transform.position, DamageType.LaserCutter, go);
 			WorldUtil.spawnParticlesAt(Vector3.Lerp(go.transform.position, tgt.transform.position, 0.5F), "361b23ed-58dd-4f45-9c5f-072fa66db88a", 0.5F, true);
 		}
-	    
-	    public static void getKnifeHarvest(DIHooks.KnifeHarvest h) {
-			if (h.objectType == EcoceanMod.mushroomVaseStrand.TechType && ObjectUtil.isFarmedPlant(h.hit)) {
+
+		public static void getKnifeHarvest(DIHooks.KnifeHarvest h) {
+			if (h.objectType == EcoceanMod.mushroomVaseStrand.TechType && h.hit.isFarmedPlant()) {
 				h.hit.FindAncestor<MushroomVaseStrand.MushroomVaseStrandTag>().tryHarvest();
-	    	}
-	    }
-		
+			}
+		}
+
 		public static void onPickup(DIHooks.ItemPickup ip) {
 			Pickupable pp = ip.item;
-	    	FoodEffectSystem.instance.ensureEatable(pp);
+			FoodEffectSystem.instance.ensureEatable(pp);
 			GlowOilTag g = pp.GetComponent<GlowOilTag>();
 			if (g) {
 				g.resetGlow();
 			}
 		}
-		
+
 		public static void getWaterTemperature(DIHooks.WaterTemperatureCalculation calc) {
 			//SNUtil.writeToChat("EC: Checking water temp @ "+calc.position+" def="+calc.originalValue);
 			LavaBomb.iterateLavaBombs(lb => {
@@ -376,28 +375,28 @@ namespace ReikaKalseki.Ecocean {
 					float f2 = dist/LavaBomb.HEAT_RADIUS;
 					float f = 1F-(f2*f2*4);
 					//SNUtil.writeToChat("Found lava bomb "+lb.transform.position+" at dist "+dist+" > "+f+" > "+(f*lb.getTemperature()));
-					calc.setValue(Mathf.Max(calc.getTemperature(), f*lb.getTemperature()));
+					calc.setValue(Mathf.Max(calc.getTemperature(), f * lb.getTemperature()));
 				}
 			});
 		}
-	    
-	    public static void onSkyApplierSpawn(SkyApplier pk) {
-	    	GameObject go = pk.gameObject;
-	    	if (go.name.StartsWith("Seamoth", StringComparison.InvariantCultureIgnoreCase) && go.name.EndsWith("Arm(Clone)", StringComparison.InvariantCultureIgnoreCase))
-	    		return;
+
+		public static void onSkyApplierSpawn(SkyApplier pk) {
+			GameObject go = pk.gameObject;
+			if (go.name.StartsWith("Seamoth", StringComparison.InvariantCultureIgnoreCase) && go.name.EndsWith("Arm(Clone)", StringComparison.InvariantCultureIgnoreCase))
+				return;
 			else if (pk.GetComponent<Player>()) {
 				go.EnsureComponent<PlantHidingTracker>().minRadius = 0;
-	    	}
-	    	PrefabIdentifier pi = go.FindAncestor<PrefabIdentifier>();
-	    	if (pi) {
-	    		if (ObjectUtil.isAnchorPod(go) && !isSeaTreaderCave(go))
-	    			go.EnsureComponent<ExplodingAnchorPod>();
-	    		else if (bloodVine.Contains(pi.ClassId))
-	    			go.EnsureComponent<PredatoryBloodvine>();
-	    		else if (pi.ClassId == VanillaCreatures.REEFBACK.prefab) {
+			}
+			PrefabIdentifier pi = go.FindAncestor<PrefabIdentifier>();
+			if (pi) {
+				if (go.isAnchorPod() && !isSeaTreaderCave(go))
+					go.EnsureComponent<ExplodingAnchorPod>();
+				else if (bloodVine.Contains(pi.ClassId))
+					go.EnsureComponent<PredatoryBloodvine>();
+				else if (pi.ClassId == VanillaCreatures.REEFBACK.prefab) {
 					go.EnsureComponent<ECReefback>();
-	    			go.EnsureComponent<ReefbackJetSuctionManager>();
-	    		}
+					go.EnsureComponent<ReefbackJetSuctionManager>();
+				}
 				else if (pi.ClassId == VanillaCreatures.REAPER.prefab)
 					go.EnsureComponent<ECReaper>();
 				else if (pi.ClassId == VanillaCreatures.SEA_TREADER.prefab)
@@ -424,15 +423,15 @@ namespace ReikaKalseki.Ecocean {
 					}
 				}
 				else if (VanillaFlora.CAVE_BUSH.includes(pi.ClassId)) {
-					PlantHidingCollider.addToObject(go.GetComponentInChildren<Collider>(), new Color(130/255F, 73/255F, 183/255F));
+					PlantHidingCollider.addToObject(go.GetComponentInChildren<Collider>(), new Color(130 / 255F, 73 / 255F, 183 / 255F));
 				}
 				else if (VanillaFlora.MUSHROOM_DISK.includes(pi.ClassId)) {
-					ObjectUtil.removeChildObject(go, "StrandHolder");
+					go.removeChildObject("StrandHolder");
 					/*
 					if (mushroomTendrilNoise == null)
 						mushroomTendrilNoise = ((Simplex3DGenerator)new Simplex3DGenerator(SNUtil.getWorldSeed()).setFrequency(0.2F));
 					if (mushroomTendrilNoise.getValue(go.transform.position) > 0.4F) {
-						GameObject strands = ObjectUtil.getChildObject(go, "StrandHolder");
+						GameObject strands = go.getChildObject("StrandHolder");
 						if (!strands) {
 							strands = new GameObject("StrandHolder");
 							strands.transform.SetParent(go.transform);
@@ -452,14 +451,14 @@ namespace ReikaKalseki.Ecocean {
 							strand.transform.localEulerAngles = new Vector3(90, 0, 0);
 							strand.transform.localScale = new Vector3(r, Mathf.Sqrt(r)-0.05F, r);
 						//}
-					}*/						
-					GameObject rain = ObjectUtil.getChildObject(go, "RainHolder");
-						if (!rain) {
-							rain = new GameObject("RainHolder");
-							rain.transform.SetParent(go.transform);
-							Utils.ZeroTransform(rain.transform);
-							rain.transform.localEulerAngles = new Vector3(90, 0, 0);
-						}
+					}*/
+					GameObject rain = go.getChildObject("RainHolder");
+					if (!rain) {
+						rain = new GameObject("RainHolder");
+						rain.transform.SetParent(go.transform);
+						Utils.ZeroTransform(rain.transform);
+						rain.transform.localEulerAngles = new Vector3(90, 0, 0);
+					}
 					rain.EnsureComponent<MushroomDiskRain>();
 				}
 				else if (VanillaFlora.SPOTTED_DOCKLEAF.includes(pi.ClassId)) {
@@ -494,36 +493,36 @@ namespace ReikaKalseki.Ecocean {
 				else if (pi.ClassId == "1c34945a-656d-4f70-bf86-8bc101a27eee") {
 					go.EnsureComponent<ECMoth>();
 					go.EnsureComponent<PlantHidingTracker>().minRadius = 4;
-	    		}
+				}
 				else if (pi.ClassId == DecoPlants.VINE_TREE.prefab || pi.ClassId == DecoPlants.VINE_TREE_2.prefab) {
 					foreach (Renderer r in go.GetComponentsInChildren<Renderer>())
 						r.materials[0].EnableKeyword("UWE_WAVING"); //make leaves move
 				}
 				else if (pi.ClassId == DecoPlants.PINK_BULB_STACK.prefab) {
-	    			go.EnsureComponent<TechTag>().type = EcoceanMod.pinkBulbStack.TechType;
-	    			LiveMixin lv = go.GetComponent<LiveMixin>();
-	    			lv.data.maxHealth = 100;
-	    		}
+					go.EnsureComponent<TechTag>().type = EcoceanMod.pinkBulbStack.TechType;
+					LiveMixin lv = go.GetComponent<LiveMixin>();
+					lv.data.maxHealth = 100;
+				}
 				else if (pi.ClassId == DecoPlants.MUSHROOM_VASE_STRANDS.prefab) {
-	    			go.EnsureComponent<TechTag>().type = EcoceanMod.mushroomVaseStrand.TechType;
-	    			LiveMixin lv = go.GetComponent<LiveMixin>();
-	    			lv.data.maxHealth = 100;
-	    			MushroomVaseStrand.setupCollider(go);
-	    		}
-	    	}
-	    }
-		
+					go.EnsureComponent<TechTag>().type = EcoceanMod.mushroomVaseStrand.TechType;
+					LiveMixin lv = go.GetComponent<LiveMixin>();
+					lv.data.maxHealth = 100;
+					MushroomVaseStrand.setupCollider(go);
+				}
+			}
+		}
+
 		private static bool isSeaTreaderCave(GameObject go) { //skip the c2c prop ones
 			return Vector3.Distance(go.transform.position, new Vector3(-1264, -281, -728)) <= 30;
 		}
-		
+
 		public static void onGeyserSpawn(Geyser g) {
 			g.gameObject.EnsureComponent<GeyserSonarSignal>();
 			CapsuleCollider cc = g.GetComponent<CapsuleCollider>();
-			cc.center += Vector3.down*1.5F;
+			cc.center += Vector3.down * 1.5F;
 			cc.height += 3.5F;
 		}
-		
+
 		public static void tickObjectInGeyser(Geyser g, Collider c) {
 			if (g.erupting) {
 				//SNUtil.writeToChat(c.gameObject.name);
@@ -533,19 +532,18 @@ namespace ReikaKalseki.Ecocean {
 						v.GetComponentInChildren<DIHooks.LavaWarningTriggerDetector>().markGeyserDetected();
 					}
 					else if (v is Exosuit) {
-						v.liveMixin.TakeDamage(g.damage*0.04F*Time.deltaTime, c.transform.position, DamageType.Fire, g.gameObject);
+						v.liveMixin.TakeDamage(g.damage * 0.04F * Time.deltaTime, c.transform.position, DamageType.Fire, g.gameObject);
 					}
 				}
 				SubRoot sub = c.gameObject.FindAncestor<SubRoot>();
 				if (sub && sub.isCyclops && sub.thermalReactorUpgrade) {
-					float num;
-					sub.powerRelay.AddEnergy(5*Time.deltaTime, out num);
+					sub.powerRelay.AddEnergy(5 * Time.deltaTime, out float num);
 				}
 				if (!sub) {
 					Rigidbody rb = c.gameObject.FindAncestor<Rigidbody>();
-					if (rb && !rb.isKinematic) {	
+					if (rb && !rb.isKinematic) {
 						float dh = rb.transform.position.y-(g.transform.position.y-1.5F);
-						float f = 1F-(dh)/30;
+						float f = 1F-(dh/30);
 						if (v)
 							f *= 0.1F;/*
 						Vector3 vec = (rb.transform.position.setY(0)-g.transform.position.setY(0)).normalized;
@@ -553,50 +551,50 @@ namespace ReikaKalseki.Ecocean {
 						vec *= f2*f2*f2*f2*0.025F;
 						vec.y = 1;*/
 						Vector3 vec = Vector3.up;
-						vec *= 80*f;
+						vec *= 80 * f;
 						rb.AddForce(vec, ForceMode.Force);
-						if (!v && !ObjectUtil.isPlayer(rb)) {
+						if (!v && !rb.isPlayer()) {
 							GeyserDisplacement obj = rb.gameObject.EnsureComponent<GeyserDisplacement>();
 							obj.geyser = g;
-							obj.destroyIn = DayNightCycle.main.timePassedAsFloat+1.5F;
+							obj.destroyIn = DayNightCycle.main.timePassedAsFloat + 1.5F;
 						}
 					}
 				}
 			}
 		}
-		
+
 		class GeyserDisplacement : MonoBehaviour {
-			
+
 			internal Geyser geyser;
 			internal float destroyIn;
-			
+
 			private Rigidbody body;
-			
+
 			void Update() {
 				if (!body)
-					body = GetComponent<Rigidbody>();
+					body = this.GetComponent<Rigidbody>();
 				if (DayNightCycle.main.timePassedAsFloat >= destroyIn) {
-					UnityEngine.Object.DestroyImmediate(this);
+					this.destroy();
 					return;
 				}
 				if (geyser && geyser.erupting) {
 					float dh = transform.position.y-geyser.transform.position.y;
-					Vector3 vec = (transform.position.setY(0)-geyser.transform.position.setY(0));
+					Vector3 vec = transform.position.setY(0)-geyser.transform.position.setY(0);
 					if (vec.sqrMagnitude >= 1600) {
-						UnityEngine.Object.DestroyImmediate(this);
+						this.destroy();
 					}
 					else {
 						//float f2 = (dh/40F)+1;
 						//vec *= f2*f2*f2*f2*Time.deltaTime;
 						vec *= Time.deltaTime;
-						body.AddForce(vec.normalized*20, ForceMode.Force);
+						body.AddForce(vec.normalized * 20, ForceMode.Force);
 						Vector3 vel = body.velocity;
 						vel.y *= 0.99F;
 						body.velocity = vel;
 					}
 				}
 			}
-			
+
 		}
 		/*
 		class ECWaterFilter : MonoBehaviour {
@@ -613,7 +611,7 @@ namespace ReikaKalseki.Ecocean {
 			}
 			
 		}*/
-		
+
 		public static void onTorpedoExploded(SeamothTorpedo sm, Transform result) {
 			SeamothTorpedoWhirlpool vortex = result.GetComponent<SeamothTorpedoWhirlpool>();
 			//SNUtil.writeToChat(sm+" makes "+result);
@@ -630,20 +628,20 @@ namespace ReikaKalseki.Ecocean {
 				}
 			});
 		}
-		
+
 		public static void honkCyclopsHorn(CyclopsHornButton b) {
 			attractToSoundPing(b.gameObject.FindAncestor<SubRoot>(), true, 1);
 			lastHornUsed = DayNightCycle.main.timePassedAsFloat;
 		}
-	    
-	    public static void pingSeamothSonar(SeaMoth sm) {
+
+		public static void pingSeamothSonar(SeaMoth sm) {
 			pingSonarFromObject(sm);
-	    }
-	    
+		}
+
 		public static void pingCyclopsSonar(SubRoot sb) {
 			pingSonarFromObject(sb);
-	    }
-	    
+		}
+
 		public static void pingSonarFromObject(MonoBehaviour mb, float strength = 1) {
 			attractToSoundPing(mb, false, strength);
 			lastSonarUsed = DayNightCycle.main.timePassedAsFloat;
@@ -654,14 +652,14 @@ namespace ReikaKalseki.Ecocean {
 				if (f > 0 && UnityEngine.Random.Range(0F, 1F) < f) {
 					ExplodingAnchorPod ea = go.GetComponent<ExplodingAnchorPod>();
 					if (ea) {
-						ea.scheduleExplode(0.25F+0.004F*Mathf.Sqrt(dist));
+						ea.scheduleExplode(0.25F + (0.004F * Mathf.Sqrt(dist)));
 					}
 				}
 			});
-	    }
-		
+		}
+
 		public static void attractToSoundPing(MonoBehaviour obj, bool isHorn, float strength) {
-			if (obj is SubRoot && ((SubRoot)obj).isCyclops) {
+			if (obj is SubRoot sub && sub.isCyclops) {
 				CyclopsNoiseManager noise = obj.gameObject.GetComponentInChildren<CyclopsNoiseManager>();
 				if (noise) {
 					noise.noiseScalar *= isHorn ? 6 : 2;
@@ -671,11 +669,11 @@ namespace ReikaKalseki.Ecocean {
 			float range = 400*strength;
 			WorldUtil.getGameObjectsNear(obj.transform.position, range, go => tryAttractToSound(go, obj, isHorn, strength, range));
 		}
-		
+
 		private static void tryAttractToSound(GameObject go, MonoBehaviour obj, bool isHorn, float strength, float range) {
 			Creature c = go.GetComponent<Creature>();
 			if (c && attractedToSound(c, isHorn) && !c.GetComponent<WaterParkCreature>()) {
-				float chance = 0.5F*Mathf.Clamp01(1F-Vector3.Distance(c.transform.position, obj.transform.position)/range);
+				float chance = 0.5F*Mathf.Clamp01(1F-(Vector3.Distance(c.transform.position, obj.transform.position)/range));
 				if (!Mathf.Approximately(strength, 1))
 					chance *= Mathf.Sqrt(strength);
 				if (isHorn) {
@@ -694,34 +692,24 @@ namespace ReikaKalseki.Ecocean {
 					AttractToTarget.attractCreatureToTarget(c, obj, isHorn);
 			}
 		}
-		
+
 		internal static bool attractedToSound(Creature c, bool horn) {
-			if (c is GhostLeviathan || c is GhostLeviatanVoid || c is ReaperLeviathan || c is SeaDragon || c.gameObject.FindAncestor<PrefabIdentifier>().ClassId == "GulperLeviathan")
-				return true;
-			if (c is Reefback || c is BoneShark)
-				return horn;
-			if (c is CrabSnake || c is CrabSquid)
-				return !horn;
-			return false;
+			return c is GhostLeviathan || c is GhostLeviatanVoid || c is ReaperLeviathan || c is SeaDragon || c.gameObject.FindAncestor<PrefabIdentifier>().ClassId == "GulperLeviathan" || (c is Reefback || c is BoneShark ? horn : (c is CrabSnake || c is CrabSquid) && !horn);
 		}
-		
+
 		internal static bool attractedToLight(Creature c, MonoBehaviour obj) {
-			if (c is SeaDragon)
-				return true;
-			if (c is BoneShark)
-				return !(obj is SubRoot);
-			return false;
+			return c is SeaDragon || (c is BoneShark && !(obj is SubRoot));
 		}
-		
+
 		public static void attractToLight(MonoBehaviour obj) {
 			float range = obj is SubRoot ? 150 : 80;
 			WorldUtil.getGameObjectsNear(obj.transform.position, range, go => tryAttractToLight(go, obj, range));
 		}
-		
+
 		private static bool tryAttractToLight(GameObject go, MonoBehaviour obj, float range) {
 			Creature c = go.GetComponent<Creature>();
 			if (c && attractedToLight(c, obj) && !c.GetComponent<WaterParkCreature>() && (obj is SubRoot || ObjectUtil.isLookingAt(obj.transform, c.transform.position, 45))) {
-				float chance = Mathf.Clamp01(1F-Vector3.Distance(c.transform.position, obj.transform.position)/range);
+				float chance = Mathf.Clamp01(1F-(Vector3.Distance(c.transform.position, obj.transform.position)/range));
 				if (obj is SeaMoth)
 					chance *= obj.GetComponent<ECMoth>().getLightIntensity();
 				if (UnityEngine.Random.Range(0F, 1F) <= chance) {
@@ -731,46 +719,46 @@ namespace ReikaKalseki.Ecocean {
 			}
 			return false;
 		}
-		
+
 		internal static void attractCreaturesToBase(SubRoot sub, float range, Predicate<Creature> rule = null) {
 			WorldUtil.getGameObjectsNear(sub.transform.position, range, go => {
-			    Creature c = go.GetComponent<Creature>();
-			    if (c && (rule == null || rule.Invoke(c)))
+				Creature c = go.GetComponent<Creature>();
+				if (c && (rule == null || rule.Invoke(c)))
 					AttractToTarget.attractCreatureToTarget(c, sub, false);
 			});
 		}
-		
+
 		public static void applyCurrentForce(Rigidbody rb, Vector3 force, ForceMode mode, Current c) {
 			WaterCurrentTag wc = c.GetComponent<WaterCurrentTag>();
 			float str = wc ? wc.getCurrentStrength(rb.transform.position) : 1;
 			if (str > 0)
-				rb.AddForce(force*str, mode);
+				rb.AddForce(force * str, mode);
 		}
-		
+
 		public static void setHUDCompassDirection(uGUI_Compass compass, float dir) { /* 0-1 for 360 */
-			compass.direction = (dir+CompassDistortionSystem.instance.getTotalDisplacement(Player.main.transform.position)/360F)%1F;
+			compass.direction = (dir + (CompassDistortionSystem.instance.getTotalDisplacement(Player.main.transform.position) / 360F)) % 1F;
 		}
-		
+
 		public static void setCyclopsCompassDirection(Transform obj, Quaternion dir) {
 			obj.rotation = dir;
 			obj.Rotate(0, CompassDistortionSystem.instance.getTotalDisplacement(obj.position), 0);
 		}
-		
+
 		public static void onDrillableTick(Drillable d, Vector3 vec, Exosuit s) {
 			PiezoCrystalTag pt = d.GetComponent<PiezoCrystalTag>();
 			if (pt)
-				pt.onDrilled();
+				pt.onDrilled(vec);
 		}/*
 		
 		public static void tickVortexTorpedo(SeamothTorpedoWhirlpool go) {
 			
 		}*/
-		
+
 		public static bool canMeleeBite(MeleeAttack me, GameObject go) {
 			BaseCell bc = go.GetComponent<BaseCell>();
 			return (bc && canCreatureAttackBase(bc, me)) || me.CanBite(go);
 		}
-		
+
 		private static bool canCreatureAttackBase(BaseCell bc, MeleeAttack me) {
 			AttractToTarget att = me.GetComponent<AttractToTarget>();
 			if (att && att.isTargeting(bc.gameObject))
@@ -778,7 +766,7 @@ namespace ReikaKalseki.Ecocean {
 			Creature c = me.GetComponent<Creature>();
 			return c is GhostLeviatanVoid || c is GhostLeviathan || c is SeaDragon || c is CrabSquid || c is Shocker;
 		}
-		
+
 		public static GameObject getMeleeTarget(MeleeAttack me, Collider c) {
 			GameObject ret = c.gameObject;
 			BaseCell bc = ret.FindAncestor<BaseCell>();
@@ -788,33 +776,37 @@ namespace ReikaKalseki.Ecocean {
 				ret = c.attachedRigidbody.gameObject;
 			return ret;
 		}
-		
+
 		public static float getWaterFilterSaltTickTime(float val, FiltrationMachine machine) {
 			if (VanillaBiomes.LOSTRIVER.isInBiome(machine.transform.position))
 				val *= 3;
 			return val;
 		}
-		
+
 		public static void checkCreatureCanSee(DIHooks.CreatureSeeObjectCheck ch) {
 			PlantHidingTracker ph = ch.target.GetComponent<PlantHidingTracker>();
 			if (ph && ph.isActive())
 				ch.canSee = false;
 		}
-		
+
 		public static void checkCreaturePilotedAggression(DIHooks.AggressiveToPilotingVehicleCheck ch) {
 			PlantHidingTracker ph = ch.vehicle.GetComponent<PlantHidingTracker>();
 			if (ph && ph.isActive())
 				ch.canTarget = false;
 		}
-		
+
 		public static void onBaseRebuild(Base b) {
-			ObjectUtil.removeComponent<BaseCellEnviroHandler>(b.gameObject);
+			b.gameObject.removeComponent<BaseCellEnviroHandler>();
 			foreach (BaseCell bc in b.GetComponentsInChildren<BaseCell>()) {
 				BaseCellEnviroHandler ce = bc.gameObject.EnsureComponent<BaseCellEnviroHandler>();
 				ce.cell = bc;
 				ce.seabase = b;
 				ce.computeEnvironment();
 			}
+		}
+
+		public static void tickGrowingPlant(GrowingPlant g, float prog) {
+			//g.gameObject.EnsureComponent<GrowingPlantViabilityTracker>().plant = g;
 		}
 	}
 }

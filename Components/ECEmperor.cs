@@ -1,42 +1,48 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
-using UnityEngine;
-using UnityEngine.Serialization;
-using UnityEngine.Scripting;
-using UnityEngine.UI;
-using System.Collections.Generic;
-using ReikaKalseki.DIAlterra;
-using ReikaKalseki.Ecocean;
-using SMLHelper.V2.Handlers;
-using SMLHelper.V2.Utility;
+
+using ECCLibrary;
+
 using FMOD;
 using FMOD.Studio;
+
 using FMODUnity;
-using ECCLibrary;
+
+using ReikaKalseki.DIAlterra;
+using ReikaKalseki.Ecocean;
+
+using SMLHelper.V2.Handlers;
+using SMLHelper.V2.Utility;
+
+using UnityEngine;
+using UnityEngine.Scripting;
+using UnityEngine.Serialization;
+using UnityEngine.UI;
 
 namespace ReikaKalseki.Ecocean {
 	internal class ECEmperor : MonoBehaviour {
-		
+
 		void Start() {
-			InvokeRepeating("applyPassivity", 0, 0.5F);
+			this.InvokeRepeating("applyPassivity", 0, 0.5F);
 		}
-		
+
 		void OnDisable() {
-			CancelInvoke("applyPassivity");
+			this.CancelInvoke("applyPassivity");
 		}
-		
+
 		void OnDestroy() {
-			OnDisable();
+			this.OnDisable();
 		}
-		
+
 		void applyPassivity() {
 			foreach (AggressiveWhenSeeTarget a in WorldUtil.getObjectsNearWithComponent<AggressiveWhenSeeTarget>(transform.position, 100)) {
 				a.creature.Aggression.Add(-1);
 				a.lastTarget.target = null;
 			}
 		}
-			
+
 	}
 }

@@ -1,31 +1,34 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Xml;
 using System.Xml.Serialization;
-using System.Reflection;
-using UnityEngine;
-using UnityEngine.Serialization;
-using UnityEngine.Scripting;
-using UnityEngine.UI;
-using System.Collections.Generic;
+
 using ReikaKalseki.DIAlterra;
+
+using SMLHelper.V2.Assets;
 using SMLHelper.V2.Handlers;
 using SMLHelper.V2.Utility;
-using SMLHelper.V2.Assets;
+
+using UnityEngine;
+using UnityEngine.Scripting;
+using UnityEngine.Serialization;
+using UnityEngine.UI;
 
 namespace ReikaKalseki.Ecocean {
-	
+
 	public class PlanktonItem : WorldCollectedItem {
-	        
-	    internal PlanktonItem(XMLLocale.LocaleEntry e) : base(e, "18229b4b-3ed3-4b35-ae30-43b1c31a6d8d") {
+
+		internal PlanktonItem(XMLLocale.LocaleEntry e) : base(e, "18229b4b-3ed3-4b35-ae30-43b1c31a6d8d") {
 			sprite = TextureManager.getSprite(EcoceanMod.modDLL, "Textures/Items/PlanktonItem");
 			//inventorySize = new Vector2int(2, 1);
-			
-			this.renderModify = r => {
+
+			renderModify = r => {
 				GameObject root = r.gameObject.FindAncestor<PrefabIdentifier>().gameObject;
-				root.transform.localScale = Vector3.one*1F;
-				ObjectUtil.removeComponent<PickPrefab>(root);
-				ObjectUtil.removeComponent<Plantable>(root);
+				root.transform.localScale = Vector3.one * 1F;
+				root.removeComponent<PickPrefab>();
+				root.removeComponent<Plantable>();
 				Eatable ea = root.EnsureComponent<Eatable>();
 				ea.decomposes = false;
 				ea.foodValue = 6;
@@ -46,7 +49,7 @@ namespace ReikaKalseki.Ecocean {
 				((MeshRenderer)r).shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
 				((MeshRenderer)r).receiveShadows = false;
 			};
-	    }
-			
+		}
+
 	}
 }

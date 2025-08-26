@@ -310,8 +310,17 @@
 			
 		</pda>
 		<koosh>
-			Is sharp and difficult to eat.
+			Is squishy and gross, but edible.
 		</koosh>
+		<bulbo>
+			Contains bitter sap.
+		</bulbo>
+		<jaffa>
+			Smells terrible and tastes worse.
+		</jaffa>
+		<dockleaf>
+			Tastes pungent but pleasant, though of little nutritional value.
+		</dockleaf>
 		<poison>
 			Is dangerously poisonous.
 		</poison>
