@@ -44,7 +44,7 @@ namespace ReikaKalseki.Ecocean {
 		}
 
 		public static bool checkAndTryScoop(SeaMoth sm, float dT, TechType harvest) {
-			if (sm.GetComponent<Rigidbody>().velocity.magnitude >= 4 && InventoryUtil.vehicleHasUpgrade(sm, EcoceanMod.planktonScoop.TechType)) {
+			if (sm.GetComponent<Rigidbody>().velocity.magnitude >= 4 && sm.vehicleHasUpgrade(EcoceanMod.planktonScoop.TechType)) {
 				if (UnityEngine.Random.Range(0F, 1F) < 0.075F * dT * EcoceanMod.config.getFloat(ECConfig.ConfigEntries.PLANKTONRATE)) {
 					foreach (SeamothStorageContainer sc in sm.GetComponentsInChildren<SeamothStorageContainer>(true)) {
 						TechTag tt = sc.GetComponent<TechTag>();

@@ -245,7 +245,7 @@ namespace ReikaKalseki.Ecocean {
 				GameObject go = ObjectUtil.createWorldObject("18229b4b-3ed3-4b35-ae30-43b1c31a6d8d");
 				if (!go)
 					continue;
-				RenderUtil.convertToModel(go);
+				go.convertToModel();
 				go.removeComponent<Collider>();
 				go.removeComponent<PrefabIdentifier>();
 				go.removeComponent<ChildObjectIdentifier>();

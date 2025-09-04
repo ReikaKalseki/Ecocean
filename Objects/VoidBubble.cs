@@ -174,7 +174,7 @@ namespace ReikaKalseki.Ecocean {
 				inner = gameObject.getChildObject("InnerShine");
 				if (!inner) {
 					inner = VoidBubble.getBubbleSource().setName("InnerShine");
-					RenderUtil.convertToModel(inner);
+					inner.convertToModel();
 					inner.transform.SetParent(transform);
 					inner.transform.localPosition = Vector3.zero;
 					innerRender = inner.GetComponentInChildren<Renderer>();

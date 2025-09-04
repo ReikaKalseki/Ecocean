@@ -49,7 +49,7 @@ namespace ReikaKalseki.Ecocean {
 		}
 
 		private void die() {
-			if (InventoryUtil.forceRemoveItem(growbed.storageContainer, plant.seed.pickupable)) {
+			if (growbed.storageContainer.forceRemoveItem(plant.seed.pickupable)) {
 				GameObject go = ObjectUtil.createWorldObject(EcoceanMod.deadBlighted.TechType);
 				go.SetActive(false);
 				growbed.storageContainer.container.AddItem(go.GetComponent<Pickupable>());

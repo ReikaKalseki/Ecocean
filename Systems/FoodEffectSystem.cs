@@ -25,7 +25,7 @@ namespace ReikaKalseki.Ecocean {
 
 		private readonly Dictionary<TechType, FoodEffect> data = new Dictionary<TechType, FoodEffect>();
 
-		internal Action<float> moraleCallback = null;
+		public Action<float> moraleCallback = null;
 
 		public event Action<Survival, InfectedMixin, float> onEatenInfectedEvent;
 

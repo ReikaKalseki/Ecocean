@@ -229,8 +229,6 @@ namespace ReikaKalseki.Ecocean {
 				ACUEcosystems.addFood(new ACUEcosystems.PlantFood(pinkBulbStack, 0.1F, BiomeRegions.Koosh, BiomeRegions.GrandReef));
 				ACUEcosystems.addFood(new ACUEcosystems.PlantFood(pinkLeaves, 0.1F, BiomeRegions.Other));
 
-				FoodEffectSystem.instance.moraleCallback = MoraleSystem.instance.shiftMorale;
-
 				MushroomVaseStrand.filterDrops.addEntry(TechType.Salt, 50);
 				MushroomVaseStrand.filterDrops.addEntry(TechType.Copper, 10);
 				MushroomVaseStrand.filterDrops.addEntry(TechType.Gold, 5);
