@@ -330,6 +330,12 @@ namespace ReikaKalseki.Ecocean {
 				health.TakeDamage(dT * 50, transform.position);
 			}
 
+			if (isBaseBound) {
+				bool touchable = !Player.main.IsInBase();
+				aoe.gameObject.SetActive(touchable);
+				leviSphere.entity.SetActive(touchable);
+			}
+
 			if (time - ECHooks.getLastSonarUse() <= 10 || time - ECHooks.getLastHornUse() <= 10) {
 				touchIntensity = Mathf.Max(1, touchIntensity);
 			}
