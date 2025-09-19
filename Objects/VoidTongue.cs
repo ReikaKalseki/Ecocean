@@ -106,6 +106,10 @@ namespace ReikaKalseki.Ecocean {
 		private static readonly float SPEED_CYCLOPS = 30;
 		private static readonly float KILL_DEPTH = 1800;
 
+		public static event Action<VoidTongueTag, Rigidbody> onVoidTongueGrabEvent;
+		public static event Action<VoidTongueTag, Rigidbody> onVoidTongueReleaseEvent;
+		public static event Action<VoidTongueTag, Rigidbody> voidTongueHeldTickEvent;
+
 		void Update() {
 			if (Camera.main && !sonarShader)
 				sonarShader = Camera.main.GetComponent<SonarScreenFX>();
@@ -171,6 +175,8 @@ namespace ReikaKalseki.Ecocean {
 			Transform tt = this.getCollider(this.getPriorityTarget());
 
 			if (stuckTo) {
+				if (voidTongueHeldTickEvent != null)
+					voidTongueHeldTickEvent.Invoke(this, stuckTo);
 				if (sonarShader)
 					sonarShader.enabled = false;
 				stuckTo.isKinematic = false;
@@ -351,6 +357,8 @@ namespace ReikaKalseki.Ecocean {
 
 		public void Disconnect() {
 			if (stuckTo != null) {
+				if (onVoidTongueReleaseEvent != null)
+					onVoidTongueReleaseEvent.Invoke(this, stuckTo);
 				//SNUtil.writeToChat("Releasing "+stuckTo);
 				CyclopsHolographicHUD hud = stuckTo.GetComponentInChildren<CyclopsHolographicHUD>();
 				if (hud) {
@@ -427,6 +435,8 @@ namespace ReikaKalseki.Ecocean {
 				ObjectUtil.addCyclopsHologramWarning(rb, tip, Sprite.Create(TextureManager.getTexture(EcoceanMod.modDLL, "Textures/CyclopsVoidTongueIcon"), new Rect(0, 0, 100, 100), new Vector2(0, 0)));
 				if (pda)
 					PDAManager.getPage("ency_VoidTongue").unlock();
+				if (onVoidTongueGrabEvent != null)
+					onVoidTongueGrabEvent.Invoke(this, rb);
 			}
 		}
 

@@ -17,6 +17,8 @@ using UnityEngine.UI;
 namespace ReikaKalseki.Ecocean {
 	public class PredatoryBloodvine : MonoBehaviour {
 
+		public static event Action<PredatoryBloodvine, GameObject> onBloodKelpGrabEvent;
+
 		private static readonly float DURATION = 10F;
 		private static readonly float SNAP_TIME = 0.2F;
 		private static readonly float RELEASE_TIME = 2-SNAP_TIME;
@@ -135,6 +137,8 @@ namespace ReikaKalseki.Ecocean {
 			//SNUtil.writeToChat(eatStart.ToString("00.000"));
 			target.gameObject.SendMessage("OnBloodKelpGrab", this, SendMessageOptions.DontRequireReceiver);
 			live.TakeDamage(amt, go.transform.position, DamageType.Puncture, gameObject);
+			if (onBloodKelpGrabEvent != null)
+				onBloodKelpGrabEvent.Invoke(this, go);
 			SoundManager.playSoundAt(SoundManager.buildSound("event:/creature/reaper/attack_player_claw"), centerTarget, false, 40);
 		}
 		/*

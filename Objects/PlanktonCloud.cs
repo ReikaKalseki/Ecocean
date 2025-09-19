@@ -40,7 +40,7 @@ namespace ReikaKalseki.Ecocean {
 			addSpawnData(VanillaBiomes.VOID, 25, 4, 1, 400);
 
 			OnFinishedPatching += () => {
-				SaveSystem.addSaveHandler(ClassID, new SaveSystem.ComponentFieldSaveHandler<PlanktonCloudTag>().addField("touchIntensity"));
+				//SaveSystem.addSaveHandler(ClassID, new SaveSystem.ComponentFieldSaveHandler<PlanktonCloudTag>().addField("touchIntensity"));
 			};
 		}
 
@@ -284,6 +284,7 @@ namespace ReikaKalseki.Ecocean {
 
 			this.setupAuxSphere(leviSphere, s => s.entity.EnsureComponent<PlanktonCloudLeviDetector>().init(this, s.collider));
 			this.setupAuxSphere(clearingSphere, s => s.entity.EnsureComponent<PlanktonCloudClearableContactZone>().parent = this);
+			clearingSphere.entity.layer = LayerID.Default;
 
 			transform.localScale = Vector3.one * 0.5F;
 
