@@ -332,7 +332,7 @@ namespace ReikaKalseki.Ecocean {
 			}
 
 			if (isBaseBound) {
-				bool touchable = !Player.main.IsInBase();
+				bool touchable = !Player.main.IsInBase() && !Player.main.cinematicModeActive;
 				aoe.gameObject.SetActive(touchable);
 				leviSphere.entity.SetActive(touchable);
 			}
