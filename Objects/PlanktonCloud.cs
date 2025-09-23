@@ -286,6 +286,8 @@ namespace ReikaKalseki.Ecocean {
 			this.setupAuxSphere(clearingSphere, s => s.entity.EnsureComponent<PlanktonCloudClearableContactZone>().parent = this);
 			clearingSphere.entity.layer = LayerID.Default;
 
+			gameObject.layer = isBaseBound ? LayerID.Default : LayerID.Useable;
+
 			transform.localScale = Vector3.one * 0.5F;
 
 			//mainBody.constraints = RigidbodyConstraints.FreezeAll;
@@ -312,7 +314,7 @@ namespace ReikaKalseki.Ecocean {
 					SeaMoth s = other.GetComponent<SeaMoth>();
 					if (s && !isBaseBound)
 						this.checkAndTryScoop(s, dT);
-					if (other.isPlayer() && !Player.main.currentSub && !Player.main.GetVehicle()) {
+					if (other.isPlayer() && !Player.main.currentSub && !Player.main.cinematicModeActive && !Player.main.GetVehicle()) {
 						float hf = health.GetHealthFraction();
 						float amt = isBaseBound ? (hf < 0.25 ? 0 : 15 * dT * hf * hf) : 5 * dT * hf;
 						if (isBaseBound) {

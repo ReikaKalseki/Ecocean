@@ -96,6 +96,10 @@ namespace ReikaKalseki.Ecocean {
 			return false;
 		}
 
+		protected override bool isExploitable() {
+			return true;
+		}
+
 		public override Plantable.PlantSize getSize() {
 			return Plantable.PlantSize.Small;
 		}
