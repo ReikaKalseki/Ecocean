@@ -133,7 +133,7 @@ namespace ReikaKalseki.Ecocean {
 
 			private Animator animator;
 
-			private LiveMixin health;
+			internal LiveMixin health;
 
 			private CapsuleCollider interactTrigger;
 

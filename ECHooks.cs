@@ -64,6 +64,8 @@ namespace ReikaKalseki.Ecocean {
 
 			DIHooks.growingPlantTickEvent += tickGrowingPlant;
 
+			DIHooks.targetabilityEvent += checkTargetingSkip;
+
 			bloodVine.AddRange(VanillaFlora.BLOOD_KELP.getPrefabs(true, true));
 		}
 
@@ -327,7 +329,13 @@ namespace ReikaKalseki.Ecocean {
 				return;
 			}
 			if (tt == EcoceanMod.mushroomVaseStrand.TechType) {
-				DIHooks.fireKnifeHarvest(go, new Dictionary<TechType, int> { { EcoceanMod.mushroomVaseStrand.seed.TechType, 1 } });
+				MushroomVaseStrand.MushroomVaseStrandTag tag = go.GetComponent<MushroomVaseStrand.MushroomVaseStrandTag>();
+				if (tag && tag.isHarvested()) {
+					tag.health.TakeDamage(9999);
+				}
+				else {
+					DIHooks.fireKnifeHarvest(go, new Dictionary<TechType, int> { { EcoceanMod.mushroomVaseStrand.seed.TechType, 1 } });
+				}
 				return;
 			}
 			ExplodingAnchorPod e = go.FindAncestor<ExplodingAnchorPod>();
@@ -807,6 +815,13 @@ namespace ReikaKalseki.Ecocean {
 
 		public static void tickGrowingPlant(GrowingPlant g, float prog) {
 			//g.gameObject.EnsureComponent<GrowingPlantViabilityTracker>().plant = g;
+		}
+
+		public static void checkTargetingSkip(DIHooks.TargetabilityCheck ch) {
+			if (ch.prefab.ClassId == EcoceanMod.plankton.ClassID) {
+				PlanktonCloudTag tag = ch.prefab.GetComponentInChildren<PlanktonCloudTag>();
+				ch.allowTargeting = tag && !tag.isBaseBound;
+			}
 		}
 	}
 }

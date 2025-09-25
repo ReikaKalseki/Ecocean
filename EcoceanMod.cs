@@ -216,12 +216,12 @@ namespace ReikaKalseki.Ecocean {
 			if (InstructionHandlers.getTypeBySimpleName("ReikaKalseki.AqueousEngineering.BaseSonarPinger") != null) { //AE is loaded
 				BaseSonarPinger.onBaseSonarPingedEvent += go => ECHooks.pingSonarFromObject(go.gameObject.FindAncestor<SubRoot>(), 0.67F);
 
-				BaseRoomSpecializationSystem.instance.registerModdedObject(glowOil, 0.2F);
-				BaseRoomSpecializationSystem.instance.registerModdedObject(glowShroom, 0.2F);
+				BaseRoomSpecializationSystem.instance.registerModdedObject(glowOil, 0.25F);
+				BaseRoomSpecializationSystem.instance.registerModdedObject(glowShroom, 0.4F); //jellyshroom is 0.4
 				BaseRoomSpecializationSystem.instance.registerModdedObject(lavaShroom, 0.4F);
 				BaseRoomSpecializationSystem.instance.registerModdedObject(mushroomStack, 0.15F);
 				BaseRoomSpecializationSystem.instance.registerModdedObject(pinkBulbStack, -0.05F);
-				BaseRoomSpecializationSystem.instance.registerModdedObject(pinkLeaves, 0.5F);
+				BaseRoomSpecializationSystem.instance.registerModdedObject(pinkLeaves, 0.75F);
 
 				ACUEcosystems.addFood(new ACUEcosystems.PlantFood(glowShroom, 0.25F, BiomeRegions.Other));
 				ACUEcosystems.addFood(new ACUEcosystems.PlantFood(lavaShroom, 0.25F, BiomeRegions.LavaZone));

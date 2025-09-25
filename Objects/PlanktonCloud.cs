@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using System.Xml;
 using System.Xml.Serialization;
 
@@ -236,6 +237,10 @@ namespace ReikaKalseki.Ecocean {
 
 		private float activation = 0;
 
+		private static float lastPlayerHurtTime = -1;
+
+		private static readonly float MINIMUM_PLAYER_HURT_INTERVAL = 0.02F;
+
 		void Awake() {
 			if (DIHooks.getWorldAge() < 0.5F)
 				gameObject.destroy(false, 0.1F);
@@ -307,6 +312,7 @@ namespace ReikaKalseki.Ecocean {
 			if (age > 0.5F) { //do not apply effects for first 0.5s, prevent pulses of damage from spawned and then killed plankton
 							  //if (touching.Count > 0)
 							  //	SNUtil.writeToChat("ticking plankton with "+touching.Count+" contacts");
+				bool removePlayer = false;
 				foreach (GameObject other in touching) {
 					if (!other)
 						continue;
@@ -314,30 +320,37 @@ namespace ReikaKalseki.Ecocean {
 					SeaMoth s = other.GetComponent<SeaMoth>();
 					if (s && !isBaseBound)
 						this.checkAndTryScoop(s, dT);
-					if (other.isPlayer() && !Player.main.currentSub && !Player.main.cinematicModeActive && !Player.main.GetVehicle()) {
-						float hf = health.GetHealthFraction();
-						float amt = isBaseBound ? (hf < 0.25 ? 0 : 15 * dT * hf * hf) : 5 * dT * hf;
-						if (isBaseBound) {
-							if (age < 0.6F || DayNightCycle.main.timePassedAsFloat - lastScoopTime <= 0.5F)
-								amt = 0;
-							else
-								amt *= Player.main.liveMixin.GetHealthFraction();
+					if (other.isPlayer()) {
+						if (canHurtPlayer(time, out removePlayer)) {
+							lastPlayerHurtTime = time;
+							float hf = health.GetHealthFraction();
+							float dT2 = Math.Max(dT, MINIMUM_PLAYER_HURT_INTERVAL);
+							float amt = isBaseBound ? (hf < 0.25 ? 0 : 15 * dT2 * hf * hf) : 5 * dT2 * hf;
+							if (isBaseBound) {
+								if (age < 0.6F || DayNightCycle.main.timePassedAsFloat - lastScoopTime <= 0.5F)
+									amt = 0;
+								else
+									amt *= Player.main.liveMixin.GetHealthFraction();
+							}
+							if (amt > 0)
+								Player.main.liveMixin.TakeDamage(amt, Player.main.transform.position, DamageType.Poison, gameObject);
 						}
-						if (amt > 0)
-							Player.main.liveMixin.TakeDamage(amt, Player.main.transform.position, DamageType.Poison, gameObject);
 					}
 				}
+
+				if (removePlayer)
+					touching.Remove(Player.main.gameObject);
 			}
 
 			if (isBaseBound && age >= 300) { //5 min
 				health.TakeDamage(dT * 50, transform.position);
 			}
-
+			/*
 			if (isBaseBound) {
 				bool touchable = !Player.main.IsInBase() && !Player.main.cinematicModeActive;
 				aoe.gameObject.SetActive(touchable);
 				leviSphere.entity.SetActive(touchable);
-			}
+			}*/
 
 			if (time - ECHooks.getLastSonarUse() <= 10 || time - ECHooks.getLastHornUse() <= 10) {
 				touchIntensity = Mathf.Max(1, touchIntensity);
@@ -409,6 +422,10 @@ namespace ReikaKalseki.Ecocean {
 			clearingSphere.radius = isBaseBound ? 7.5F : 20;
 		}
 
+		private bool canHurtPlayer(float time, out bool isFreed) {
+			isFreed = Player.main.currentSub || Player.main.GetVehicle();
+			return !isFreed && !Player.main.cinematicModeActive && time > lastPlayerHurtTime+MINIMUM_PLAYER_HURT_INTERVAL;
+		}
 		private void setupAuxSphere(AuxSphere field, Action<AuxSphere> onSetup = null) {
 			if (!field.entity) {
 				field.entity = gameObject.getChildObject(field.name);
@@ -431,13 +448,14 @@ namespace ReikaKalseki.Ecocean {
 		}
 
 		void OnDisable() {
-			gameObject.destroy(false);
+			if (age > 0.001F)
+				gameObject.destroy(false);
 		}
 
 		public static bool skipPlanktonTouch;
 
 		public bool isTouchDisabled() {
-			return isBaseBound && Player.main.currentSub && Player.main.currentSub.isBase;
+			return isBaseBound && ((Player.main.currentSub && Player.main.currentSub.isBase) || Player.main.cinematicModeActive);
 		}
 
 		private void OnTriggerEnter(Collider other) { //scoop with seamoth
