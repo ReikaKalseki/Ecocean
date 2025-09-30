@@ -53,11 +53,15 @@ namespace ReikaKalseki.Ecocean {
 		public static void addToObject(Collider c, Color clr) {
 			if (!c)
 				return;
+			if (c.gameObject.FindAncestor<WaterPark>())
+				return;
 			c.gameObject.EnsureComponent<PlantHidingCollider>().initialize(c, clr);
 		}
 
 		public static void addToObject(InteractionVolumeCollider c, Color clr) {
 			if (!c)
+				return;
+			if (c.gameObject.FindAncestor<WaterPark>())
 				return;
 			c.gameObject.EnsureComponent<PlantHidingCollider>().initialize(c.GetComponent<Collider>(), clr);
 		}

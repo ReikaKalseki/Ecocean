@@ -820,7 +820,7 @@ namespace ReikaKalseki.Ecocean {
 		public static void checkTargetingSkip(DIHooks.TargetabilityCheck ch) {
 			if (ch.prefab.ClassId == EcoceanMod.plankton.ClassID) {
 				PlanktonCloudTag tag = ch.prefab.GetComponentInChildren<PlanktonCloudTag>();
-				ch.allowTargeting = tag && !tag.isBaseBound;
+				ch.allowTargeting = tag && !tag.isBaseBound && !Player.main.currentSub && !Player.main.GetVehicle();
 			}
 		}
 	}

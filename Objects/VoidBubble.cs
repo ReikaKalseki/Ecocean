@@ -68,7 +68,7 @@ namespace ReikaKalseki.Ecocean {
 		internal static GameObject getBubbleSource() {
 			GameObject coral = ObjectUtil.lookupPrefab("171c6a5b-879b-4785-be7a-6584b2c8c442");
 			IntermittentInstantiate ii = coral.GetComponent<IntermittentInstantiate>();
-			return UnityEngine.Object.Instantiate(ii.prefab);
+			return ii.prefab.clone();
 		}
 
 		public void register() {

@@ -133,7 +133,7 @@ namespace ReikaKalseki.Ecocean {
 			Animator a = this.GetComponentInChildren<Animator>();
 			if (a) {
 				MeshRenderer r = pfb.GetComponentInChildren<MeshRenderer>();
-				GameObject mdl = UnityEngine.Object.Instantiate(r.gameObject);
+				GameObject mdl = r.gameObject.clone();
 				mdl.transform.SetParent(transform);
 				mdl.transform.localPosition = a.transform.localPosition;
 				mdl.transform.localRotation = Quaternion.Euler(-90, a.transform.localEulerAngles.y, 0);
@@ -144,7 +144,7 @@ namespace ReikaKalseki.Ecocean {
 			GameObject coll = gameObject.getChildObject("collision");
 			if (coll) {
 				GameObject cap = pfb.getChildObject("Capsule");
-				GameObject coll2 = UnityEngine.Object.Instantiate(cap);
+				GameObject coll2 = cap.clone();
 				coll2.transform.SetParent(transform);
 				coll2.transform.localPosition = coll.transform.localPosition;
 				coll2.transform.localRotation = Quaternion.Euler(-90, coll.transform.localEulerAngles.y, 0);

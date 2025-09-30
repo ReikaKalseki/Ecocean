@@ -70,7 +70,7 @@ namespace ReikaKalseki.Ecocean {
 
 				if (animators.Length < 4) {
 					for (int i = animators.Length; i < 4; i++) {
-						GameObject go = UnityEngine.Object.Instantiate(ObjectUtil.lookupPrefab(VanillaFlora.STINGERS.getRandomPrefab(false)).GetComponentInChildren<Animator>().gameObject);
+						GameObject go = ObjectUtil.lookupPrefab(VanillaFlora.STINGERS.getRandomPrefab(false)).GetComponentInChildren<Animator>().gameObject.clone();
 						go.transform.SetParent(transform);
 					}
 					animators = this.GetComponentsInChildren<Animator>();

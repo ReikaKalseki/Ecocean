@@ -54,7 +54,7 @@ namespace ReikaKalseki.Ecocean {
 			foreach (Renderer r in pfb.GetComponentsInChildren<Renderer>()) {
 				if (r.name.Contains("LOD"))
 					continue;
-				GameObject rg = UnityEngine.Object.Instantiate(r.gameObject);
+				GameObject rg = r.gameObject.clone();
 				rg.transform.SetParent(mdl);
 				rg.transform.localPosition = r.transform.localPosition;
 				rg.transform.localRotation = r.transform.localRotation;

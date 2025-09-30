@@ -29,7 +29,7 @@ namespace ReikaKalseki.Ecocean {
 		}
 
 		public override GameObject GetGameObject() {
-			GameObject world = UnityEngine.Object.Instantiate(EcoceanMod.glowOil.GetGameObject());
+			GameObject world = EcoceanMod.glowOil.GetGameObject().clone();
 			world.EnsureComponent<TechTag>().type = TechType;
 			world.EnsureComponent<PrefabIdentifier>().ClassId = ClassID;
 			world.EnsureComponent<Pickupable>().SetTechTypeOverride(TechType);

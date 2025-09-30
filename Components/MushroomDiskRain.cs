@@ -50,7 +50,7 @@ namespace ReikaKalseki.Ecocean {
 			collider.center = refC.center + (Vector3.down * 2F);//Vector3.down * 0.8F;
 			GameObject fx = gameObject.getChildObject("Particles");
 			if (!fx) {
-				fx = UnityEngine.Object.Instantiate(ObjectUtil.lookupPrefab("0e67804e-4a59-449d-929a-cd3fc2bef82c").GetComponent<ParticleSystem>().gameObject);
+				fx = ObjectUtil.lookupPrefab("0e67804e-4a59-449d-929a-cd3fc2bef82c").GetComponent<ParticleSystem>().gameObject.clone();
 				fx.removeComponent<Creature>();
 				fx.removeComponent<BloomCreature>();
 				fx.removeComponent<SwimRandom>();

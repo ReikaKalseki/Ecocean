@@ -48,7 +48,7 @@ namespace ReikaKalseki.Ecocean {
 									GameObject go = CraftData.GetPrefabForTechType(pp.pickTech);
 									pp.SetPickedUp();
 									if (go) {
-										GameObject go2 = UnityEngine.Object.Instantiate(go);
+										GameObject go2 = go.clone();
 										go2.transform.position = MathUtil.getRandomVectorAround(transform.position, 1.5F);
 										go2.transform.localScale = Vector3.one * 2.5F;
 										Rigidbody seed = go2.GetComponent<Rigidbody>();

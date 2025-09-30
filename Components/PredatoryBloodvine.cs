@@ -102,9 +102,11 @@ namespace ReikaKalseki.Ecocean {
 
 		internal bool canAttack(GameObject go, out LiveMixin live) {
 			live = go.FindAncestor<LiveMixin>();
+			if (!live || !live.IsAlive())
+				return false;
 			if (gameObject.FindAncestor<WaterPark>())
 				return false;
-			if (!live || !live.IsAlive())
+			if (gameObject.FindAncestor<Bubble>())
 				return false;
 			Player p = go.FindAncestor<Player>();
 			if (gameObject.FindAncestor<Planter>() && (p || go.FindAncestor<Vehicle>()))

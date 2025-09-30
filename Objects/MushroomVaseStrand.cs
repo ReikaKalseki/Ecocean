@@ -72,7 +72,7 @@ namespace ReikaKalseki.Ecocean {
 
 			GameObject pfb = ObjectUtil.lookupPrefab(DecoPlants.MUSHROOM_VASE_STRANDS.prefab);
 			Animator a = pfb.GetComponentInChildren<Animator>();
-			GameObject rg = UnityEngine.Object.Instantiate(a.gameObject);
+			GameObject rg = a.gameObject.clone();
 			rg.transform.SetParent(mdl);
 			rg.transform.localPosition = Vector3.zero;
 			rg.transform.localRotation = Quaternion.Euler(90, 0, 0);

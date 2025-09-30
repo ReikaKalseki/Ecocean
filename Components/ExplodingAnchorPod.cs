@@ -186,7 +186,7 @@ namespace ReikaKalseki.Ecocean {
 			int n = UnityEngine.Random.Range(8, 12);
 			for (int i = 0; i < n; i++) {
 				Vector3 pos = MathUtil.getRandomVectorAround(effectivePodCenter, 4F);
-				GameObject go = UnityEngine.Object.Instantiate(bubble);
+				GameObject go = bubble.clone();
 				go.transform.position = pos;
 				float f = UnityEngine.Random.Range(1.5F, 3F);
 				go.transform.localScale = Vector3.one * f;

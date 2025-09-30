@@ -182,7 +182,7 @@ namespace ReikaKalseki.Ecocean {
 			}
 			GameObject pfb = ObjectUtil.lookupPrefab(VanillaCreatures.CRABSQUID.prefab).GetComponent<EMPAttack>().ammoPrefab;
 			for (int i = 0; i < 180; i += 30) {
-				GameObject emp = UnityEngine.Object.Instantiate(pfb).setName("PiezoCrystal_EMPulse"+i);
+				GameObject emp = pfb.clone().setName("PiezoCrystal_EMPulse"+i);
 				emp.transform.position = transform.position;
 				emp.transform.localRotation = Quaternion.Euler(i, 0, 0);
 				Renderer r = emp.GetComponentInChildren<Renderer>();
