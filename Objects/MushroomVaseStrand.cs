@@ -343,6 +343,9 @@ namespace ReikaKalseki.Ecocean {
 			private void pickResource() {
 				if (resourceGenerationProgress >= 1) {
 					TechType tt = MushroomVaseStrand.filterDrops.getRandomEntry();
+					TechType bias = planktonClearingMgr.getProperty<TechType>("dropBias");
+					if (bias != TechType.None && UnityEngine.Random.Range(0F, 1F) <= planktonClearingMgr.getProperty<float>("dropBiasChance"))
+						tt = bias;
 					InventoryUtil.addItem(tt);
 					if (vaseStrandFilterCollectEvent != null) {
 						vaseStrandFilterCollectEvent.Invoke(this, tt);

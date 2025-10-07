@@ -25,6 +25,17 @@ namespace ReikaKalseki.Ecocean {
 
 		public event Action<PlanktonCloudTag, float> onClearTick;
 
+		private Dictionary<string, object> properties = new Dictionary<string, object>();
+
+		void Start() {
+			Rigidbody rb = gameObject.EnsureComponent<Rigidbody>();
+			rb.isKinematic = true;
+			rb.mass = 9999999;
+			rb.useGravity = false;
+			rb.freezeRotation = true;
+			rb.constraints = RigidbodyConstraints.FreezeAll;
+		}
+
 		private void OnTriggerStay(Collider other) {
 			if (Time.deltaTime <= 0)
 				return;
@@ -40,9 +51,27 @@ namespace ReikaKalseki.Ecocean {
 			}
 		}
 
-		internal void tickExternal() {
+		public void tickExternal(float r = 1) {
 			if (onClearTick != null)
-				onClearTick.Invoke(null, Time.deltaTime * clearingRate);
+				onClearTick.Invoke(null, Time.deltaTime * clearingRate * r);
+		}
+
+		public void setProperty(string name, object value) {
+			properties[name] = value;
+		}
+
+		public object getProperty(string name) {
+			return properties.ContainsKey(name) ? properties[name] : null;
+		}
+
+		public E getProperty<E>(string name) {
+			object o = getProperty(name);
+			return o != null && o is E ? (E)o : default(E);
+		}
+
+		public bool getBooleanProperty(string name) {
+			object o = getProperty(name);
+			return o != null && o is bool b && b;
 		}
 
 	}

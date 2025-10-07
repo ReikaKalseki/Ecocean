@@ -26,6 +26,8 @@ namespace ReikaKalseki.Ecocean {
 
 	public class MushroomDiskRain : MonoBehaviour {
 
+		public static bool permanentRain = false;
+
 		public static readonly Color color1 = new Color(0.4F, 1.0F, 1.5F, 1F);
 		public static readonly Color color2 = new Color(1.8F, 1.1F, 0.5F, 1F);
 
@@ -102,6 +104,10 @@ namespace ReikaKalseki.Ecocean {
 		}
 
 		public void toggleOff() {
+			if (permanentRain) {
+				this.Invoke("toggleOff", 10F);
+				return;
+			}
 			if (locked)
 				return;
 			rainOn = false;
@@ -114,8 +120,12 @@ namespace ReikaKalseki.Ecocean {
 		}
 
 		void OnTriggerStay(Collider other) {
-			if (rainOn && !other.isTrigger) {
-				if (other.isPlayer()) {
+			if (rainOn) {
+				if (other.name == "RainHolder" || other.name == "Mouth")
+					return;
+				else if (other.isTrigger && other.GetComponent<MushroomDiskRain>())
+					return;
+				else if (other.isPlayer()) {
 					FoodEffectSystem.VisualDistortionEffect e = Player.main.gameObject.EnsureComponent<FoodEffectSystem.VisualDistortionEffect>();
 					e.intensity = 2;
 					e.timeRemaining = 10;
@@ -124,13 +134,18 @@ namespace ReikaKalseki.Ecocean {
 					e.tintColor = (renderColor.exponent(2) * 4).WithAlpha(1);
 				}
 				else {
-					SeaMoth sm = other.gameObject.FindAncestor<SeaMoth>();
+					//if (other.isTrigger)
+					//	SNUtil.writeToChat("Touching "+other.gameObject.GetFullHierarchyPath());
+					SeaMoth sm = other.isTrigger ? null : other.gameObject.FindAncestor<SeaMoth>();
 					if (sm) {
 						SeamothPlanktonScoop.checkAndTryScoop(sm, Time.deltaTime, EcoceanMod.treeMushroomSpores.TechType);
 					}
-					PlanktonClearingArea area = other.gameObject.FindAncestor<PlanktonClearingArea>();
+					PlanktonClearingArea area = other.isTrigger ? other.gameObject.FindAncestor<PlanktonClearingArea>() : null;
 					if (area) {
-						area.tickExternal();
+						area.setProperty("mushdisk", true);
+						area.setProperty("dropBias", EcoceanMod.treeMushroomSpores.TechType);
+						area.setProperty("dropBiasChance", 0.5F);
+						area.tickExternal(4);
 					}
 				}
 			}

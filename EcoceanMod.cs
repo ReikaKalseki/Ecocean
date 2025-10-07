@@ -177,9 +177,6 @@ namespace ReikaKalseki.Ecocean {
 			GenUtil.registerWorldgen(new PositionedPrefab(VanillaCreatures.REAPER.prefab, reaperlessTripleVent.setY(-200)));
 			GenUtil.registerWorldgen(new PositionedPrefab(VanillaCreatures.REAPER.prefab, northDuneBit.setY(-320)));
 
-			glowShroom.addNativeBiome(VanillaBiomes.DUNES);
-			lavaShroom.addNativeBiome(VanillaBiomes.ILZ);
-
 			//ConsoleCommandsHandler.Main.RegisterConsoleCommand<Action<int>>("currentFlowVec", MountainCurrentSystem.instance.registerFlowVector);
 			ConsoleCommandsHandler.Main.RegisterConsoleCommand<Action<float>>("attackBase", r => { ECHooks.attractCreaturesToBase(Player.main.currentSub, r, c => c is GhostLeviathan || c is GhostLeviatanVoid || c is ReaperLeviathan || c is SeaDragon || c is Shocker || c is CrabSquid || c is BoneShark); });
 
@@ -200,6 +197,7 @@ namespace ReikaKalseki.Ecocean {
 			pinkBulbStack.addNativeBiome(VanillaBiomes.KOOSH);
 			mushroomStack.addNativeBiome(VanillaBiomes.MOUNTAINS);
 			pinkLeaves.addNativeBiome(VanillaBiomes.CRASH);
+			mushroomVaseStrand.addNativeBiome(VanillaBiomes.MUSHROOM);
 			//lavaLily.addNativeBiome(VanillaBiomes.ALZ);
 
 			e = locale.getEntry("Mouseovers");
@@ -222,12 +220,14 @@ namespace ReikaKalseki.Ecocean {
 				BaseRoomSpecializationSystem.instance.registerModdedObject(mushroomStack, 0.15F);
 				BaseRoomSpecializationSystem.instance.registerModdedObject(pinkBulbStack, -0.05F);
 				BaseRoomSpecializationSystem.instance.registerModdedObject(pinkLeaves, 0.75F);
+				BaseRoomSpecializationSystem.instance.registerModdedObject(mushroomVaseStrand, 0.25F);
 
 				ACUEcosystems.addFood(new ACUEcosystems.PlantFood(glowShroom, 0.25F, BiomeRegions.Other));
 				ACUEcosystems.addFood(new ACUEcosystems.PlantFood(lavaShroom, 0.25F, BiomeRegions.LavaZone));
 				ACUEcosystems.addFood(new ACUEcosystems.PlantFood(mushroomStack, 0.02F, BiomeRegions.Other));
 				ACUEcosystems.addFood(new ACUEcosystems.PlantFood(pinkBulbStack, 0.1F, BiomeRegions.Koosh, BiomeRegions.GrandReef));
 				ACUEcosystems.addFood(new ACUEcosystems.PlantFood(pinkLeaves, 0.1F, BiomeRegions.Other));
+				ACUEcosystems.addFood(new ACUEcosystems.PlantFood(mushroomVaseStrand, 0.3F, BiomeRegions.Mushroom));
 
 				MushroomVaseStrand.filterDrops.addEntry(TechType.Salt, 50);
 				MushroomVaseStrand.filterDrops.addEntry(TechType.Copper, 10);
