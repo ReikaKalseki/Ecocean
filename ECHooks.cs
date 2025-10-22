@@ -215,7 +215,8 @@ namespace ReikaKalseki.Ecocean {
 				Vector3 offset = pos-mod;
 				foreach (Vector3 col in heatColumns) {
 					float dist = (col.setY(mod.y) - mod).magnitude;
-					if (dist > 200)
+					Vector3 at = col+offset;
+					if (dist > 200 || !isVoidHeatColumn(at, out Vector3 trash, true))
 						continue;
 					bool inCol = dist <= 18;
 					inColumn |= inCol;
@@ -224,13 +225,15 @@ namespace ReikaKalseki.Ecocean {
 						bool anyY = false;
 						bool forceCenter = false;
 						float forcedY = float.NaN;
-						Vector3 vec2 = MathUtil.getRandomVectorAround(col+offset, 0, 15);
+						float yRange = -1;
+						Vector3 vec2 = MathUtil.getRandomVectorAround(at, 0, 15);
 						string id = EcoceanMod.heatBubble.ClassID;
 						if (UnityEngine.Random.Range(0F, 1F) < 0.03F) {
 							id = EcoceanMod.voidOrganic.ClassID;
 						}
 						else if (UnityEngine.Random.Range(0F, 1F) < 0.075F) {
 							id = EcoceanMod.heatColumnBones.Values.getRandomEntry().ClassID;
+							yRange = 100;
 						}/*
 						else if (UnityEngine.Random.Range(0F, 1F) < 0.2F) {
 							id = EcoceanMod.heatColumnFog.ClassID;
@@ -249,9 +252,11 @@ namespace ReikaKalseki.Ecocean {
 							vec2 = vec2.setY(pos.y - 100);
 						}
 						if (forceCenter)
-							vec2 = (col + offset).setY(vec2.y);
+							vec2 = at.setY(vec2.y);
 						if (!float.IsNaN(forcedY))
 							vec2 = vec2.setY(forcedY);
+						if (yRange > 0)
+							vec2 += Vector3.up * UnityEngine.Random.Range(0F, yRange);
 						GameObject go = ObjectUtil.createWorldObject(id);
 						//SNUtil.log("Spawning object '"+id+"' in Heat Column at " + vec2);
 						go.transform.position = vec2;
@@ -307,10 +312,12 @@ namespace ReikaKalseki.Ecocean {
 			}
 		}
 
-		public static bool isVoidHeatColumn(Vector3 vec, out Vector3 colCenter) { //2200 is significantly offshore
+		public static bool isVoidHeatColumn(Vector3 vec, out Vector3 colCenter, bool biomeOnly = false) { //2200 is significantly offshore
 			colCenter = Vector3.zero;
 			if (!(VanillaBiomes.VOID.isInBiome(vec) && vec.setY(0).magnitude >= 2200))
 				return false;
+			if (biomeOnly)
+				return true;
 			Vector3 mod = vec.modulo(1000);
 			foreach (Vector3 v in heatColumns) {
 				if ((v - mod).setY(0).sqrMagnitude <= 500) {
