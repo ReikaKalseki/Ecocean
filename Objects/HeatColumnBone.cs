@@ -70,7 +70,7 @@ namespace ReikaKalseki.Ecocean {
 			if (!body)
 				body = gameObject.EnsureComponent<Rigidbody>();
 
-			if (transform.position.y >= -10 && !gameObject.FindAncestor<StorageContainer>())
+			if (transform.position.y >= -5 && !gameObject.FindAncestor<StorageContainer>())
 				gameObject.destroy();
 			else if ((transform.position-Player.main.transform.position).sqrMagnitude >= 50000)
 				gameObject.destroy();

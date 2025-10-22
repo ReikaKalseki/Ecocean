@@ -21,6 +21,9 @@ namespace ReikaKalseki.Ecocean {
 
 	public class HeatColumnShell : Spawnable {
 
+		public static float fresnelAmount = 0.925F;
+		public static float specStrength = 0.02F;
+
 		private XMLLocale.LocaleEntry locale;
 
 		private string fixedUUID = Guid.NewGuid().ToString();
@@ -51,12 +54,17 @@ namespace ReikaKalseki.Ecocean {
 			r.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
 			Texture2D tex = TextureManager.getTexture(EcoceanMod.modDLL, "Textures/heatcolumnshell");
 			//r.materials[0].SetTexture("_MainTex", tex);
-			r.materials[0].EnableKeyword("MARMO_EMISSION");
-			RenderUtil.setEmissivity(r, 0.2F);
-			r.materials[0].SetTexture("_Illum", tex);
+			//r.materials[0].EnableKeyword("MARMO_EMISSION");
+			r.materials[0].EnableKeyword("MARMO_SPECMAP");
+			r.materials[0].EnableKeyword("UWE_WAVING");
+			//RenderUtil.setEmissivity(r, 0.2F);
+			r.materials[0].SetFloat("_SpecInt", 0.02F);
+			r.materials[0].SetFloat("_Fresnel", fresnelAmount);
+			r.materials[0].SetTexture("_SpecTex", tex);
 			r.materials[0].SetFloat("_MyCullVariable", 0.77F);
+			r.materials[0].SetFloat("_IBLreductionAtNight", 0);
 			//AcidicBrineDamageTrigger acid = world.EnsureComponent<AcidicBrineDamageTrigger>();
-			
+
 
 			return world;
 		}
@@ -90,10 +98,12 @@ namespace ReikaKalseki.Ecocean {
 				collider = this.GetComponentInChildren<CapsuleCollider>();
 
 			float f = scaleFactor+2*Mathf.Sin(age*0.2F);
-			transform.localScale = new Vector3(f, 30, f);
+			transform.localScale = new Vector3(f, 300, f);
+			if (Player.main)
+				transform.position = transform.position.setY(Mathf.Min(-150, Player.main.transform.position.y-50));
 			//collider.radius = 
 
-			render.materials[0].SetTexture("_Illum", TextureManager.getTexture(EcoceanMod.modDLL, "Textures/heatcolumnshell"));
+			render.materials[0].SetTexture("_SpecTex", TextureManager.getTexture(EcoceanMod.modDLL, "Textures/heatcolumnshell"));
 
 			age += Time.deltaTime;
 
@@ -112,10 +122,17 @@ namespace ReikaKalseki.Ecocean {
 			else if (age < 5) {
 				f = age / 5F;
 			}
-			RenderUtil.setEmissivity(render, 0.004F*f);
+			if (Player.main) {
+				double dist = (transform.position-Player.main.transform.position).setY(0).magnitude;
+				f *= (float)MathUtil.linterpolate(dist, 50, 200, 0.3, 1, true);
+			}
+			//RenderUtil.setEmissivity(render, 0.004F*f);
+			render.materials[0].SetFloat("_SpecInt", f * HeatColumnShell.specStrength);
 
 			Color c = new Color(1F, 2.5F, 1.5F);
 			render.materials[0].SetColor("_Color", c);
+			f = Mathf.Max(0, 0.15F+0.85F*Mathf.Sin(age*0.34F));
+			render.materials[0].SetColor("_SpecColor", new Color(1, f, 1));
 			render.materials[0].color = c;
 		}
 

@@ -223,6 +223,7 @@ namespace ReikaKalseki.Ecocean {
 					for (int k = 0; k < 3; k++) {
 						bool anyY = false;
 						bool forceCenter = false;
+						float forcedY = float.NaN;
 						Vector3 vec2 = MathUtil.getRandomVectorAround(col+offset, 0, 15);
 						string id = EcoceanMod.heatBubble.ClassID;
 						if (UnityEngine.Random.Range(0F, 1F) < 0.03F) {
@@ -235,10 +236,11 @@ namespace ReikaKalseki.Ecocean {
 							id = EcoceanMod.heatColumnFog.ClassID;
 							anyY = true;
 						}*/
-						else if (UnityEngine.Random.Range(0F, 1F) < 0.15F) {
+						else if (UnityEngine.Random.Range(0F, 1F) < 0.03F) {
 							id = EcoceanMod.heatColumnShell.ClassID;
-							anyY = true;
+							//anyY = true;
 							forceCenter = true;
+							forcedY = pos.y;
 						}
 						if (anyY) {
 							vec2 = vec2.setY(pos.y - 200F + UnityEngine.Random.Range(0, 400F));
@@ -248,6 +250,8 @@ namespace ReikaKalseki.Ecocean {
 						}
 						if (forceCenter)
 							vec2 = (col + offset).setY(vec2.y);
+						if (!float.IsNaN(forcedY))
+							vec2 = vec2.setY(forcedY);
 						GameObject go = ObjectUtil.createWorldObject(id);
 						//SNUtil.log("Spawning object '"+id+"' in Heat Column at " + vec2);
 						go.transform.position = vec2;

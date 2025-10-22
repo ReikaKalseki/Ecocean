@@ -62,6 +62,7 @@ namespace ReikaKalseki.Ecocean {
 			r.material.SetVector("_Frequency", new Vector4(8.0F, 8.0F, 8.0F, 8.0F));
 			r.material.SetVector("_Speed", new Vector4(0.05F, 0.05F, 0.05F, 0.05F));
 			r.material.SetVector("_ObjectUp", new Vector4(0F, 0F, 1F, 0F));
+			r.material.SetFloat("_IBLreductionAtNight", 0);
 			return world;
 		}
 
@@ -181,6 +182,7 @@ namespace ReikaKalseki.Ecocean {
 					innerRender.material.SetVector("_Frequency", new Vector4(8.0F, 8.0F, 8.0F, 8.0F));
 					innerRender.material.SetVector("_Speed", new Vector4(0.05F, 0.05F, 0.05F, 0.05F));
 					innerRender.material.SetVector("_ObjectUp", new Vector4(0F, 0F, 1F, 0F));
+					innerRender.material.SetFloat("_IBLreductionAtNight", 0);
 				}
 			}
 
