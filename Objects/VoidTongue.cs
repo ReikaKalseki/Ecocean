@@ -28,6 +28,8 @@ namespace ReikaKalseki.Ecocean {
 
 		private readonly XMLLocale.LocaleEntry locale;
 
+		public PDAManager.PDAPage pdaPage { get; private set; }
+
 		internal VoidTongue(XMLLocale.LocaleEntry e) : base(e.key, e.name, e.desc) {
 			locale = e;
 		}
@@ -60,7 +62,7 @@ namespace ReikaKalseki.Ecocean {
 
 		public void register() {
 			this.Patch();
-			SNUtil.addPDAEntry(this, -1, "Lifeforms/Fauna/Leviathans", locale.pda, locale.getField<string>("header"));
+			pdaPage = SNUtil.addPDAEntry(this, -1, "Lifeforms/Fauna/Leviathans", locale.pda, locale.getField<string>("header"));
 			ItemRegistry.instance.addItem(this);
 		}
 

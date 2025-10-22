@@ -52,6 +52,12 @@ namespace ReikaKalseki.Ecocean {
 		public static VoidBubble voidBubble;
 		public static VoidTongue tongue;
 
+		public static HeatBubble heatBubble;
+		//public static HeatColumnFog heatColumnFog;
+		public static HeatColumnShell heatColumnShell;
+		public static VoidOrganic voidOrganic;
+		public static readonly Dictionary<string, HeatColumnBone> heatColumnBones = new Dictionary<string, HeatColumnBone>();
+
 		//public static TreeBud mushTreeResource;
 
 		public static MushroomStack mushroomStack;
@@ -137,6 +143,20 @@ namespace ReikaKalseki.Ecocean {
 			voidBubble.register();
 			tongue = new VoidTongue(locale.getEntry("VoidTongue"));
 			tongue.register();
+
+			heatBubble = new HeatBubble();
+			heatBubble.Patch();
+			//heatColumnFog = new HeatColumnFog();
+			//heatColumnFog.Patch();
+			heatColumnShell = new HeatColumnShell(locale.getEntry("HeatColumnShell"));
+			heatColumnShell.register();
+			voidOrganic = new VoidOrganic(locale.getEntry("voidOrganic"));
+			voidOrganic.sprite = TextureManager.getSprite(EcoceanMod.modDLL, "Textures/Items/VoidOrganics");
+			voidOrganic.Patch();
+			foreach (string s in HeatColumnBone.boneProps.Keys) {
+				heatColumnBones[s] = new HeatColumnBone(s);
+				heatColumnBones[s].Patch();
+			}
 
 			//mushTreeResource = new TreeBud(locale.getEntry("TreeBud"));
 			//mushTreeResource.Patch();

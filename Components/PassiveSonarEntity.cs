@@ -88,11 +88,7 @@ namespace ReikaKalseki.Ecocean {
 			//SNUtil.log("D");
 			if (this.isInVehicleWithSonar()) {
 				float dT = Time.deltaTime;
-				forcedGlowFactor = MainCamera.camera.GetComponent<SonarScreenFX>().enabled
-					? Mathf.Max(0, forcedGlowFactor - (0.67F * dT))
-					: this.isAudible() && 1.001F - this.getTimeVariationStrength() + Mathf.Sin((DayNightCycle.main.timePassedAsFloat * 0.8F) + gameObject.GetInstanceID()) > 0
-						? Mathf.Min(1, forcedGlowFactor + (2.5F * dT * this.getFadeRate()))
-						: Mathf.Max(0, forcedGlowFactor - (0.33F * dT * this.getFadeRate()));
+				forcedGlowFactor = MainCamera.camera.GetComponent<SonarScreenFX>().enabled ? Mathf.Max(0, forcedGlowFactor - (0.67F * dT)) : this.isAudible() && 1.001F - this.getTimeVariationStrength() + Mathf.Sin((DayNightCycle.main.timePassedAsFloat * 0.8F) + gameObject.GetInstanceID()) > 0 ? Mathf.Min(1, forcedGlowFactor + (2.5F * dT * this.getFadeRate())) : Mathf.Max(0, forcedGlowFactor - (0.33F * dT * this.getFadeRate()));
 			}
 			else {
 				forcedGlowFactor = 0;

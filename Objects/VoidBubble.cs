@@ -36,7 +36,7 @@ namespace ReikaKalseki.Ecocean {
 		}
 
 		public override GameObject GetGameObject() {
-			GameObject world = getBubbleSource();
+			GameObject world = ObjectUtil.createAirBubble();
 			world.removeComponent<Bubble>();
 			//world.removeComponent<LiveMixin>();
 			//world.removeComponent<WorldForces>();
@@ -63,12 +63,6 @@ namespace ReikaKalseki.Ecocean {
 			r.material.SetVector("_Speed", new Vector4(0.05F, 0.05F, 0.05F, 0.05F));
 			r.material.SetVector("_ObjectUp", new Vector4(0F, 0F, 1F, 0F));
 			return world;
-		}
-
-		internal static GameObject getBubbleSource() {
-			GameObject coral = ObjectUtil.lookupPrefab("171c6a5b-879b-4785-be7a-6584b2c8c442");
-			IntermittentInstantiate ii = coral.GetComponent<IntermittentInstantiate>();
-			return ii.prefab.clone();
 		}
 
 		public void register() {
@@ -103,7 +97,7 @@ namespace ReikaKalseki.Ecocean {
 			if (UnityEngine.Random.Range(0F, 1F) < 0.94F + f)
 				return;
 			Vector3 pos = MathUtil.getRandomVectorAround(ctr, 90).setY(ctr.y-140+UnityEngine.Random.Range(0F, 30F));
-			if (VanillaBiomes.VOID.isInBiome(pos) && (pos.y >= -50 || VanillaBiomes.VOID.isInBiome(pos + (Vector3.up * 50)))) {
+			if (VanillaBiomes.VOID.isInBiome(pos) && (pos.y >= -50 || VanillaBiomes.VOID.isInBiome(pos + (Vector3.up * 50))) && !ECHooks.isVoidHeatColumn(pos, out Vector3 trash)) {
 				GameObject go = ObjectUtil.createWorldObject(ClassID);
 				go.transform.position = pos;
 				//go.transform.localScale = new Vector3(UnityEngine.Random.Range(2F, 3F), UnityEngine.Random.Range(2F, 3F), UnityEngine.Random.Range(2F, 3F));
@@ -173,7 +167,7 @@ namespace ReikaKalseki.Ecocean {
 			if (!inner) {
 				inner = gameObject.getChildObject("InnerShine");
 				if (!inner) {
-					inner = VoidBubble.getBubbleSource().setName("InnerShine");
+					inner = ObjectUtil.createAirBubble().setName("InnerShine");
 					inner.convertToModel();
 					inner.transform.SetParent(transform);
 					inner.transform.localPosition = Vector3.zero;

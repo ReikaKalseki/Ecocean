@@ -180,13 +180,10 @@ namespace ReikaKalseki.Ecocean {
 				c.enabled = false;
 				c.gameObject.SetActive(false);
 			}
-			GameObject coral = ObjectUtil.lookupPrefab("171c6a5b-879b-4785-be7a-6584b2c8c442");
-			IntermittentInstantiate ii = coral.GetComponent<IntermittentInstantiate>();
-			GameObject bubble = ii.prefab;
 			int n = UnityEngine.Random.Range(8, 12);
 			for (int i = 0; i < n; i++) {
 				Vector3 pos = MathUtil.getRandomVectorAround(effectivePodCenter, 4F);
-				GameObject go = bubble.clone();
+				GameObject go = ObjectUtil.createAirBubble();
 				go.transform.position = pos;
 				float f = UnityEngine.Random.Range(1.5F, 3F);
 				go.transform.localScale = Vector3.one * f;

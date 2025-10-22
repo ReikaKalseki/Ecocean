@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml;
+
+using rail;
 
 using ReikaKalseki.DIAlterra;
 using ReikaKalseki.Ecocean;
@@ -27,8 +30,15 @@ namespace ReikaKalseki.Ecocean {
 
 		internal static float nextVoidTongueGrab = -1;
 
+		internal static readonly SimplexNoiseGenerator tongueDepthNoise = (SimplexNoiseGenerator)new SimplexNoiseGenerator(587129).setFrequency(0.08);
+		//internal static readonly SimplexNoiseGenerator heatColumnNoise = (SimplexNoiseGenerator)new SimplexNoiseGenerator(2176328).setFrequency(0.1);
+
+		internal static List<Vector3> heatColumns = new List<Vector3>();
+
 		static ECHooks() {
 			SNUtil.log("Initializing ECHooks");
+			DIHooks.onWorldLoadedEvent += onWorldLoaded;
+
 			DIHooks.onSkyApplierSpawnEvent += onSkyApplierSpawn;
 			DIHooks.onDamageEvent += onTakeDamage;
 			DIHooks.onKnifedEvent += onKnifed;
@@ -72,6 +82,7 @@ namespace ReikaKalseki.Ecocean {
 		public class ECMoth : MonoBehaviour {
 
 			private SeaMoth seamoth;
+			private Rigidbody body;
 
 			private bool lightsOn;
 
@@ -79,9 +90,28 @@ namespace ReikaKalseki.Ecocean {
 
 			private readonly LinkedList<float> lightToggles = new LinkedList<float>();
 
+			public int stuckCells { get; private set; }
+			private float lastCellCheckTime;
+
+			public PredatoryBloodvine holdingBloodKelp { get; private set; }
+
+			public bool touchingKelp { get; private set; }
+
+			public float lastTouchHeatBubble { get; internal set; }
+
+			public float lastGeyserTime { get; internal set; }
+
+			private VehicleAccelerationModifier speedModifier;
+
 			void Update() {
 				if (!seamoth)
 					seamoth = this.GetComponent<SeaMoth>();
+				if (!body)
+					body = this.GetComponent<Rigidbody>();
+
+				if (!speedModifier)
+					speedModifier = seamoth.addSpeedModifier();
+
 				float time = DayNightCycle.main.timePassedAsFloat;
 				while (lightToggles.First != null && time - lightToggles.First.Value > 3) {
 					lightToggles.RemoveFirst();
@@ -108,12 +138,44 @@ namespace ReikaKalseki.Ecocean {
 					if (UnityEngine.Random.Range(0F, 1F) <= 0.02F)
 						attractToLight(seamoth);
 				}
+
+				if (time - lastCellCheckTime >= 1) {
+					lastCellCheckTime = time;
+					//stuckCells = GetComponentsInChildren<VoidBubbleTag>().Length;
+					stuckCells = 0;
+					foreach (VoidBubbleTag vb in WorldUtil.getObjectsNearWithComponent<VoidBubbleTag>(transform.position, 24)) {
+						if (vb.isStuckTo(body))
+							stuckCells++;
+					}
+				}
+
+				speedModifier.accelerationMultiplier = 1;
+				if (stuckCells > 0)
+					speedModifier.accelerationMultiplier *= Mathf.Exp(-stuckCells * 0.2F);
+				if (touchingKelp)
+					speedModifier.accelerationMultiplier *= 0.3F;
 			}
 
 			private float getFlashEffectiveness() {
 				float brightness = DayNightCycle.main.GetLightScalar();
 				return 1.2F - (brightness * 0.8F);
 			}
+
+			public void OnBloodKelpGrab(PredatoryBloodvine c) {
+				holdingBloodKelp = c;
+			}
+		}
+
+		public static void onWorldLoaded() {
+			heatColumns.Clear();
+			UnityEngine.Random.InitState(SNUtil.getWorldSeedInt());
+			for (int i = 0; i < 100; i++) {
+				Vector3 vec = new Vector3(UnityEngine.Random.Range(0F, 1000F), 0, UnityEngine.Random.Range(0F, 1000F));
+				if (heatColumns.Any(v => (v - vec).sqrMagnitude <= 40000))
+					continue;
+				heatColumns.Add(vec);
+			}
+			SNUtil.log("Computed heat columns: " + heatColumns.toDebugString());
 		}
 
 		public static void tickPrawn(Exosuit e) {
@@ -144,10 +206,86 @@ namespace ReikaKalseki.Ecocean {
 						EcoceanMod.plankton.tickSpawner(ep, data, dT);
 				}
 			}
+			Vehicle vv = ep.GetVehicle();
 			Vector3 pos = ep.transform.position;
-			if (pos.setY(0).magnitude >= 1700) //more than 1200m from center
+			if (pos.setY(0).magnitude >= 1700) { //more than 1200m from center
 				EcoceanMod.voidBubble.tickSpawner(ep, time, dT);
-			if (pos.y <= -UnityEngine.Random.Range(1000F, 1200F) && VanillaBiomes.VOID.isInBiome(pos)) {
+				bool inColumn = false;
+				Vector3 mod = pos.modulo(1000);
+				Vector3 offset = pos-mod;
+				foreach (Vector3 col in heatColumns) {
+					float dist = (col.setY(mod.y) - mod).magnitude;
+					if (dist > 200)
+						continue;
+					bool inCol = dist <= 18;
+					inColumn |= inCol;
+					//SNUtil.writeToChat("Heat Column at " + col+" ("+inCol+")");
+					for (int k = 0; k < 3; k++) {
+						bool anyY = false;
+						bool forceCenter = false;
+						Vector3 vec2 = MathUtil.getRandomVectorAround(col+offset, 0, 15);
+						string id = EcoceanMod.heatBubble.ClassID;
+						if (UnityEngine.Random.Range(0F, 1F) < 0.03F) {
+							id = EcoceanMod.voidOrganic.ClassID;
+						}
+						else if (UnityEngine.Random.Range(0F, 1F) < 0.075F) {
+							id = EcoceanMod.heatColumnBones.Values.getRandomEntry().ClassID;
+						}/*
+						else if (UnityEngine.Random.Range(0F, 1F) < 0.2F) {
+							id = EcoceanMod.heatColumnFog.ClassID;
+							anyY = true;
+						}*/
+						else if (UnityEngine.Random.Range(0F, 1F) < 0.15F) {
+							id = EcoceanMod.heatColumnShell.ClassID;
+							anyY = true;
+							forceCenter = true;
+						}
+						if (anyY) {
+							vec2 = vec2.setY(pos.y - 200F + UnityEngine.Random.Range(0, 400F));
+						}
+						else {
+							vec2 = vec2.setY(pos.y - 100);
+						}
+						if (forceCenter)
+							vec2 = (col + offset).setY(vec2.y);
+						GameObject go = ObjectUtil.createWorldObject(id);
+						//SNUtil.log("Spawning object '"+id+"' in Heat Column at " + vec2);
+						go.transform.position = vec2;
+						go.transform.rotation = UnityEngine.Random.rotationUniform;
+						go.fullyEnable();
+					}
+				}
+				if (inColumn) {
+					if (!ep.currentSub && !vv) {
+						ep.rigidBody.AddForce(Vector3.up * Time.deltaTime * 150, ForceMode.Acceleration);
+						//ep.liveMixin.TakeDamage(5 * Time.deltaTime, type: DamageType.Acid);
+					}
+					else if (vv) {
+						//vv.liveMixin.TakeDamage(5 * Time.deltaTime, type: DamageType.Acid);
+					}
+					Story.StoryGoal.Execute("EnteredHeatColumn", Story.GoalType.Story);
+				}
+			}
+			float minDepth = vv ? 800 : 1000;
+			float maxDepth = minDepth+300;
+			minDepth += 50F * (float)tongueDepthNoise.getValue(ep.transform.position);
+			HashSet<BiomeBase> biomes = new HashSet<BiomeBase>{ VanillaBiomes.VOID };
+			if (ep.currentSub) {
+				minDepth = 600;
+				maxDepth = 750;
+				biomes.Add(BiomeBase.getBiome("Void Spikes"));
+			}
+			if (time - getLastSonarUse() <= 5 || time - getLastHornUse() <= 5) {
+				minDepth = 675;
+				maxDepth = 900;
+			}
+			ECMoth ec = vv ? vv.GetComponent<ECMoth>() : null;
+			if (ec) {
+				minDepth -= 50 * ec.stuckCells;
+				if (minDepth < 600)
+					minDepth = 600;
+			}
+			if (pos.y <= -UnityEngine.Random.Range(minDepth, maxDepth) && biomes.Contains(BiomeBase.getBiome(pos))) {
 				//if (UnityEngine.Object.FindObjectsOfType<VoidTongueTag>().Length == 0)
 				//	SNUtil.writeToChat("Check void grab time = "+time.ToString("000.0")+"/"+nextVoidTongueGrab.ToString("000.0"));
 				if (time >= nextVoidTongueGrab) {
@@ -163,6 +301,21 @@ namespace ReikaKalseki.Ecocean {
 					v.startGrab(Mathf.Max(-depth - (ep.currentSub ? 250 : 150), -pos.y + (UnityEngine.Random.Range(200F, 400F) * (ep.currentSub ? 0.75F : 1))));
 				}
 			}
+		}
+
+		public static bool isVoidHeatColumn(Vector3 vec, out Vector3 colCenter) { //2200 is significantly offshore
+			colCenter = Vector3.zero;
+			if (!(VanillaBiomes.VOID.isInBiome(vec) && vec.setY(0).magnitude >= 2200))
+				return false;
+			Vector3 mod = vec.modulo(1000);
+			foreach (Vector3 v in heatColumns) {
+				if ((v - mod).setY(0).sqrMagnitude <= 500) {
+					colCenter = v;
+					return true;
+				}
+			}
+			return false;
+			//return heatColumnNoise.getValue(vec) > 0.8 && VanillaBiomes.VOID.isInBiome(vec) && vec.setY(0).magnitude >= 2200;
 		}
 
 		public static void onEMPTouch(EMPBlast e, Collider c) {
@@ -386,6 +539,10 @@ namespace ReikaKalseki.Ecocean {
 					calc.setValue(Mathf.Max(calc.getTemperature(), f * lb.getTemperature()));
 				}
 			});
+			if (isVoidHeatColumn(calc.position, out Vector3 trash)) {
+				//SNUtil.writeToChat("Computing water temp @ " + calc.position + " in heat column " + trash);
+				calc.setValue(Mathf.Max(calc.getTemperature(), 75));
+			}
 		}
 
 		public static void onSkyApplierSpawn(SkyApplier pk) {
@@ -536,6 +693,10 @@ namespace ReikaKalseki.Ecocean {
 				//SNUtil.writeToChat(c.gameObject.name);
 				Vehicle v = c.gameObject.FindAncestor<Vehicle>();
 				if (v) {
+					ECMoth ec = v.GetComponent<ECMoth>();
+					if (ec) {
+						ec.lastGeyserTime = DayNightCycle.main.timePassedAsFloat;
+					}
 					if (v is SeaMoth) { //will set temp and do a ton of damage
 						v.GetComponentInChildren<DIHooks.LavaWarningTriggerDetector>().markGeyserDetected();
 					}

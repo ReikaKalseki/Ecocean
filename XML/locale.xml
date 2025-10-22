@@ -111,6 +111,22 @@
 			WaterCurrent
 		</header>
 	</WaterCurrent>
+	<HeatColumnShell>
+		<name>
+			 Thermal Plume
+		</name>
+		<desc>
+			
+		</desc>
+		<pda>
+			Probably driven by volcanic activity on the seafloor far below, these upwellings of heated water carry organic detritus that sank to the seafloor eons ago.
+			
+			Note: The debris and turbulence within may serve to disguise acoustic emissions.
+		</pda>
+		<header>
+			HeatColumnShell
+		</header>
+	</HeatColumnShell>
 	<TreeBud>
 		<name>
 			
@@ -235,6 +251,20 @@
 			
 		</header>
 	</treeMushroomSpores>
+	<voidOrganic>
+		<name>
+			Abyssal Organic Material
+		</name>
+		<desc>
+			Organic detritus rising from the depths.
+		</desc>
+		<pda>
+			
+		</pda>
+		<header>
+			
+		</header>
+	</voidOrganic>
 	<pinkBulbStack>
 		<name>
 			Bulb Chain
