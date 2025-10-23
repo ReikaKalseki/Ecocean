@@ -233,7 +233,7 @@ namespace ReikaKalseki.Ecocean {
 						}
 						else if (UnityEngine.Random.Range(0F, 1F) < 0.075F) {
 							id = EcoceanMod.heatColumnBones.Values.getRandomEntry().ClassID;
-							yRange = 100;
+							yRange = (float)MathUtil.linterpolate(dist, 80, 200, 100, 300);
 						}/*
 						else if (UnityEngine.Random.Range(0F, 1F) < 0.2F) {
 							id = EcoceanMod.heatColumnFog.ClassID;
@@ -552,7 +552,7 @@ namespace ReikaKalseki.Ecocean {
 			});
 			if (isVoidHeatColumn(calc.position, out Vector3 trash)) {
 				//SNUtil.writeToChat("Computing water temp @ " + calc.position + " in heat column " + trash);
-				calc.setValue(Mathf.Max(calc.getTemperature(), 75));
+				calc.setValue(Mathf.Max(calc.getTemperature(), 60));
 			}
 		}
 

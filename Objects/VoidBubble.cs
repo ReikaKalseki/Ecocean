@@ -255,8 +255,10 @@ namespace ReikaKalseki.Ecocean {
 			light.range = stuckTo ? 16 : 24;
 			light.color = color;
 
-			if ((transform.position.y < -50 && !VanillaBiomes.VOID.isInBiome(transform.position + (Vector3.up * 50))) || UWE.Utils.RaycastIntoSharedBuffer(new Ray(transform.position, Vector3.up), 12, Voxeland.GetTerrainLayerMask()) > 0)
-				this.burst();
+			if (!stuckTo) {
+				if ((transform.position.y < -50 && !VanillaBiomes.VOID.isInBiome(transform.position + (Vector3.up * 50))) || UWE.Utils.RaycastIntoSharedBuffer(new Ray(transform.position, Vector3.up), 12, Voxeland.GetTerrainLayerMask()) > 0)
+					this.burst();
+			}
 		}
 
 		public void fade(float time) {
