@@ -297,18 +297,25 @@ namespace ReikaKalseki.Ecocean {
 			if (pos.y <= -UnityEngine.Random.Range(minDepth, maxDepth) && biomes.Contains(BiomeBase.getBiome(pos))) {
 				//if (UnityEngine.Object.FindObjectsOfType<VoidTongueTag>().Length == 0)
 				//	SNUtil.writeToChat("Check void grab time = "+time.ToString("000.0")+"/"+nextVoidTongueGrab.ToString("000.0"));
-				if (time >= nextVoidTongueGrab) {
-					nextVoidTongueGrab = time + 10;
-					GameObject go = ObjectUtil.createWorldObject(EcoceanMod.tongue.ClassID);
-					go.fullyEnable();
-					float depth = Mathf.Min(pos.y-(UnityEngine.Random.Range(400F, 500F)*(ep.currentSub ? 2 : 1)));
-					Vector3 put = MathUtil.getRandomVectorAround(pos, 60).setY(depth);
-					go.transform.position = put;
-					//go.transform.position = MathUtil.getRandomVectorAround(pos+Camera.main.transform.forward.normalized*400, 40).setY(-1600);
-					VoidTongueTag v = go.GetComponent<VoidTongueTag>();
-					v.enabled = true;
-					v.startGrab(Mathf.Max(-depth - (ep.currentSub ? 250 : 150), -pos.y + (UnityEngine.Random.Range(200F, 400F) * (ep.currentSub ? 0.75F : 1))));
-				}
+				attemptTongueGrab();
+			}
+		}
+
+		public static void attemptTongueGrab() {
+			float time = DayNightCycle.main.timePassedAsFloat;
+			if (time >= nextVoidTongueGrab) {
+				Player ep = Player.main;
+				Vector3 pos = ep.transform.position;
+				nextVoidTongueGrab = time + 10;
+				GameObject go = ObjectUtil.createWorldObject(EcoceanMod.tongue.ClassID);
+				go.fullyEnable();
+				float depth = Mathf.Min(pos.y-(UnityEngine.Random.Range(400F, 500F)*(ep.currentSub ? 2 : 1)));
+				Vector3 put = MathUtil.getRandomVectorAround(pos, 60).setY(depth);
+				go.transform.position = put;
+				//go.transform.position = MathUtil.getRandomVectorAround(pos+Camera.main.transform.forward.normalized*400, 40).setY(-1600);
+				VoidTongueTag v = go.GetComponent<VoidTongueTag>();
+				v.enabled = true;
+				v.startGrab(Mathf.Max(-depth - (ep.currentSub ? 250 : 150), -pos.y + (UnityEngine.Random.Range(200F, 400F) * (ep.currentSub ? 0.75F : 1))));
 			}
 		}
 
