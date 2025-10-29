@@ -17,9 +17,7 @@ using UnityEngine.UI;
 
 namespace ReikaKalseki.Ecocean {
 
-	public class VoidBubble : Spawnable {
-
-		private readonly XMLLocale.LocaleEntry locale;
+	public class VoidBubble : InteractableSpawnable {
 
 		internal static readonly Color COLOR = new Color(0.25F, 0F, 1F, 1);
 		internal static readonly Color COLOR_ATTACHED = new Color(0.75F, 0.5F, 1F, 1);
@@ -31,8 +29,8 @@ namespace ReikaKalseki.Ecocean {
 
 		private float lastIterateTime = -1;
 
-		internal VoidBubble(XMLLocale.LocaleEntry e) : base(e.key, e.name, e.desc) {
-			locale = e;
+		internal VoidBubble(XMLLocale.LocaleEntry e) : base(e) {
+			scanTime = 1.5F;
 		}
 
 		public override GameObject GetGameObject() {
@@ -68,7 +66,7 @@ namespace ReikaKalseki.Ecocean {
 
 		public void register() {
 			this.Patch();
-			SNUtil.addPDAEntry(this, 1.5F, "PlanetaryGeology", locale.pda, locale.getField<string>("header"));
+			registerEncyPage();
 			ItemRegistry.instance.addItem(this);
 		}
 

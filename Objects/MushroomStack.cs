@@ -21,7 +21,7 @@ namespace ReikaKalseki.Ecocean {
 		public MushroomStack(XMLLocale.LocaleEntry e) : base(e, new FloraPrefabFetch("99cdec62-302b-4999-ba49-f50c73575a4d"), "10d3c291-f343-4d7c-a68a-ecc64229d086", "Samples") {
 			glowIntensity = 2F;
 			finalCutBonus = 0;
-			OnFinishedPatching += () => { this.addPDAEntry(e.pda, 15F, e.getField<string>("header")); };
+			OnFinishedPatching += () => { this.addPDAEntry(e.pda, 15F, e.getString("header")); };
 		}
 
 		public override Vector2int SizeInInventory {

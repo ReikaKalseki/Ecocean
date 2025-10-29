@@ -62,7 +62,7 @@ namespace ReikaKalseki.Ecocean {
 
 		public void register() {
 			this.Patch();
-			pdaPage = SNUtil.addPDAEntry(this, -1, "Lifeforms/Fauna/Leviathans", locale.pda, locale.getField<string>("header"));
+			pdaPage = SNUtil.addPDAEntry(this, -1, "Lifeforms/Fauna/Leviathans", locale.pda, locale.getString("header"));
 			ItemRegistry.instance.addItem(this);
 		}
 

@@ -29,7 +29,7 @@ namespace ReikaKalseki.Ecocean {
 
 			XMLLocale.LocaleEntry e = EcoceanMod.locale.getEntry("WaterCurrent");
 			EcoceanMod.waterCurrentCommon = TechTypeHandler.AddTechType(EcoceanMod.modDLL, e.key, e.name, e.desc);
-			SNUtil.addPDAEntry(basic, 5, "PlanetaryGeology", e.pda, e.getField<string>("header"), d => d.key = EcoceanMod.waterCurrentCommon);
+			SNUtil.addPDAEntry(basic, 5, e.getString("category"), e.pda, e.getString("header"), d => d.key = EcoceanMod.waterCurrentCommon);
 		}
 
 	}

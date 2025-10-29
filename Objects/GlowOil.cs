@@ -106,10 +106,10 @@ namespace ReikaKalseki.Ecocean {
 
 		public void register() {
 			this.Patch();
-			//SNUtil.addPDAEntry(this, 3, "Advanced", locale.pda, locale.getField<string>("header"));/*
+			//SNUtil.addPDAEntry(this, 3, "Advanced", locale.pda, locale.getString("header"));/*
 			pdaPage = PDAManager.createPage("ency_" + ClassID, FriendlyName, locale.pda, "Lifeforms");
 			pdaPage.addSubcategory("Flora").addSubcategory("Exploitable");
-			pdaPage.setHeaderImage(TextureManager.getTexture(EcoceanMod.modDLL, "Textures/PDA/" + locale.getField<string>("header")));
+			pdaPage.setHeaderImage(TextureManager.getTexture(EcoceanMod.modDLL, "Textures/PDA/" + locale.getString("header")));
 			pdaPage.register();
 			KnownTechHandler.Main.SetAnalysisTechEntry(TechType, new List<TechType>() { TechType });
 			PDAScanner.EntryData e = new PDAScanner.EntryData();

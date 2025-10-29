@@ -39,19 +39,19 @@ namespace ReikaKalseki.Ecocean {
 		}
 
 		public string getLocaleEntry(string key) {
-			return this.getLocaleEntry().getField<string>(key);
+			return this.getLocaleEntry().getString(key);
 		}
 
 		internal void register() {
 			XMLLocale.LocaleEntry e = this.getLocaleEntry();
-			this.addEffect(TechType.KooshChunk, (s, go) => shiftMorale(-10), e.getField<string>("koosh"));
-			this.addEffect(TechType.BulboTreePiece, (s, go) => shiftMorale(-5), e.getField<string>("bulbo"));
-			this.addEffect(TechType.OrangeMushroomSpore, (s, go) => shiftMorale(-20), e.getField<string>("jaffa"));
-			this.addEffect(TechType.SpottedLeavesPlantSeed, (s, go) => shiftMorale(5), e.getField<string>("dockleaf"));
-			this.addEffect(TechType.PinkFlowerSeed, (s, go) => Player.main.liveMixin.TakeDamage(UnityEngine.Random.Range(15, 20), Player.main.transform.position, DamageType.Puncture, go), e.getField<string>("koosh"));
+			this.addEffect(TechType.KooshChunk, (s, go) => shiftMorale(-10), e.getString("koosh"));
+			this.addEffect(TechType.BulboTreePiece, (s, go) => shiftMorale(-5), e.getString("bulbo"));
+			this.addEffect(TechType.OrangeMushroomSpore, (s, go) => shiftMorale(-20), e.getString("jaffa"));
+			this.addEffect(TechType.SpottedLeavesPlantSeed, (s, go) => shiftMorale(5), e.getString("dockleaf"));
+			this.addEffect(TechType.PinkFlowerSeed, (s, go) => Player.main.liveMixin.TakeDamage(UnityEngine.Random.Range(15, 20), Player.main.transform.position, DamageType.Puncture, go), e.getString("koosh"));
 
-			this.addDamageOverTimeEffect(TechType.AcidMushroom, 40, 15, DamageType.Acid, e.getField<string>("acidburn"));
-			this.addDamageOverTimeEffect(TechType.WhiteMushroom, 250, 10, DamageType.Acid, e.getField<string>("acidburn"));
+			this.addDamageOverTimeEffect(TechType.AcidMushroom, 40, 15, DamageType.Acid, e.getString("acidburn"));
+			this.addDamageOverTimeEffect(TechType.WhiteMushroom, 250, 10, DamageType.Acid, e.getString("acidburn"));
 
 			this.addVisualDistortionEffect(TechType.JellyPlant, 3, 15);
 
@@ -68,8 +68,8 @@ namespace ReikaKalseki.Ecocean {
 			this.addPoisonEffect(TechType.RedRollPlantSeed, 40, 15);
 			this.addPoisonEffect(TechType.PurpleStalkSeed, 50, 15);
 
-			this.addEffect(TechType.CreepvineSeedCluster, (s, go) => PlayerMovementSpeedModifier.add(0.4F, 30), e.getField<string>("slow"));
-			this.addEffect(EcoceanMod.glowOil.TechType, (s, go) => PlayerMovementSpeedModifier.add(0.33F, 60), e.getField<string>("slow"));
+			this.addEffect(TechType.CreepvineSeedCluster, (s, go) => PlayerMovementSpeedModifier.add(0.4F, 30), e.getString("slow"));
+			this.addEffect(EcoceanMod.glowOil.TechType, (s, go) => PlayerMovementSpeedModifier.add(0.33F, 60), e.getString("slow"));
 
 			this.addVomitingEffect(EcoceanMod.lavaShroom.seed.TechType, 60, 60, 8, 4F, 20);
 			this.addPoisonEffect(EcoceanMod.lavaShroom.seed.TechType, 50, 30);
@@ -135,7 +135,7 @@ namespace ReikaKalseki.Ecocean {
 		}
 
 		public void addPoisonEffect(TechType tt, float totalDamage, float duration) {
-			this.addDamageOverTimeEffect(tt, totalDamage, duration, DamageType.Poison, this.getLocaleEntry().getField<string>("poison"));
+			this.addDamageOverTimeEffect(tt, totalDamage, duration, DamageType.Poison, this.getLocaleEntry().getString("poison"));
 		}
 
 		public void addVisualDistortionEffect(TechType tt, float intensity, float duration) {

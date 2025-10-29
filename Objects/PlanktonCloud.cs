@@ -19,9 +19,7 @@ using UnityEngine.UI;
 
 namespace ReikaKalseki.Ecocean {
 
-	public class PlanktonCloud : Spawnable {
-
-		private readonly XMLLocale.LocaleEntry locale;
+	public class PlanktonCloud : InteractableSpawnable {
 
 		internal static readonly float BASE_RANGE = 10;
 		internal static readonly float MAX_RANGE = 18;
@@ -32,8 +30,8 @@ namespace ReikaKalseki.Ecocean {
 
 		private static readonly Dictionary<BiomeBase, BiomeSpawnData> spawnData = new Dictionary<BiomeBase, BiomeSpawnData>();
 
-		internal PlanktonCloud(XMLLocale.LocaleEntry e) : base(e.key, e.name, e.desc) {
-			locale = e;
+		internal PlanktonCloud(XMLLocale.LocaleEntry e) : base(e) {
+			scanTime = 3;
 
 			addSpawnData(VanillaBiomes.SPARSE, 5, 0.5F, 1F, 120);
 			addSpawnData(VanillaBiomes.MOUNTAINS, 6, 1F, 0F, 120);
@@ -72,17 +70,7 @@ namespace ReikaKalseki.Ecocean {
 
 		public void register() {
 			this.Patch();
-			SNUtil.addPDAEntry(this, 3, "Lifeforms/Flora/Sea", locale.pda, locale.getField<string>("header"));/*
-			PDAManager.PDAPage pdaPage = PDAManager.createPage("ency_"+ClassID, FriendlyName, locale.pda, "Lifeforms/Flora/Sea");
-			pdaPage.setHeaderImage(TextureManager.getTexture(EcoceanMod.modDLL, "Textures/PDA/"+locale.getField<string>("header")));
-			pdaPage.register();
-        	KnownTechHandler.Main.SetAnalysisTechEntry(TechType, new List<TechType>(){TechType});
-			PDAScanner.EntryData e = new PDAScanner.EntryData();
-			e.key = TechType;
-			e.locked = true;
-			e.scanTime = 3;
-			e.encyclopedia = pdaPage.id;
-			PDAHandler.AddCustomScannerEntry(e);*/
+			registerEncyPage();
 			ItemRegistry.instance.addItem(this);
 			//GenUtil.registerSlotWorldgen(ClassID, PrefabFileName, TechType, EntitySlot.Type.Creature, LargeWorldEntity.CellLevel.Far, BiomeType.CragField_OpenDeep_CreatureOnly, 1, 1F);
 		}

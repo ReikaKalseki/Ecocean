@@ -55,10 +55,13 @@
 			
 		</desc>
 		<pda>
-			
+			Periodically fired by Lanternshrooms, these globules of semi-molten rock are notable primarily for the extreme hazard they present to those nearby. Their extreme temperature dramatically heats the surrounding water, often far past the thermal limits of any standard construction material, and a direct impact would apply severe kinetic forces.
 		</pda>
+		<category>
+			PlanetaryGeology
+		</category>
 		<header>
-			
+			lavabomb
 		</header>
 	</LavaBomb>
 	<VoidBubble>
@@ -78,6 +81,9 @@
 		<header>
 			VoidBubble
 		</header>
+		<category>
+			PlanetaryGeology
+		</category>
 	</VoidBubble>
 	<VoidTongue>
 		<name>
@@ -96,6 +102,9 @@
 		<header>
 			VoidTongue
 		</header>
+		<category>
+			Lifeforms/Fauna/Leviathans
+		</category>
 	</VoidTongue>
 	<WaterCurrent>
 		<name>
@@ -110,6 +119,9 @@
 		<header>
 			WaterCurrent
 		</header>
+		<category>
+			PlanetaryGeology
+		</category>
 	</WaterCurrent>
 	<HeatColumnShell>
 		<name>
@@ -126,6 +138,9 @@
 		<header>
 			HeatColumnShell
 		</header>
+		<category>
+			PlanetaryGeology
+		</category>
 	</HeatColumnShell>
 	<TreeBud>
 		<name>
@@ -153,6 +168,9 @@
 		<header>
 			Plankton
 		</header>
+		<category>
+			Lifeforms/Flora/Sea
+		</category>
 	</plankton>
 	<planktonItem>
 		<name>
@@ -191,6 +209,9 @@
 		<header>
 			Piezo
 		</header>
+		<category>
+			PlanetaryGeology
+		</category>
 	</piezoCrystal>
 	<mushroomStack>
 		<name>
@@ -326,8 +347,11 @@
 			
 		</pda>
 		<header>
-			Piezo
+			sonarflora
 		</header>
+		<category>
+			Lifeforms/Flora/Sea
+		</category>
 	</sonarFlora>
 	<FoodEffects>
 		<name>

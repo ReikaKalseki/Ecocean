@@ -17,12 +17,10 @@ using UnityEngine.UI;
 
 namespace ReikaKalseki.Ecocean {
 
-	public class PiezoCrystal : Spawnable {
+	public class PiezoCrystal : InteractableSpawnable {
 
-		private readonly XMLLocale.LocaleEntry locale;
-
-		internal PiezoCrystal(XMLLocale.LocaleEntry e) : base(e.key, e.name, e.desc) {
-			locale = e;
+		internal PiezoCrystal(XMLLocale.LocaleEntry e) : base(e) {
+			scanTime = 8;
 		}
 
 		public override GameObject GetGameObject() {
@@ -86,7 +84,7 @@ namespace ReikaKalseki.Ecocean {
 
 		public void register() {
 			this.Patch();
-			SNUtil.addPDAEntry(this, 8, "PlanetaryGeology", locale.pda, locale.getField<string>("header"));
+			registerEncyPage();
 			ItemRegistry.instance.addItem(this);
 			GenUtil.registerPrefabWorldgen(this, EntitySlot.Type.Creature, LargeWorldEntity.CellLevel.VeryFar, BiomeType.UnderwaterIslands_OpenDeep_CreatureOnly, 1, 0.042F);
 			GenUtil.registerWorldgen(new ScatteredPiezoGenerator(4, new Vector3(-117, -205, 1002), new Vector3(60, 20, 60)));

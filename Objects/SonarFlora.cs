@@ -20,12 +20,10 @@ using UnityEngine.UI;
 
 namespace ReikaKalseki.Ecocean {
 
-	public class SonarFlora : Spawnable {
+	public class SonarFlora : InteractableSpawnable {
 
-		private readonly XMLLocale.LocaleEntry locale;
-
-		internal SonarFlora(XMLLocale.LocaleEntry e) : base(e.key, e.name, e.desc) {
-			locale = e;
+		internal SonarFlora(XMLLocale.LocaleEntry e) : base(e) {
+			scanTime = 5;
 		}
 
 		public override GameObject GetGameObject() {

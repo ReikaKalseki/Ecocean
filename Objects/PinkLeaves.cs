@@ -19,7 +19,7 @@ namespace ReikaKalseki.Ecocean {
 			finalCutBonus = 1;
 			glowIntensity = 1.2F;
 			collectionMethod = HarvestType.DamageAlive;
-			//OnFinishedPatching += () => {addPDAEntry(e.pda, 4F, e.getField<string>("header"));};
+			//OnFinishedPatching += () => {addPDAEntry(e.pda, 4F, e.getString("header"));};
 		}
 
 		public override Vector2int SizeInInventory {

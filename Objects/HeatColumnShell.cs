@@ -19,22 +19,20 @@ using UnityEngine.UI;
 
 namespace ReikaKalseki.Ecocean {
 
-	public class HeatColumnShell : Spawnable {
+	public class HeatColumnShell : InteractableSpawnable {
 
 		public static float fresnelAmount = 0.925F;
 		public static float specStrength = 0.02F;
 
-		private XMLLocale.LocaleEntry locale;
-
 		private string fixedUUID = Guid.NewGuid().ToString();
 
-		internal HeatColumnShell(XMLLocale.LocaleEntry e) : base(e.key, e.name, e.desc) {
-			locale = e;
+		internal HeatColumnShell(XMLLocale.LocaleEntry e) : base(e) {
+			scanTime = 15;
 		}
 
 		public void register() {
 			Patch();
-			SNUtil.addPDAEntry(this, 10, "PlanetaryGeology", locale.pda, locale.getField<string>("header"));
+			registerEncyPage();
 		}
 
 		public override GameObject GetGameObject() {

@@ -25,7 +25,7 @@ namespace ReikaKalseki.Ecocean {
 			finalCutBonus = 0;
 			collectionMethod = HarvestType.None;
 			OnFinishedPatching += () => {
-				this.addPDAEntry(e.pda, 2F, e.getField<string>("header"));
+				this.addPDAEntry(e.pda, 2F, e.getString("header"));
 				SaveSystem.addSaveHandler(ClassID, new SaveSystem.ComponentFieldSaveHandler<MushroomVaseStrandTag>().addField("resourceGenerationProgress").addField("lastHarvest"));
 			};
 

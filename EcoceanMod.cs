@@ -67,11 +67,17 @@ namespace ReikaKalseki.Ecocean {
 		//public static readonly MushroomTendril[] mushroomTendrils = new MushroomTendril[2];
 		public static DeadPlant deadBlighted;
 
+		private static TerrainLootSpawner ilzOreSpawner;
+
 		public static TechType waterCurrentCommon;
 		public static TechType celeryTree;
 
 		internal static readonly Vector3 reaperlessTripleVent = new Vector3(-1150, -240, -258);
 		internal static readonly Vector3 northDuneBit = new Vector3(-1151, -340, 1444);
+		internal static readonly List<Vector3> ilzOreSpawners = new List<Vector3>{
+			new Vector3(-92, -1250, 343),
+			new Vector3(-108.6F, -1256, 379.7F),
+		};
 
 		[QModPatch]
 		public static void Load() {
@@ -137,7 +143,7 @@ namespace ReikaKalseki.Ecocean {
             */
 			e = locale.getEntry("celeryTree");
 			celeryTree = SNUtil.addTechTypeToVanillaPrefabs(e, DecoPlants.CELERY_TREE.prefab);
-			SNUtil.addPDAEntry(celeryTree, e.key, e.name, 10, "Lifeforms/Flora/Land", e.pda, e.getField<string>("header"));
+			SNUtil.addPDAEntry(celeryTree, e.key, e.name, 10, "Lifeforms/Flora/Land", e.pda, e.getString("header"));
 
 			voidBubble = new VoidBubble(locale.getEntry("VoidBubble"));
 			voidBubble.register();
@@ -167,14 +173,14 @@ namespace ReikaKalseki.Ecocean {
 			glowShroom = new GlowOilMushroom();
 			glowShroom.Patch();
 			e = locale.getEntry(glowShroom.ClassID);
-			glowShroom.addPDAEntry(e.pda, 15F, e.getField<string>("header"));
+			glowShroom.addPDAEntry(e.pda, 15F, e.getString("header"));
 			SNUtil.log(" > " + glowShroom);
 			GenUtil.registerPrefabWorldgen(glowShroom, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Far, BiomeType.Dunes_Grass, 1, 0.25F);
 
 			lavaShroom = new LavaBombMushroom();
 			lavaShroom.Patch();
 			e = locale.getEntry(lavaShroom.ClassID);
-			lavaShroom.addPDAEntry(e.pda, 20F, e.getField<string>("header"));
+			lavaShroom.addPDAEntry(e.pda, 20F, e.getString("header"));
 			SNUtil.log(" > " + lavaShroom);
 			GenUtil.registerPrefabWorldgen(lavaShroom, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Far, BiomeType.InactiveLavaZone_Chamber_Floor, 1, 0.08F);
 			GenUtil.registerPrefabWorldgen(lavaShroom, EntitySlot.Type.Medium, LargeWorldEntity.CellLevel.Far, BiomeType.InactiveLavaZone_Chamber_Floor_Far, 1, 0.08F);
@@ -196,6 +202,21 @@ namespace ReikaKalseki.Ecocean {
 
 			GenUtil.registerWorldgen(new PositionedPrefab(VanillaCreatures.REAPER.prefab, reaperlessTripleVent.setY(-200)));
 			GenUtil.registerWorldgen(new PositionedPrefab(VanillaCreatures.REAPER.prefab, northDuneBit.setY(-320)));
+
+			TerrainLootSpawner.WeightedTerrainLootSpawn wr = new TerrainLootSpawner.WeightedTerrainLootSpawn();
+			wr.addEntry(VanillaResources.DIAMOND.prefab, 20);
+			wr.addEntry(VanillaResources.GOLD.prefab, 30);
+			wr.addEntry(VanillaResources.LITHIUM.prefab, 10);
+			wr.addEntry(VanillaResources.MAGNETITE.prefab, 40);
+			wr.addEntry(VanillaResources.NICKEL.prefab, 40);
+			wr.addEntry(VanillaResources.RUBY.prefab, 10);
+			wr.addEntry(VanillaResources.SILVER.prefab, 20);
+			wr.addEntry(VanillaResources.URANIUM.prefab, 20);
+			ilzOreSpawner = new TerrainLootSpawner("ilzOreSpawner", wr);
+			ilzOreSpawner.Patch();
+
+			foreach (Vector3 vec in ilzOreSpawners)
+				GenUtil.registerWorldgen(new PositionedPrefab(ilzOreSpawner.ClassID, vec, Quaternion.identity, new Vector3(0.1F, 25, 40)));
 
 			//ConsoleCommandsHandler.Main.RegisterConsoleCommand<Action<int>>("currentFlowVec", MountainCurrentSystem.instance.registerFlowVector);
 			ConsoleCommandsHandler.Main.RegisterConsoleCommand<Action<float>>("attackBase", r => { ECHooks.attractCreaturesToBase(Player.main.currentSub, r, c => c is GhostLeviathan || c is GhostLeviatanVoid || c is ReaperLeviathan || c is SeaDragon || c is Shocker || c is CrabSquid || c is BoneShark); });

@@ -17,19 +17,18 @@ using UnityEngine.UI;
 
 namespace ReikaKalseki.Ecocean {
 
-	public class LavaBomb : Spawnable {
+	public class LavaBomb : InteractableSpawnable {
 
 		internal static readonly float HEAT_RADIUS = 60;
 		internal static readonly float MAX_TEMPERATURE = 1500;
 
 		internal static List<LavaBombTag> activeLavaBombs = new List<LavaBombTag>();
 
-		private readonly XMLLocale.LocaleEntry locale;
-
-		internal LavaBomb(XMLLocale.LocaleEntry e) : base(e.key, e.name, e.desc) {
-			locale = e;
+		internal LavaBomb(XMLLocale.LocaleEntry e) : base(e) {
+			scanTime = 0.5F;
 			OnFinishedPatching += () => {
 				SaveSystem.addSaveHandler(ClassID, new SaveSystem.ComponentFieldSaveHandler<LavaBombTag>().addField("temperature").addField("spawnTime"));
+				registerEncyPage();
 			};
 		}
 

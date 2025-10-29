@@ -17,7 +17,7 @@ namespace ReikaKalseki.Ecocean {
 
 		public PinkBulbStack(XMLLocale.LocaleEntry e) : base(e, new FloraPrefabFetch(VanillaFlora.REDWORT), "daff0e31-dd08-4219-8793-39547fdb745e", "Samples") {
 			finalCutBonus = 4;
-			OnFinishedPatching += () => { this.addPDAEntry(e.pda, 4F, e.getField<string>("header")); };
+			OnFinishedPatching += () => { this.addPDAEntry(e.pda, 4F, e.getString("header")); };
 		}
 
 		public override Vector2int SizeInInventory {
