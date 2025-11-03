@@ -1001,6 +1001,9 @@ namespace ReikaKalseki.Ecocean {
 				PlanktonCloudTag tag = ch.prefab.GetComponentInChildren<PlanktonCloudTag>();
 				ch.allowTargeting = tag && !tag.isBaseBound && !Player.main.currentSub && !Player.main.GetVehicle();
 			}
+			if (ch.prefab.ClassId == EcoceanMod.heatColumnShell.ClassID && PDAScanner.scanTarget.gameObject && PDAScanner.scanTarget.gameObject.GetComponent<HeatColumnShellTag>() && PDAScanner.scanTarget.gameObject != ch.prefab.gameObject) {
+				ch.allowTargeting = false;
+			}
 		}
 	}
 }

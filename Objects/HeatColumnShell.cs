@@ -69,7 +69,7 @@ namespace ReikaKalseki.Ecocean {
 
 		protected override void ProcessPrefab(GameObject go) {
 			base.ProcessPrefab(go);
-			go.EnsureComponent<PrefabIdentifier>().id = fixedUUID;
+			//go.EnsureComponent<PrefabIdentifier>().id = fixedUUID;
 		}
 
 	}
@@ -112,7 +112,9 @@ namespace ReikaKalseki.Ecocean {
 
 			f = 1;
 			if (age > 30) {
-				this.gameObject.destroy();
+				f = 0;
+				if (gameObject != PDAScanner.scanTarget.gameObject)
+					gameObject.destroy();
 			}
 			else if (age > 20) {
 				f = 1-((age - 20) / 10F);
@@ -120,7 +122,7 @@ namespace ReikaKalseki.Ecocean {
 			else if (age < 5) {
 				f = age / 5F;
 			}
-			if (Player.main) {
+			if (f > 0 && Player.main) {
 				double dist = (transform.position-Player.main.transform.position).setY(0).magnitude;
 				f *= (float)MathUtil.linterpolate(dist, 50, 200, 0.3, 1, true);
 			}

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml;
 using System.Xml.Serialization;
 
@@ -209,11 +210,12 @@ namespace ReikaKalseki.Ecocean {
 			LavaBomb.activeLavaBombs.Remove(this);
 			if (onLavaBombImpactEvent != null)
 				onLavaBombImpactEvent.Invoke(this, impacted);
-			float pdist = Vector3.Distance(transform.position, Player.main.transform.position);
-			if (pdist <= 80) {
+			float pdist = (transform.position-Player.main.transform.position).sqrMagnitude;
+			if (pdist <= 22500) {
 				SoundManager.playSoundAt(impactSound, transform.position, false, 40);
 				HashSet<int> used = new HashSet<int>();
-				HashSet<LiveMixin> set = WorldUtil.getObjectsNearWithComponent<LiveMixin>(transform.position, 15);
+				BaseCell bc = impacted.gameObject.FindAncestor<BaseCell>();
+				List<LiveMixin> set = bc ? bc.gameObject.FindAncestor<BaseHullStrength>().victims : WorldUtil.getObjectsNearWithComponent<LiveMixin>(transform.position, 15).ToList();
 				foreach (LiveMixin lv in set) {
 					if (!lv.IsAlive() || used.Contains(lv.gameObject.GetInstanceID()))
 						continue;
@@ -226,7 +228,7 @@ namespace ReikaKalseki.Ecocean {
 					float amt = wasHit ? 100 : 20;
 					SubRoot sub = lv.GetComponent<SubRoot>();
 					if (sub && sub.isCyclops)
-						amt = wasHit ? 150 : 45;
+						amt = wasHit ? 150 : 45;	
 					Vehicle v = lv.GetComponent<Vehicle>();
 					if (v && v is SeaMoth)
 						amt = wasHit ? 60 : 18;
@@ -238,8 +240,12 @@ namespace ReikaKalseki.Ecocean {
 					}
 					amt *= 0.5F + (0.5F * this.getIntensity());
 					amt *= EcoceanMod.config.getFloat(ECConfig.ConfigEntries.BOMBDMG);
+					if (bc || p)
+						amt = 100000;
 					lv.TakeDamage(amt, lv.transform.position, DamageType.Heat, gameObject);
 				}
+				//if (bc)
+					//bc.gameObject.FindAncestor<BaseFloodSim>().
 			}
 			isCollided = true;
 			if (pdist <= 200)
