@@ -269,6 +269,11 @@ namespace ReikaKalseki.Ecocean {
 			return 15;
 		}
 
+		public void OnRepulsionHit() {
+			if (!isExploded)
+				explode();
+		}
+
 	}
 
 	public class ExplodingAnchorPodDamage {

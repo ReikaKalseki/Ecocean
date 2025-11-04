@@ -43,14 +43,15 @@ namespace ReikaKalseki.Ecocean {
 			this.Patch();
 		}
 
-		public static bool checkAndTryScoop(SeaMoth sm, float dT, TechType harvest) {
+		public static bool checkAndTryScoop(SeaMoth sm, float dT, TechType harvest, out GameObject collected) {
+			collected = null;
 			if (sm.GetComponent<Rigidbody>().velocity.magnitude >= 4 && sm.vehicleHasUpgrade(EcoceanMod.planktonScoop.TechType)) {
 				if (UnityEngine.Random.Range(0F, 1F) < 0.075F * dT * EcoceanMod.config.getFloat(ECConfig.ConfigEntries.PLANKTONRATE)) {
 					foreach (SeamothStorageContainer sc in sm.GetComponentsInChildren<SeamothStorageContainer>(true)) {
 						TechTag tt = sc.GetComponent<TechTag>();
 						if (tt && tt.type == EcoceanMod.planktonScoop.TechType) {
-							GameObject go = ObjectUtil.createWorldObject(harvest, true, false);
-							sc.container.AddItem(go.GetComponentInChildren<Pickupable>());
+							collected = ObjectUtil.createWorldObject(harvest, true, false);
+							sc.container.AddItem(collected.GetComponentInChildren<Pickupable>());
 							if (sc.container.IsFull())
 								SNUtil.writeToChat("Plankton scoop is full");
 							break;

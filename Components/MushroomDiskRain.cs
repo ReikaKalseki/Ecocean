@@ -138,7 +138,7 @@ namespace ReikaKalseki.Ecocean {
 					//	SNUtil.writeToChat("Touching "+other.gameObject.GetFullHierarchyPath());
 					SeaMoth sm = other.isTrigger ? null : other.gameObject.FindAncestor<SeaMoth>();
 					if (sm) {
-						SeamothPlanktonScoop.checkAndTryScoop(sm, Time.deltaTime, EcoceanMod.treeMushroomSpores.TechType);
+						SeamothPlanktonScoop.checkAndTryScoop(sm, Time.deltaTime, EcoceanMod.treeMushroomSpores.TechType, out GameObject drop);
 					}
 					PlanktonClearingArea area = other.isTrigger ? other.gameObject.FindAncestor<PlanktonClearingArea>() : null;
 					if (area) {

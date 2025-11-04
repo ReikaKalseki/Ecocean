@@ -77,6 +77,8 @@ namespace ReikaKalseki.Ecocean {
 		internal static readonly List<Vector3> ilzOreSpawners = new List<Vector3>{
 			new Vector3(-92, -1250, 343),
 			new Vector3(-108.6F, -1256, 379.7F),
+			new Vector3(-358, -1052, 109),
+			new Vector3(-165, -1278, 267),
 		};
 
 		[QModPatch]
@@ -216,7 +218,7 @@ namespace ReikaKalseki.Ecocean {
 			ilzOreSpawner.Patch();
 
 			foreach (Vector3 vec in ilzOreSpawners)
-				GenUtil.registerWorldgen(new PositionedPrefab(ilzOreSpawner.ClassID, vec, Quaternion.identity, new Vector3(0.1F, 25, 40)));
+				GenUtil.registerWorldgen(new PositionedPrefab(ilzOreSpawner.ClassID, vec, Quaternion.identity, new Vector3(0.1F, 32, 40)));
 
 			//ConsoleCommandsHandler.Main.RegisterConsoleCommand<Action<int>>("currentFlowVec", MountainCurrentSystem.instance.registerFlowVector);
 			ConsoleCommandsHandler.Main.RegisterConsoleCommand<Action<float>>("attackBase", r => { ECHooks.attractCreaturesToBase(Player.main.currentSub, r, c => c is GhostLeviathan || c is GhostLeviatanVoid || c is ReaperLeviathan || c is SeaDragon || c is Shocker || c is CrabSquid || c is BoneShark); });

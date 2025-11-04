@@ -491,7 +491,7 @@ namespace ReikaKalseki.Ecocean {
 
 		private void checkAndTryScoop(SeaMoth sm, float dT) {
 			if (Vector3.Distance(sm.transform.position, transform.position) <= 5) {
-				if (SeamothPlanktonScoop.checkAndTryScoop(sm, dT, EcoceanMod.planktonItem.TechType)) {
+				if (SeamothPlanktonScoop.checkAndTryScoop(sm, dT, EcoceanMod.planktonItem.TechType, out GameObject drop)) {
 					this.damage(sm, dT);
 					if (onPlanktonScoopEvent != null)
 						onPlanktonScoopEvent.Invoke(this, sm);
