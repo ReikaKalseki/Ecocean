@@ -66,6 +66,8 @@ namespace ReikaKalseki.Ecocean {
 
 		new void Update() {
 			base.Update();
+			if (!transform)
+				return;
 			transform.localScale = Vector3.one * scaleFactor * 0.15F;
 			if (body)
 				body.velocity = Vector3.up * 7 * speedFactor;

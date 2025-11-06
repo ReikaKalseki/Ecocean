@@ -19,7 +19,7 @@ using UnityEngine;
 
 namespace ReikaKalseki.Ecocean {
 
-	public static class ECHooks {
+	public static partial class ECHooks {
 
 		private static readonly HashSet<string> bloodVine = new HashSet<string>();
 
@@ -79,93 +79,6 @@ namespace ReikaKalseki.Ecocean {
 			bloodVine.AddRange(VanillaFlora.BLOOD_KELP.getPrefabs(true, true));
 		}
 
-		public class ECMoth : MonoBehaviour {
-
-			private SeaMoth seamoth;
-			private Rigidbody body;
-
-			private bool lightsOn;
-
-			public Func<float> getLightIntensity = () => 1;
-
-			private readonly LinkedList<float> lightToggles = new LinkedList<float>();
-
-			public int stuckCells { get; private set; }
-			private float lastCellCheckTime;
-
-			public PredatoryBloodvine holdingBloodKelp { get; private set; }
-
-			public bool touchingKelp { get; private set; }
-
-			public float lastTouchHeatBubble { get; internal set; }
-
-			public float lastGeyserTime { get; internal set; }
-
-			private VehicleAccelerationModifier speedModifier;
-
-			void Update() {
-				if (!seamoth)
-					seamoth = this.GetComponent<SeaMoth>();
-				if (!body)
-					body = this.GetComponent<Rigidbody>();
-
-				if (!speedModifier)
-					speedModifier = seamoth.addSpeedModifier();
-
-				float time = DayNightCycle.main.timePassedAsFloat;
-				while (lightToggles.First != null && time - lightToggles.First.Value > 3) {
-					lightToggles.RemoveFirst();
-				}
-				if (seamoth.toggleLights.lightsActive != lightsOn) {
-					lightToggles.AddLast(time);
-					lightsOn = seamoth.toggleLights.lightsActive;
-				}
-				int flashCount = lightToggles.Count;
-				//SNUtil.writeToChat(flashCount+" > "+((flashCount-5)/200F).ToString("0.0000"));
-				if (flashCount > 5 && UnityEngine.Random.Range(0F, 1F) < (flashCount - 5) / 250F * this.getFlashEffectiveness() * getLightIntensity()/* && seamoth.mainAnimator.GetBool("reaper_attack")*/) {
-					GameObject go = WorldUtil.areAnyObjectsNear(transform.position, 60, obj => {
-						ReaperLeviathan rl = obj.GetComponent<ReaperLeviathan>();
-						return rl && rl.holdingVehicle == seamoth;
-					}
-					);
-					//SNUtil.writeToChat("Found object "+go);
-					if (go) {
-						go.GetComponent<ReaperLeviathan>().ReleaseVehicle();
-					}
-				}
-				if (lightsOn) {
-					GlowOil.handleLightTick(transform);
-					if (UnityEngine.Random.Range(0F, 1F) <= 0.02F)
-						attractToLight(seamoth);
-				}
-
-				if (time - lastCellCheckTime >= 1) {
-					lastCellCheckTime = time;
-					//stuckCells = GetComponentsInChildren<VoidBubbleTag>().Length;
-					stuckCells = 0;
-					foreach (VoidBubbleTag vb in WorldUtil.getObjectsNearWithComponent<VoidBubbleTag>(transform.position, 24)) {
-						if (vb.isStuckTo(body))
-							stuckCells++;
-					}
-				}
-
-				speedModifier.accelerationMultiplier = 1;
-				if (stuckCells > 0)
-					speedModifier.accelerationMultiplier *= Mathf.Exp(-stuckCells * 0.2F);
-				if (touchingKelp)
-					speedModifier.accelerationMultiplier *= 0.3F;
-			}
-
-			private float getFlashEffectiveness() {
-				float brightness = DayNightCycle.main.GetLightScalar();
-				return 1.2F - (brightness * 0.8F);
-			}
-
-			public void OnBloodKelpGrab(PredatoryBloodvine c) {
-				holdingBloodKelp = c;
-			}
-		}
-
 		public static void onWorldLoaded() {
 			heatColumns.Clear();
 			UnityEngine.Random.InitState(SNUtil.getWorldSeedInt());
@@ -208,9 +121,9 @@ namespace ReikaKalseki.Ecocean {
 			}
 			Vehicle vv = ep.GetVehicle();
 			Vector3 pos = ep.transform.position;
+			bool inColumn = false;
 			if (pos.setY(0).magnitude >= 1700) { //more than 1200m from center
 				EcoceanMod.voidBubble.tickSpawner(ep, time, dT);
-				bool inColumn = false;
 				Vector3 mod = pos.modulo(1000);
 				Vector3 offset = pos-mod;
 				foreach (Vector3 col in heatColumns) {
@@ -228,10 +141,10 @@ namespace ReikaKalseki.Ecocean {
 						float yRange = -1;
 						Vector3 vec2 = MathUtil.getRandomVectorAround(at, 0, 15);
 						string id = EcoceanMod.heatBubble.ClassID;
-						if (UnityEngine.Random.Range(0F, 1F) < 0.03F) {
-							id = EcoceanMod.voidOrganic.ClassID;
-						}
-						else if (UnityEngine.Random.Range(0F, 1F) < 0.075F) {
+						//if (UnityEngine.Random.Range(0F, 1F) < 0.03F) { replace with scoop
+						//	id = EcoceanMod.voidOrganic.ClassID;
+						//}
+						if (UnityEngine.Random.Range(0F, 1F) < 0.075F) {
 							id = EcoceanMod.heatColumnBones.Values.getRandomEntry().ClassID;
 							yRange = (float)MathUtil.linterpolate(dist, 80, 200, 100, 300);
 						}/*
@@ -294,6 +207,9 @@ namespace ReikaKalseki.Ecocean {
 				if (minDepth < 600)
 					minDepth = 600;
 			}
+			if (inColumn && minDepth < 800)
+				minDepth = 800;
+			maxDepth = Mathf.Max(maxDepth, minDepth+100);
 			if (pos.y <= -UnityEngine.Random.Range(minDepth, maxDepth) && biomes.Contains(BiomeBase.getBiome(pos))) {
 				//if (UnityEngine.Object.FindObjectsOfType<VoidTongueTag>().Length == 0)
 				//	SNUtil.writeToChat("Check void grab time = "+time.ToString("000.0")+"/"+nextVoidTongueGrab.ToString("000.0"));

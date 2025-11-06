@@ -210,8 +210,8 @@ namespace ReikaKalseki.Ecocean {
 			LavaBomb.activeLavaBombs.Remove(this);
 			if (onLavaBombImpactEvent != null)
 				onLavaBombImpactEvent.Invoke(this, impacted);
-			float pdist = (transform.position-Player.main.transform.position).sqrMagnitude;
-			if (pdist <= 22500) {
+			float pdist = Player.main ? (transform.position-Player.main.transform.position).sqrMagnitude : 999999;
+			if (impacted && pdist <= 22500) {
 				SoundManager.playSoundAt(impactSound, transform.position, false, 40);
 				HashSet<int> used = new HashSet<int>();
 				BaseCell bc = impacted.gameObject.FindAncestor<BaseCell>();

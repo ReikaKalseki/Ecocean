@@ -63,6 +63,9 @@ namespace ReikaKalseki.Ecocean {
 			r.materials[0].SetFloat("_IBLreductionAtNight", 0);
 			//AcidicBrineDamageTrigger acid = world.EnsureComponent<AcidicBrineDamageTrigger>();
 
+			Color c = new Color(0.2F, 1F, 0.67F);
+			Light l = world.addLight(0.7F, 5, c);
+			l.type = LightType.Spot;
 
 			return world;
 		}
@@ -84,16 +87,28 @@ namespace ReikaKalseki.Ecocean {
 
 		private float age;
 
+		private Light spotlight;
+
 		void Start() {
 			transform.rotation = Quaternion.identity;
 			transform.localScale = new Vector3(1, 1, 1);
 		}
 
 		void Update() {
+			if (!spotlight)
+				spotlight = this.GetComponentInChildren<Light>();
+
 			if (!render)
 				render = this.GetComponentInChildren<Renderer>();
 			if (!collider)
 				collider = this.GetComponentInChildren<CapsuleCollider>();
+
+			spotlight.type = LightType.Spot;
+			spotlight.range = transform.localScale.y;
+			spotlight.innerSpotAngle = 5;
+			spotlight.spotAngle = 5;
+			spotlight.transform.position = transform.position + Vector3.down * spotlight.range * 0.5F;
+			spotlight.transform.forward = Vector3.up;
 
 			float f = scaleFactor+2*Mathf.Sin(age*0.2F);
 			transform.localScale = new Vector3(f, 300, f);

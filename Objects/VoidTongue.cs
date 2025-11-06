@@ -212,7 +212,10 @@ namespace ReikaKalseki.Ecocean {
 					//stuckTo.transform.localRotation = Quaternion.Lerp(stuckTo.transform.rotation, targetRotation, 0.02F);
 					stuckTo.transform.LookAt(transform, Vector3.up);
 					stuckTo.velocity = currentSpeed * transform.up.normalized;
-					stuckTo.MovePosition(tip.transform.position);
+					stuckTo.transform.position = tip.transform.position;
+					CrushDamage ch = stuckTo.GetComponent<CrushDamage>();
+					if (ch)
+						ch.depthCache.currValue = -tip.transform.position.y;
 				}
 				//if (stuckCyclops && stuckCyclops == Player.main.currentSub)
 				//Player.main.transform.position = stuckTo.transform.position+playerRel;
@@ -221,7 +224,7 @@ namespace ReikaKalseki.Ecocean {
 				if (stuckTo.transform.position.y < Mathf.Min(-KILL_DEPTH, transform.position.y + 150)) {
 					this.doKill();
 				}
-				else if (stuckTo.transform.position.y < -willReleaseAtDepth || stuckTo.transform.position.y > -900) {
+				else if (stuckTo.transform.position.y < -willReleaseAtDepth || stuckTo.transform.position.y > -600) {
 					this.Disconnect();
 					isGrabbing = false;
 					currentSpeed = SPEED / 2;
@@ -244,6 +247,7 @@ namespace ReikaKalseki.Ecocean {
 				}
 			}
 			else {
+				transform.position = transform.position + Vector3.down * 5;
 				length -= dT * SPEED;
 				if (length < 1)
 					length = 1;
@@ -256,7 +260,9 @@ namespace ReikaKalseki.Ecocean {
 			Vector3 unitVec = (transform.position-tt.position).normalized;
 			transform.rotation = MathUtil.unitVecToRotation(unitVec);
 
-			animator.transform.localScale = new Vector3(30, length, 30);/*
+			animator.gameObject.SetActive(false);
+			animator.transform.localScale = new Vector3(30, length, 30);
+			animator.gameObject.SetActive(true);/*
 			collider.center = Vector3.zero;
 			collider.height = length;
 			collider.radius = 10;*/
@@ -348,7 +354,7 @@ namespace ReikaKalseki.Ecocean {
 			currentSpeed = SPEED / 2;
 			willReleaseAtDepth = releaseAt;
 			hasBeenUsed = true;
-			//SNUtil.writeToChat("Grab from "+transform.position+", will release at "+releaseAt.ToString("0000.0"));
+			//SNUtil.writeToChat("Grab from "+transform.position+", will release at "+(-releaseAt).ToString("0000.0"));
 			//if (releaseAt > -transform.position.y)
 			//	SNUtil.writeToChat("RELEASING TOO LOW");
 		}

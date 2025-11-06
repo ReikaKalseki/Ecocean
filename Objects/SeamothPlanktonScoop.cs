@@ -51,7 +51,8 @@ namespace ReikaKalseki.Ecocean {
 						TechTag tt = sc.GetComponent<TechTag>();
 						if (tt && tt.type == EcoceanMod.planktonScoop.TechType) {
 							collected = ObjectUtil.createWorldObject(harvest, true, false);
-							sc.container.AddItem(collected.GetComponentInChildren<Pickupable>());
+							if (sc.container.AddItem(collected.GetComponentInChildren<Pickupable>()) != null)
+								uGUI_IconNotifier.main.Play(harvest, uGUI_IconNotifier.AnimationType.From, null);
 							if (sc.container.IsFull())
 								SNUtil.writeToChat("Plankton scoop is full");
 							break;
