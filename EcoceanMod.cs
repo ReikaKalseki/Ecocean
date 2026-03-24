@@ -35,7 +35,7 @@ namespace ReikaKalseki.Ecocean {
 
 		public static GlowOilMushroom glowShroom;
 		public static GlowOil glowOil;
-		internal static GlowOilNatural naturalOil;
+		public static GlowOilNatural naturalOil;
 
 		public static LavaBombMushroom lavaShroom;
 		public static LavaBomb lavaBomb;
